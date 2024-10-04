@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recuperar Contraseña</title>
+    <link rel="stylesheet" href="olvidarcontraseña.css">
+</head>
+<body>
+    <div class="recover-container">
+        <h2>Recuperar Contraseña</h2>
+        <form id="recoverForm">
+            <label for="emailOrPhone">Correo electrónico o número de celular:</label>
+            <input type="text" id="emailOrPhone" required>
+
+            <button type="button" id="sendCode">Enviar código</button>
+
+            <div id="codeSection" style="display:none;">
+                <label for="verificationCode">Código de verificación:</label>
+                <input type="text" id="verificationCode" required>
+
+                <label for="newPassword">Nueva Contraseña:</label>
+                <input type="password" id="newPassword" required>
+
+                <button type="submit">Guardar nueva contraseña</button>
+            </div>
+        </form>
+
+        <button onclick="window.location.href='login.html'">Volver al Login</button>
+    </div>
+
+    <script>
+        document.getElementById('sendCode').addEventListener('click', function() {
+            alert('El código ha sido enviado a su correo o celular.');
+            document.getElementById('codeSection').style.display = 'block';
+        });
+
+        document.getElementById('recoverForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Contraseña cambiada con éxito. Ahora puede iniciar sesión.');
+            window.location.href = 'login.html';
+        });
+    </script>
+</body>
+</html>

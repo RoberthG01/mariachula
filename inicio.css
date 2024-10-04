@@ -1,0 +1,71 @@
+/* Estilo general */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #8B468D; /* Fondo naranja */
+    color: #333; /* Color de texto por defecto */
+}
+
+/* Estilo del encabezado */
+header {
+    background-color: #333;
+    color: #fff;
+    padding: 20px;
+    text-align: center;
+}
+
+.logo {
+    max-width: 150px;
+}
+
+/* Contenedor principal */
+.container {
+    padding: 20px;
+    text-align: center;
+    background-color: #fff; /* Fondo blanco para el contenido principal */
+    border-radius: 8px; /* Bordes redondeados */
+    margin: 20px auto;
+    max-width: 1000px; /* Ancho máximo */
+}
+
+/* Secciones */
+.section {
+    margin-bottom: 20px;
+}
+
+/* Enlaces de redes sociales */
+.social-links a {
+    margin: 0 10px;
+    text-decoration: none;
+}
+
+.social-links img {
+    width: 30px;
+    height: 30px;
+}
+
+
+/* Botón de login */
+.login-button {
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 16px;
+    color: #fff;
+    background-color: #000000;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.login-button:hover {
+    background-color: #333;
+}
+
+/* Imagen del restaurante */
+img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px; /* Bordes redondeados */
+}

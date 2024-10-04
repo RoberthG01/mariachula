@@ -1,0 +1,15 @@
+{
+  "dependencies": {
+    "pg": "^8.13.0"
+  },
+  "scripts": {
+    "start": "node server.js"
+  },
+  "name": "restmariachula",
+  "version": "1.0.0",
+  "main": "script.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}

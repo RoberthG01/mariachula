@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión</title>
+    <link rel="stylesheet" href="login.css">
+</head>
+<body>
+    <div class="login-container">
+        <!-- Incluimos el logo aquí -->
+        <img src="fotos/logomch.png" alt="Logo de María Chula" class="logo">
+        <h2>Iniciar Sesión</h2>
+        <form id="loginForm">
+            <label for="email">Correo electrónico:</label>
+            <input type="email" id="email" required>
+
+            <label for="password">Contraseña:</label>
+            <input type="password" id="password" required>
+
+            <button type="submit" onclick="window.location.href='menu.html'">Iniciar sesión</button>
+        </form>
+
+        <div class="links">
+            <a href="registrouser.html">Crear usuario</a>
+            <a href="olvidacontraseña.html">¿Olvidaste tu contraseña?</a>
+        </div>
+
+        <button onclick="window.location.href='inicio.html'">Volver al Inicio</button>
+
+    </div>
+</body>
+</html>
