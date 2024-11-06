@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Restaurante María Chula</title>
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+
+<div class="container">
+    <aside class="sidebar">
+        <div class="logo">
+            <img src="fotos/logomch.png" alt="Logo del Sistema">
+        </div>
+        <nav>
+            <ul>
+                <li><a href="inicio.html"><i class="fas fa-home"></i> Inicio</a></li>
+                <li><a href="menu.html"><i class="fas fa-utensils"></i> Menú</a></li>
+                <li><a href="cola-pedidos.html"><i class="fas fa-clipboard-list"></i> Cola de Pedidos</a></li>
+                <li><a href="eventos.html"><i class="fas fa-calendar-alt"></i> Eventos</a></li>
+                <li><a class="active" href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <main class="content">
+        <h1>Dashboard Administrativo</h1>
+        <div class="cards">
+            <div class="card">
+                <h2>Usuarios Registrados</h2>
+                <p id="userCount">0</p>
+            </div>
+            <div class="card">
+                <h2>Pedidos Activos</h2>
+                <p id="activeOrders">0</p>
+            </div>
+            <div class="card">
+                <h2>Eventos Programados</h2>
+                <p id="scheduledEvents">0</p>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    // JavaScript simple para actualizar datos del dashboard
+    document.getElementById('userCount').textContent = '15';
+    document.getElementById('activeOrders').textContent = '8';
+    document.getElementById('scheduledEvents').textContent = '3';
+</script>
+
+</body>
+</html>

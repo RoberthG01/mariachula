@@ -3,80 +3,569 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Menú de María Chula</title>
-    <link rel="stylesheet" href="registroproduct.css"> <!-- Reutilizo el CSS existente -->
+    <title>Menú del Restaurante</title>
+    <link rel="stylesheet" href="menu.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
 
-    <header>
-        <h1>Menú de María Chula</h1>
-    </header>
+    <!-- Carrito de compras flotante -->
+<div id="cart" class="floating-cart">
+    <h2>Carrito de Compras</h2>
+    <div id="cart-items">
+        <p>Tu carrito está vacío</p>
+    </div>
+    <button onclick="toggleCart()">Cerrar</button>
+</div>
+<button class="cart-toggle" onclick="toggleCart()">🛒</button>
 
-    <main>
-        <section>
-            <fieldset>
-                <legend>Entradas</legend>
-                <div class="menu-item">
-                    <h3>Ensalada César</h3>
-                    <p>Fresca ensalada con lechuga, crutones y aderezo César.</p>
-                    <span>Q45.00</span>
-                </div>
-                <div class="menu-item">
-                    <h3>Nachos con Guacamole</h3>
-                    <p>Nachos crujientes con guacamole fresco y salsa.</p>
-                    <span>Q35.00</span>
-                </div>
-            </fieldset>
 
-            <fieldset>
-                <legend>Platos Principales</legend>
-                <div class="menu-item">
-                    <h3>Pollo a la Parrilla</h3>
-                    <p>Pollo marinado y asado a la parrilla, servido con papas y ensalada.</p>
-                    <span>Q80.00</span>
-                </div>
-                <div class="menu-item">
-                    <h3>Pasta Alfredo</h3>
-                    <p>Pasta fresca con salsa cremosa de queso parmesano y trozos de pollo.</p>
-                    <span>Q75.00</span>
-                </div>
-            </fieldset>
+<div class="container">
+    <aside class="sidebar">
+        <div class="logo">
+            <img src="fotos/logomch.png" alt="Logo del Sistema">
+        </div>
+        <nav>
+            <ul>
+                <li><a href="inicio.html"><i class="fas fa-home"></i> Inicio</a></li>
+                <li><a href="login.html"><i class="fas fa-sign-in-alt"></i> Login</a></li>
+                <li><a href="menu.html"><i class="fas fa-utensils"></i> Menú del Restaurante</a></li>
+                <li><a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="cola-pedidos.html"><i class="fas fa-clipboard-list"></i> Cola de Pedidos</a></li>
+                <li><a href="eventos.html"><i class="fas fa-calendar-alt"></i> Módulo de Eventos</a></li>
+            </ul>
+        </nav>
+    </aside>
 
-            <fieldset>
-                <legend>Postres</legend>
-                <div class="menu-item">
-                    <h3>Cheesecake de Fresa</h3>
-                    <p>Suave cheesecake con una capa de mermelada de fresa.</p>
-                    <span>Q30.00</span>
-                </div>
-                <div class="menu-item">
-                    <h3>Brownie con Helado</h3>
-                    <p>Delicioso brownie de chocolate servido con una bola de helado.</p>
-                    <span>Q25.00</span>
-                </div>
-            </fieldset>
+    <main class="content">
+        <h1>Menú del Restaurante</h1>
 
-            <fieldset>
-                <legend>Bebidas</legend>
-                <div class="menu-item">
-                    <h3>Jugo de Naranja</h3>
-                    <p>Jugo de naranja natural recién exprimido.</p>
-                    <span>Q15.00</span>
-                </div>
-                <div class="menu-item">
-                    <h3>Café Americano</h3>
-                    <p>Café negro recién hecho, servido caliente.</p>
-                    <span>Q10.00</span>
-                </div>
-            </fieldset>
-        </section>
+<!-- Sección de Pastas -->
+<section class="menu-section">
+    <h2>Pastas</h2>
+    <img src="fotos/PASTA.jpg" alt="Imagen general de platillos de pasta" class="menu-section-image">
 
-        <section class="navigation">
-            <button onclick="window.location.href='menuGuia.html'">Regresar al Menú Guía</button>
-            <button onclick="window.location.href='dashboard.html'">Ir al Dashboard</button>
-            <button onclick="window.location.href='colaPedidos.html'">Ir a Cola de Pedidos</button>
-        </section>
+    <!-- Ítem 1: Boloñesa -->
+    <div class="menu-item">
+        <span>Boloñesa (spaguetti o canelones)</span>
+        <span>Q55.00</span>
+        <button type="button" onclick="addToCart('Boloñesa', 55)" aria-label="Añadir Boloñesa al carrito">
+            Añadir
+        </button>
+    </div>
+
+    <!-- Ítem 2: Pesto -->
+    <div class="menu-item">
+        <span>Pesto (fusilli o fetuccini)</span>
+        <span>Q50.00</span>
+        <button type="button" onclick="addToCart('Pesto', 50)" aria-label="Añadir Pesto al carrito">
+            Añadir
+        </button>
+    </div>
+
+    <!-- Ítem 3: Pasta al vodka -->
+    <div class="menu-item">
+        <span>Pasta al vodka (penne o caracolitos)</span>
+        <span>Q55.00</span>
+        <button type="button" onclick="addToCart('Pasta al vodka', 55)" aria-label="Añadir Pasta al vodka al carrito">
+            Añadir
+        </button>
+    </div>
+</section>
+
+<!-- Sección de Platos Fuertes -->
+<section class="menu-section">
+    <h2>Platos Fuertes</h2>
+    <img src="fotos/parrillada.jpg" alt="Imagen general de platos fuertes" class="menu-section-image">
+
+    <!-- Ítem 1: Mar y Tierra -->
+    <div class="menu-item">
+        <span>Mar y Tierra (res y camarones)</span>
+        <span>Q70.00</span>
+        <button type="button" onclick="addToCart('Mar y Tierra', 70)" aria-label="Añadir Mar y Tierra al carrito">
+            Añadir
+        </button>
+    </div>
+
+    <!-- Ítem 2: Filete de pescado con coco y curry -->
+    <div class="menu-item">
+        <span>Filete de pescado con coco y curry</span>
+        <span>Q80.00</span>
+        <button type="button" onclick="addToCart('Filete de pescado con coco y curry', 80)" aria-label="Añadir Filete de pescado con coco y curry al carrito">
+            Añadir
+        </button>
+    </div>
+
+    <!-- Ítem 3: Pollo Teriyaki -->
+    <div class="menu-item">
+        <span>Pollo Teriyaki</span>
+        <span>Q75.00</span>
+        <button type="button" onclick="addToCart('Pollo Teriyaki', 75)" aria-label="Añadir Pollo Teriyaki al carrito">
+            Añadir
+        </button>
+    </div>
+
+    <!-- Ítem 4: Parrillada -->
+    <div class="menu-item">
+        <span>Parrillada</span>
+        <span>Q85.00</span>
+        <button type="button" onclick="addToCart('Parrillada', 85)" aria-label="Añadir Parrillada al carrito">
+            Añadir
+        </button>
+    </div>
+
+    <!-- Ítem 5: Entraña al vino tinto -->
+    <div class="menu-item">
+        <span>Entraña al vino tinto</span>
+        <span>Q85.00</span>
+        <button type="button" onclick="addToCart('Entraña al vino tinto', 85)" aria-label="Añadir Entraña al vino tinto al carrito">
+            Añadir
+        </button>
+    </div>
+</section>
+
+        <!-- Sección de Sopas y Cremas -->
+<section class="menu-section">
+    <h2>Sopas y Cremas</h2>
+    <img src="fotos/crema de tomate.jpg" alt="Imagen general de sopas y cremas" class="menu-section-image">
+
+    <!-- Ítem 1: Sopa Tlapeño -->
+    <div class="menu-item">
+        <span>Sopa Tlapeño</span>
+        <span>Q45.00</span>
+        <button type="button" onclick="addToCart('Sopa Tlapeño', 45)" aria-label="Añadir Sopa Tlapeño al carrito">
+            Añadir
+        </button>
+    </div>
+
+    <!-- Ítem 2: Sopa de camarón -->
+    <div class="menu-item">
+        <span>Sopa de camarón</span>
+        <span>Q45.00</span>
+        <button type="button" onclick="addToCart('Sopa de camarón', 45)" aria-label="Añadir Sopa de camarón al carrito">
+            Añadir
+        </button>
+    </div>
+
+    <!-- Ítem 3: Crema de tomate -->
+    <div class="menu-item">
+        <span>Crema de tomate</span>
+        <span>Q40.00</span>
+        <button type="button" onclick="addToCart('Crema de tomate', 40)" aria-label="Añadir Crema de tomate al carrito">
+            Añadir
+        </button>
+    </div>
+
+    <!-- Ítem 4: Crema de brócoli -->
+    <div class="menu-item">
+        <span>Crema de brócoli</span>
+        <span>Q40.00</span>
+        <button type="button" onclick="addToCart('Crema de brócoli', 40)" aria-label="Añadir Crema de brócoli al carrito">
+            Añadir
+        </button>
+    </div>
+</section>
+
+        <!-- Sección de Antojitos -->
+<section class="menu-section">
+    <h2>Antojitos</h2>
+    <img src="fotos/nachos.jpg" alt="Imagen general de Antojitos" class="menu-section-image">
+
+    <!-- Ítem 1: Papas bravas -->
+    <div class="menu-item">
+        <span>Papas bravas</span>
+        <span>Q30.00</span>
+        <button type="button" onclick="addToCart('Papas bravas', 30)" aria-label="Añadir Papas bravas al carrito">Añadir</button>
+    </div>
+
+    <!-- Ítem 2: Nachos Rebeldes -->
+    <div class="menu-item">
+        <span>Nachos Rebeldes</span>
+        <span>Q50.00</span>
+        <button type="button" onclick="addToCart('Nachos Rebeldes', 50)" aria-label="Añadir Nachos Rebeldes al carrito">Añadir</button>
+    </div>
+
+    <!-- Ítem 3: Pinchos de carnita -->
+    <div class="menu-item">
+        <span>Pinchos de carnita</span>
+        <span>Q50.00</span>
+        <button type="button" onclick="addToCart('Pinchos de carnita', 50)" aria-label="Añadir Pinchos de carnita al carrito">Añadir</button>
+    </div>
+
+    <!-- Ítem 4: Quesadillas -->
+    <div class="menu-item">
+        <span>Quesadillas (pollo o camarón)</span>
+        <span>Q60.00</span>
+        <button type="button" onclick="addToCart('Quesadillas', 60)" aria-label="Añadir Quesadillas al carrito">Añadir</button>
+    </div>
+
+    <!-- Ítem 5: Tacos -->
+    <div class="menu-item">
+        <span>Tacos (birria, pollo o pescado)</span>
+        <span>Q60.00</span>
+        <button type="button" onclick="addToCart('Tacos', 60)" aria-label="Añadir Tacos al carrito">Añadir</button>
+    </div>
+
+    <!-- Ítem 6: Hamburguesa Clásica -->
+    <div class="menu-item">
+        <span>Hamburguesa Clásica</span>
+        <span>Q40.00</span>
+        <button type="button" onclick="addToCart('Hamburguesa Clásica', 40)" aria-label="Añadir Hamburguesa Clásica al carrito">Añadir</button>
+    </div>
+
+    <!-- Ítem 7: Hamburguesa Hawaiana -->
+    <div class="menu-item">
+        <span>Hamburguesa Hawaiana</span>
+        <span>Q50.00</span>
+        <button type="button" onclick="addToCart('Hamburguesa Hawaiana', 50)" aria-label="Añadir Hamburguesa Hawaiana al carrito">Añadir</button>
+    </div>
+
+    <!-- Ítem 8: Hamburguesa Monstruo -->
+    <div class="menu-item">
+        <span>Hamburguesa Monstruo</span>
+        <span>Q60.00</span>
+        <button type="button" onclick="addToCart('Hamburguesa Monstruo', 60)" aria-label="Añadir Hamburguesa Monstruo al carrito">Añadir</button>
+    </div>
+</section>
+
+        <!-- Sección de Bebidas Frías -->
+<section class="menu-section">
+    <h2>Bebidas Frías</h2>
+    <img src="fotos/cerverzas.jpg" alt="Imagen general de Bebidas Frías" class="menu-section-image">
+
+    <!-- Ítem 1: Cervezas -->
+    <div class="menu-item">
+        <span>Cervezas</span>
+        <span>Q18.00</span>
+        <button type="button" onclick="addToCart('Cervezas', 18)" aria-label="Añadir Cervezas al carrito">Añadir</button>
+    </div>
+
+    <!-- Ítem 2: Vino de la casa -->
+    <div class="menu-item">
+        <span>Vino de la casa</span>
+        <span>Q25.00</span>
+        <button type="button" onclick="addToCart('Vino de la casa', 25)" aria-label="Añadir Vino de la casa al carrito">Añadir</button>
+    </div>
+
+    <!-- Ítem 3: Gaseosas -->
+    <div class="menu-item">
+        <span>Gaseosas</span>
+        <span>Q10.00</span>
+        <button type="button" onclick="addToCart('Gaseosas', 10)" aria-label="Añadir Gaseosas al carrito">Añadir</button>
+    </div>
+
+    <!-- Ítem 4: Tamarindo -->
+    <div class="menu-item">
+        <span>Tamarindo</span>
+        <span>Q18.00</span>
+        <button type="button" onclick="addToCart('Tamarindo', 18)" aria-label="Añadir Tamarindo al carrito">Añadir</button>
+    </div>
+
+    <!-- Ítem 5: Horchata -->
+    <div class="menu-item">
+        <span>Horchata</span>
+        <span>Q18.00</span>
+        <button type="button" onclick="addToCart('Horchata', 18)" aria-label="Añadir Horchata al carrito">Añadir</button>
+    </div>
+
+    <!-- Ítem 6: Naranjada -->
+    <div class="menu-item">
+        <span>Naranjada</span>
+        <span>Q18.00</span>
+        <button type="button" onclick="addToCart('Naranjada', 18)" aria-label="Añadir Naranjada al carrito">Añadir</button>
+    </div>
+
+    <!-- Ítem 7: Limonada -->
+    <div class="menu-item">
+        <span>Limonada</span>
+        <span>Q18.00</span>
+        <button type="button" onclick="addToCart('Limonada', 18)" aria-label="Añadir Limonada al carrito">Añadir</button>
+    </div>
+
+    <!-- Ítem 8: Licuados con leche -->
+    <div class="menu-item">
+        <span>Licuados con leche</span>
+        <span>Q22.00</span>
+        <button type="button" onclick="addToCart('Licuados con leche', 22)" aria-label="Añadir Licuados con leche al carrito">Añadir</button>
+    </div>
+
+    <!-- Ítem 9: Licuados con yogurt -->
+    <div class="menu-item">
+        <span>Licuados con yogurt</span>
+        <span>Q25.00</span>
+        <button type="button" onclick="addToCart('Licuados con yogurt', 25)" aria-label="Añadir Licuados con yogurt al carrito">Añadir</button>
+    </div>
+
+    <!-- Ítem 10: Jugo de zanahoria -->
+    <div class="menu-item">
+        <span>Jugo de zanahoria</span>
+        <span>Q30.00</span>
+        <button type="button" onclick="addToCart('Jugo de zanahoria', 30)" aria-label="Añadir Jugo de zanahoria al carrito">Añadir</button>
+    </div>
+
+    <!-- Ítem 11: Jugo de piña -->
+    <div class="menu-item">
+        <span>Jugo de piña</span>
+        <span>Q30.00</span>
+        <button type="button" onclick="addToCart('Jugo de piña', 30)" aria-label="Añadir Jugo de piña al carrito">Añadir</button>
+    </div>
+</section>
+
+        <!-- Sección de Bebidas Calientes -->
+<section class="menu-section">
+    <h2>Bebidas Calientes</h2>
+    <img src="fotos/cerverzas.jpg" alt="Imagen general de Bebidas Calientes" class="menu-section-image">
+
+    <!-- Ítem 1: Chocolate con agua o leche -->
+    <div class="menu-item">
+        <span>Chocolate con agua o leche</span>
+        <span>Q15.00</span>
+        <button type="button" onclick="addToCart('Chocolate', 15)" aria-label="Añadir Chocolate al carrito">Añadir</button>
+    </div>
+
+    <!-- Ítem 2: Café -->
+    <div class="menu-item">
+        <span>Café</span>
+        <span>Q10.00</span>
+        <button type="button" onclick="addToCart('Café', 10)" aria-label="Añadir Café al carrito">Añadir</button>
+    </div>
+
+    <!-- Ítem 3: Capuchino -->
+    <div class="menu-item">
+        <span>Capuchino</span>
+        <span>Q20.00</span>
+        <button type="button" onclick="addToCart('Capuchino', 20)" aria-label="Añadir Capuchino al carrito">Añadir</button>
+    </div>
+
+    <!-- Ítem 4: Espresso -->
+    <div class="menu-item">
+        <span>Espresso</span>
+        <span>Q20.00</span>
+        <button type="button" onclick="addToCart('Espresso', 20)" aria-label="Añadir Espresso al carrito">Añadir</button>
+    </div>
+
+    <!-- Ítem 5: Moka -->
+    <div class="menu-item">
+        <span>Moka</span>
+        <span>Q20.00</span>
+        <button type="button" onclick="addToCart('Moka', 20)" aria-label="Añadir Moka al carrito">Añadir</button>
+    </div>
+
+    <!-- Ítem 6: Latte -->
+    <div class="menu-item">
+        <span>Latte</span>
+        <span>Q25.00</span>
+        <button type="button" onclick="addToCart('Latte', 25)" aria-label="Añadir Latte al carrito">Añadir</button>
+    </div>
+
+    <!-- Ítem 7: Té -->
+    <div class="menu-item">
+        <span>Té (Manzanilla, Jamaica, Menta, Canela y Negro)</span>
+        <span>Q15.00</span>
+        <button type="button" onclick="addToCart('Té', 15)" aria-label="Añadir Té al carrito">Añadir</button>
+    </div>
+</section>
+
+        <!-- Sección de Cocktails -->
+<section class="menu-section">
+    <h2>Cocktail</h2>
+    <img src="fotos/cocktail.jpg" alt="Imagen General de Cocktails" class="menu-section-image">
+
+    <!-- Ítem 1: Piña Colada -->
+    <div class="menu-item">
+        <span>Piña Colada</span>
+        <span>Q35.00</span>
+        <button type="button" onclick="addToCart('Piña colada', 35)" aria-label="Añadir Piña Colada al carrito">Añadir</button>
+    </div>
+
+    <!-- Ítem 2: Margarita -->
+    <div class="menu-item">
+        <span>Margarita</span>
+        <span>Q35.00</span>
+        <button type="button" onclick="addToCart('Margarita', 35)" aria-label="Añadir Margarita al carrito">Añadir</button>
+    </div>
+
+    <!-- Ítem 3: Daiquiri -->
+    <div class="menu-item">
+        <span>Daiquiri</span>
+        <span>Q35.00</span>
+        <button type="button" onclick="addToCart('Daiquiri', 35)" aria-label="Añadir Daiquiri al carrito">Añadir</button>
+    </div>
+
+    <!-- Ítem 4: Vodka Tonic -->
+    <div class="menu-item">
+        <span>Vodka Tonic</span>
+        <span>Q40.00</span>
+        <button type="button" onclick="addToCart('Vodka tonic', 40)" aria-label="Añadir Vodka Tonic al carrito">Añadir</button>
+    </div>
+
+    <!-- Ítem 5: Cuba Libre -->
+    <div class="menu-item">
+        <span>Cuba Libre</span>
+        <span>Q30.00</span>
+        <button type="button" onclick="addToCart('Cuba libre', 30)" aria-label="Añadir Cuba Libre al carrito">Añadir</button>
+    </div>
+
+    <!-- Ítem 6: Mojito -->
+    <div class="menu-item">
+        <span>Mojito</span>
+        <span>Q30.00</span>
+        <button type="button" onclick="addToCart('Mojito', 30)" aria-label="Añadir Mojito al carrito">Añadir</button>
+    </div>
+
+    <!-- Ítem 7: Kuso -->
+    <div class="menu-item">
+        <span>Kuso</span>
+        <span>Q30.00</span>
+        <button type="button" onclick="addToCart('Kuso', 30)" aria-label="Añadir Kuso al carrito">Añadir</button>
+    </div>
+
+    <!-- Ítem 8: Michelada -->
+    <div class="menu-item">
+        <span>Michelada</span>
+        <span>Q35.00</span>
+        <button type="button" onclick="addToCart('Michelada', 35)" aria-label="Añadir Michelada al carrito">Añadir</button>
+    </div>
+</section>
+
+         <!-- Sección de Cocktail Especial -->
+<section class="menu-section">
+    <h2>Cocktail Especial</h2>
+    <img src="fotos/cocktail.jpg" alt="Imagen de Cocktail Especial" class="menu-section-image">
+
+    <!-- Ítem 1: Mariyita -->
+    <div class="menu-item">
+        <span>Mariyita</span>
+        <span>Q45.00</span>
+        <button type="button" onclick="addToCart('Mariyita', 45)" aria-label="Añadir Mariyita al carrito">Añadir</button>
+    </div>
+
+    <!-- Ítem 2: Canelot -->
+    <div class="menu-item">
+        <span>Canelot</span>
+        <span>Q40.00</span>
+        <button type="button" onclick="addToCart('Canelot', 40)" aria-label="Añadir Canelot al carrito">Añadir</button>
+    </div>
+
+    <!-- Ítem 3: Hulk -->
+    <div class="menu-item">
+        <span>Hulk</span>
+        <span>Q40.00</span>
+        <button type="button" onclick="addToCart('Hulk', 40)" aria-label="Añadir Hulk al carrito">Añadir</button>
+    </div>
+
+    <!-- Ítem 4: Mai Tai -->
+    <div class="menu-item">
+        <span>Mai Tai</span>
+        <span>Q45.00</span>
+        <button type="button" onclick="addToCart('Mai Tai', 45)" aria-label="Añadir Mai Tai al carrito">Añadir</button>
+    </div>
+
+    <!-- Ítem 5: Vodka Sunset -->
+    <div class="menu-item">
+        <span>Vodka Sunset</span>
+        <span>Q45.00</span>
+        <button type="button" onclick="addToCart('Vodka Sunset', 45)" aria-label="Añadir Vodka Sunset al carrito">Añadir</button>
+    </div>
+
+    <!-- Ítem 6: T.N.T. -->
+    <div class="menu-item">
+        <span>T.N.T.</span>
+        <span>Q45.00</span>
+        <button type="button" onclick="addToCart('T.N.T.', 45)" aria-label="Añadir T.N.T. al carrito">Añadir</button>
+    </div>
+
+    <!-- Ítem 7: Petróleo -->
+    <div class="menu-item">
+        <span>Petróleo</span>
+        <span>Q40.00</span>
+        <button type="button" onclick="addToCart('Petróleo', 40)" aria-label="Añadir Petróleo al carrito">Añadir</button>
+    </div>
+</section>
+
     </main>
+</div>
+
+<script>
+    // JavaScript para el carrito
+    let cart = [];
+
+    function addToCart(item, price) {
+        const cartItem = cart.find(i => i.name === item);
+        if (cartItem) {
+            cartItem.quantity++;
+        } else {
+            cart.push({ name: item, price: price, quantity: 1, details: '' });
+        }
+        updateCart();
+    }
+
+    function updateCart() {
+        const cartDiv = document.getElementById('cart');
+        cartDiv.innerHTML = ''; 
+        cart.forEach((item, index) => {
+            cartDiv.innerHTML += `
+                <div class="cart-item">
+                    <span>${item.name} - Q${item.price}</span>
+                    <span>
+                        <button onclick="decreaseQuantity(${index})">-</button>
+                        ${item.quantity}
+                        <button onclick="increaseQuantity(${index})">+</button>
+                    </span>
+                    <button onclick="removeItem(${index})">Eliminar</button>
+                </div>
+            `;
+        });
+        if (cart.length === 0) {
+            cartDiv.innerHTML = '<p>Tu carrito está vacío</p>';
+        }
+    }
+
+    function increaseQuantity(index) {
+        cart[index].quantity++;
+        updateCart();
+    }
+
+    function decreaseQuantity(index) {
+        if (cart[index].quantity > 1) {
+            cart[index].quantity--;
+        } else {
+            removeItem(index);
+        }
+        updateCart();
+    }
+
+    function removeItem(index) {
+        cart.splice(index, 1);
+        updateCart();
+    }
+
+    function toggleCart() {
+    const cart = document.getElementById('cart');
+    cart.style.display = cart.style.display === 'none' || cart.style.display === '' ? 'block' : 'none';
+}
+
+function updateCart() {
+    const cartItems = document.getElementById('cart-items');
+    cartItems.innerHTML = ''; 
+    cart.forEach((item, index) => {
+        cartItems.innerHTML += `
+            <div class="cart-item">
+                <span>${item.name} - Q${item.price}</span>
+                <span>
+                    <button onclick="decreaseQuantity(${index})">-</button>
+                    ${item.quantity}
+                    <button onclick="increaseQuantity(${index})">+</button>
+                </span>
+                <button onclick="removeItem(${index})">Eliminar</button>
+            </div>
+        `;
+    });
+    if (cart.length === 0) {
+        cartItems.innerHTML = '<p>Tu carrito está vacío</p>';
+    }
+}
+</script>
 
 </body>
 </html>

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eventos - Restaurante María Chula</title>
+    <link rel="stylesheet" href="eventos.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+
+<div class="container">
+    <aside class="sidebar">
+        <div class="logo">
+            <img src="fotos/logomch.png" alt="Logo del Sistema">
+        </div>
+        <nav>
+            <ul>
+                <li><a href="inicio.html"><i class="fas fa-home"></i> Inicio</a></li>
+                <li><a href="login.html"><i class="fas fa-sign-in-alt"></i> Login</a></li>
+                <li><a href="menu.html"><i class="fas fa-utensils"></i> Menú del Restaurante</a></li>
+                <li><a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="cola-pedidos.html"><i class="fas fa-clipboard-list"></i> Cola de Pedidos</a></li>
+                <li><a href="eventos.html"><i class="fas fa-calendar-alt"></i> Eventos</a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <main class="content">
+        <h1>Cotización de Eventos María Chula</h1>
+        <p>Elige las opciones para tu evento: servicio de comida y bebida, tipo de vajilla, y personaliza tu experiencia con los platillos y bebidas de nuestro menú.</p>
+
+        <!-- Formulario de selección de evento -->
+        <form class="event-form" id="event-form">
+            <div class="form-group">
+                <label for="vajilla">Tipo de Vajilla:</label>
+                <select id="vajilla" name="vajilla" onchange="updateTotal()">
+                    <option value="losa" data-precio="50">Losa - Q50.00</option>
+                    <option value="desechable" data-precio="20">Desechables - Q20.00</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="evento">Tipo de Evento:</label>
+                <select id="evento" name="evento">
+                    <option value="cumpleaños">Cumpleaños</option>
+                    <option value="boda">Boda</option>
+                    <option value="formal">Evento formal</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="menu-seleccion">Selecciona los platillos del menú:</label>
+                <div id="menu-seleccion">
+                    <div class="menu-item">
+                        <span>Boloñesa (spaguetti o canelones) - Q55.00</span>
+                        <input type="number" name="bolonesa" min="0" value="0" onchange="updateTotal()">
+                    </div>
+                    <div class="menu-item">
+                        <span>Pesto (fusilli o fetuccini) - Q50.00</span>
+                        <input type="number" name="pesto" min="0" value="0" onchange="updateTotal()">
+                    </div>
+                    <div class="menu-item">
+                        <span>Mar y Tierra (res y camarones) - Q70.00</span>
+                        <input type="number" name="mary-tierra" min="0" value="0" onchange="updateTotal()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="bebidas-seleccion">Selecciona las bebidas del menú:</label>
+                <div id="bebidas-seleccion">
+                    <div class="menu-item">
+                        <span>Limonada - Q18.00</span>
+                        <input type="number" name="limonada" min="0" value="0" onchange="updateTotal()">
+                    </div>
+                    <div class="menu-item">
+                        <span>Vino de la Casa - Q25.00</span>
+                        <input type="number" name="vino" min="0" value="0" onchange="updateTotal()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="fecha">Fecha del Evento:</label>
+                <input type="date" id="fecha" name="fecha" required>
+            </div>
+
+            <div class="form-group">
+                <label for="detalles">Detalles adicionales:</label>
+                <textarea id="detalles" name="detalles" rows="4" placeholder="Ingresa detalles adicionales sobre el evento..."></textarea>
+            </div>
+
+            <h2>Total: Q<span id="total">0.00</span></h2>
+
+            <button type="submit" class="submit-button">Reservar Evento</button>
+        </form>
+    </main>
+</div>
+
+<script>
+    function updateTotal() {
+        let total = 0;
+        // Sumar el costo de la vajilla
+        const vajilla = document.getElementById('vajilla');
+        total += parseFloat(vajilla.options[vajilla.selectedIndex].getAttribute('data-precio'));
+
+        // Sumar los precios de los platillos seleccionados
+        const menuSeleccion = document.querySelectorAll('#menu-seleccion input[type="number"]');
+        menuSeleccion.forEach(input => {
+            const precio = parseFloat(input.parentElement.textContent.split('- Q')[1]);
+            total += precio * parseInt(input.value || 0);
+        });
+        // Sumar los precios de las bebidas seleccionadas
+        const bebidasSeleccion = document.querySelectorAll('#bebidas-seleccion input[type="number"]');
+        bebidasSeleccion.forEach(input => {
+            const precio = parseFloat(input.parentElement.textContent.split('- Q')[1]);
+            total += precio * parseInt(input.value || 0);
+        });
+        // Actualizar el total mostrado
+        document.getElementById('total').textContent = total.toFixed(2);
+    }
+
+    document.getElementById('event-form').addEventListener('submit', function (e) {
+        e.preventDefault();
+        alert('Evento reservado exitosamente. Total: Q' + document.getElementById('total').textContent);
+    });
+</script>
+
+</body>
+</html>

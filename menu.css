@@ -1,0 +1,160 @@
+/* Aseguramos que el contenido no se superponga con el menú lateral */
+.container {
+    display: flex;
+    flex-direction: row;
+}
+
+.sidebar {
+    width: 220px;
+    background-color: #2c3e50; /* Color de fondo del menú lateral */
+    color: white;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    padding-top: 20px;
+}
+
+.sidebar .logo {
+    text-align: center;
+    padding: 10px 0;
+}
+
+.sidebar img {
+    max-width: 100px;
+}
+
+.sidebar nav ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar nav ul li {
+    padding: 15px 0;
+    text-align: center;
+}
+
+.sidebar nav ul li a {
+    color: white;
+    text-decoration: none;
+    display: block;
+    padding: 10px 0;
+    background-color: #2c3e50; /* Mismo color de fondo para el enlace */
+    transition: background-color 0.3s ease; /* Transición suave en hover */
+}
+
+.sidebar nav ul li a:hover, 
+.sidebar nav ul li a.active {
+    background-color: #00C5A5; /* Verde turquesa cuando pasas el mouse por encima */
+}
+
+/* Contenido principal */
+.content {
+    margin-left: 220px; /* Esto asegura que el contenido no se superponga con el menú */
+    padding: 20px;
+    width: calc(100% - 220px);
+    box-sizing: border-box;
+    flex-grow: 1;
+}
+
+/* Estilos para los platillos y el carrito */
+.menu-section {
+    margin: 20px 0;
+}
+
+.menu-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 15px 0;
+    padding: 10px;
+    border-bottom: 1px solid #ccc; /* Agrega una línea divisoria */
+}
+
+.menu-item img {
+    width: 100px;  /* Ajusta el tamaño según prefieras */
+    height: auto;
+    margin-right: 20px;
+}
+
+.cart {
+    margin-top: 20px;
+    border: 1px solid #ccc;
+    padding: 20px;
+    width: 300px;
+}
+
+.cart-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+}
+
+.cart-details {
+    margin-bottom: 10px;
+}
+
+/* Ajustes adicionales para evitar superposición de las bebidas */
+.menu-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 15px 0;
+}
+
+.menu-image {
+    width: 100px;
+    height: 80px;
+    object-fit: cover;
+    margin-right: 20px;
+}
+.menu-section-image {
+    width: 40%; /* Ahora más pequeña, 40% del contenedor */
+    max-width: 200px; /* Máximo ancho más reducido */
+    height: auto;
+    display: block;
+    margin: 10px auto; /* Centra la imagen horizontalmente */
+    border-radius: 8px; /* Bordes redondeados */
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* Sombra más sutil */
+}
+
+/* Carrito de compras flotante */
+.floating-cart {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 300px;
+    background-color: white;
+    border: 1px solid #ccc;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    display: none; /* Oculto por defecto */
+    z-index: 100;
+}
+
+.cart-toggle {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #8B468D;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    font-size: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.cart-toggle:hover {
+    background-color: #2e302f;
+}
