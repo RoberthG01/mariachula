@@ -18,23 +18,28 @@
                 <li><a href="inicio.html"><i class="fas fa-home"></i> Inicio</a></li>
                 <li><a href="login.html"><i class="fas fa-sign-in-alt"></i> Login</a></li>
                 <li><a href="menu.html"><i class="fas fa-utensils"></i> Menú del Restaurante</a></li>
-                <li><a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Reportes</a></li>
                 <li><a href="cola-pedidos.html"><i class="fas fa-clipboard-list"></i> Cola de Pedidos</a></li>
-                <li><a href="eventos.html"><i class="fas fa-calendar-alt"></i> Módulo de Eventos</a></li>
+                <li><a href="eventos.html"><i class="fas fa-calendar-alt"></i> Eventos</a></li>
             </ul>
         </nav>
     </aside>
+
+    <header>
+        <h2>Inicio de Sesión</h2>
+    </header>
+    
     <div class="login-container">
         <img src="fotos/logomch.png" alt="Logo de María Chula" class="logo">
         <h2>Iniciar Sesión</h2>
-        <form id="loginForm">
+        <form id="loginForm" onsubmit="return handleLogin()">
             <label for="email">Correo electrónico:</label>
             <input type="email" id="email" required>
 
             <label for="password">Contraseña:</label>
             <input type="password" id="password" required>
 
-            <button type="submit" onclick="window.location.href='menu.html'">Iniciar sesión</button>
+            <button type="submit">Iniciar sesión</button>
         </form>
 
         <div class="links">
@@ -42,7 +47,15 @@
             <a href="olvidacontraseña.html">¿Olvidaste tu contraseña?</a>
         </div>
 
-        <button onclick="window.location.href='inicio.html'">Volver al Inicio</button>
+        <button class="back-button" onclick="window.location.href='inicio.html'">Volver al Inicio</button>
     </div>
+
+    <script>
+        function handleLogin() {
+            // Aquí puedes añadir validaciones o autenticación
+            window.location.href = 'panel.html';
+            return false; // Evita que el formulario se envíe de forma predeterminada
+        }
+    </script>
 </body>
 </html>

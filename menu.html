@@ -5,9 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Menú del Restaurante</title>
     <link rel="stylesheet" href="menu.css">
+    <link rel="stylesheet" href="menutodos.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
+
+    <!-- Botón hamburguesa para móviles -->
+<button class="hamburger" onclick="toggleSidebar()">☰</button>
 
     <!-- Carrito de compras flotante -->
 <div id="cart" class="floating-cart">
@@ -15,13 +19,14 @@
     <div id="cart-items">
         <p>Tu carrito está vacío</p>
     </div>
-    <button onclick="toggleCart()">Cerrar</button>
+    <button onclick="toggleCart()" class="close-button">Cerrar</button>
+    <button onclick="finalizarPedido()" class="finish-order-button">Terminar pedido</button>
 </div>
 <button class="cart-toggle" onclick="toggleCart()">🛒</button>
 
 
 <div class="container">
-    <aside class="sidebar">
+    <aside class="sidebar" id="sidebar">
         <div class="logo">
             <img src="fotos/logomch.png" alt="Logo del Sistema">
         </div>
@@ -30,18 +35,22 @@
                 <li><a href="inicio.html"><i class="fas fa-home"></i> Inicio</a></li>
                 <li><a href="login.html"><i class="fas fa-sign-in-alt"></i> Login</a></li>
                 <li><a href="menu.html"><i class="fas fa-utensils"></i> Menú del Restaurante</a></li>
-                <li><a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Reportes</a></li>
                 <li><a href="cola-pedidos.html"><i class="fas fa-clipboard-list"></i> Cola de Pedidos</a></li>
-                <li><a href="eventos.html"><i class="fas fa-calendar-alt"></i> Módulo de Eventos</a></li>
+                <li><a href="eventos.html"><i class="fas fa-calendar-alt"></i> Eventos</a></li>
             </ul>
         </nav>
     </aside>
+    <header>
+        <h2>Menú del Restaurante</h2>
+    </header>
 
     <main class="content">
-        <h1>Menú del Restaurante</h1>
 
 <!-- Sección de Pastas -->
 <section class="menu-section">
+    <h1>Menú del Restaurante</h1>
+    
     <h2>Pastas</h2>
     <img src="fotos/PASTA.jpg" alt="Imagen general de platillos de pasta" class="menu-section-image">
 
@@ -487,6 +496,13 @@
 </div>
 
 <script>
+
+    // menu lateral en dispositivos
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        sidebar.classList.toggle('active');
+    }
+
     // JavaScript para el carrito
     let cart = [];
 
@@ -565,6 +581,16 @@ function updateCart() {
         cartItems.innerHTML = '<p>Tu carrito está vacío</p>';
     }
 }
+
+// Función para finalizar el pedido y redirigir
+function finalizarPedido() {
+        if (cart.length === 0) {
+            alert("Tu carrito está vacío.");
+        } else {
+            // Redirigir a la página detalles_pedido.html
+            window.location.href = "detalles_pedido.html";
+        }
+    }
 </script>
 
 </body>

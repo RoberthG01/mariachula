@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cola de Pedidos</title>
+    <link rel="stylesheet" href="cola_pedidos_admin.css">
+    <link rel="stylesheet" href="menutodos.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="logo">
+          <img src="fotos/logomch.png" alt="Logo del Sistema">
+        </div>
+        <nav>
+          <ul>
+            <li><a href="inicio.html"><i class="fas fa-home"></i> Inicio</a></li>
+            <li><a href="login.html"><i class="fas fa-sign-in-alt"></i> Login</a></li>
+            <li><a href="menu.html"><i class="fas fa-utensils"></i> Menú del Restaurante</a></li>
+            <li><a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Reportes</a></li>
+            <li><a href="cola-pedidos.html"><i class="fas fa-clipboard-list"></i> Cola de Pedidos</a></li>
+            <li><a href="eventos.html"><i class="fas fa-calendar-alt"></i> Eventos</a></li>
+          </ul>
+        </nav>
+      </aside>
+
+    <header>
+        <h1>Cola de Pedidos</h1>
+    </header>
+    <main>
+        <section id="pedidos">
+            <h2>Lista de Pedidos en Cola</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID Pedido</th>
+                        <th>Cliente</th>
+                        <th>Platillos</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>Juan Pérez</td>
+                        <td>Tacos, Enchiladas</td>
+                        <td>En preparación</td>
+                        <td>
+                            <button class="crud-button view" onclick="viewOrder(1)">Ver</button>
+                            <button class="crud-button update" onclick="updateOrderStatus(1)">Actualizar Estado</button>
+                            <button class="crud-button delete" onclick="deleteOrder(1)">Eliminar</button>
+                        </td>
+                    </tr>
+                    <!-- Más pedidos se agregarán aquí -->
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <script>
+        function viewOrder(id) {
+            alert("Mostrando detalles del pedido con ID: " + id);
+        }
+
+        function updateOrderStatus(id) {
+            const newStatus = prompt("Ingrese el nuevo estado del pedido (Ej: En preparación, Listo, Entregado):");
+            if (newStatus) {
+                alert("El estado del pedido con ID " + id + " ha sido actualizado a: " + newStatus);
+                // Aquí iría el código para actualizar el estado en el sistema
+            }
+        }
+
+        function deleteOrder(id) {
+            if (confirm("¿Estás seguro de que deseas eliminar este pedido?")) {
+                alert("Pedido con ID " + id + " eliminado.");
+                // Aquí iría el código para eliminar el pedido en el sistema
+            }
+        }
+    </script>
+</body>
+</html>

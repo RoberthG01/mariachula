@@ -6,7 +6,7 @@
 
 .sidebar {
     width: 220px;
-    background-color: #2c3e50; /* Color de fondo del menú lateral */
+    background-color: #2c3e50;
     color: white;
     height: 100vh;
     position: fixed;
@@ -40,18 +40,18 @@
     text-decoration: none;
     display: block;
     padding: 10px 0;
-    background-color: #2c3e50; /* Mismo color de fondo para el enlace */
-    transition: background-color 0.3s ease; /* Transición suave en hover */
+    background-color: #2c3e50;
+    transition: background-color 0.3s ease;
 }
 
 .sidebar nav ul li a:hover, 
 .sidebar nav ul li a.active {
-    background-color: #00C5A5; /* Verde turquesa cuando pasas el mouse por encima */
+    background-color: #00C5A5;
 }
 
 /* Contenido principal */
 .content {
-    margin-left: 220px; /* Esto asegura que el contenido no se superponga con el menú */
+    margin-left: 220px;
     padding: 20px;
     width: calc(100% - 220px);
     box-sizing: border-box;
@@ -69,11 +69,11 @@
     align-items: center;
     margin: 15px 0;
     padding: 10px;
-    border-bottom: 1px solid #ccc; /* Agrega una línea divisoria */
+    border-bottom: 1px solid #ccc;
 }
 
 .menu-item img {
-    width: 100px;  /* Ajusta el tamaño según prefieras */
+    width: 100px;
     height: auto;
     margin-right: 20px;
 }
@@ -98,7 +98,6 @@
     margin-bottom: 10px;
 }
 
-/* Ajustes adicionales para evitar superposición de las bebidas */
 .menu-item {
     display: flex;
     justify-content: space-between;
@@ -112,14 +111,15 @@
     object-fit: cover;
     margin-right: 20px;
 }
+
 .menu-section-image {
-    width: 40%; /* Ahora más pequeña, 40% del contenedor */
-    max-width: 200px; /* Máximo ancho más reducido */
+    width: 40%;
+    max-width: 200px;
     height: auto;
     display: block;
-    margin: 10px auto; /* Centra la imagen horizontalmente */
-    border-radius: 8px; /* Bordes redondeados */
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* Sombra más sutil */
+    margin: 10px auto;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 /* Carrito de compras flotante */
@@ -133,7 +133,7 @@
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    display: none; /* Oculto por defecto */
+    display: none;
     z-index: 100;
 }
 
@@ -157,4 +157,145 @@
 
 .cart-toggle:hover {
     background-color: #2e302f;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+    .content {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+        padding: 10px 0;
+    }
+
+    .sidebar nav ul li {
+        display: inline-block;
+        padding: 10px;
+    }
+}
+
+@media (max-width: 768px) {
+    .menu-section-image {
+        width: 60%;
+    }
+
+    .menu-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .menu-item img {
+        width: 80px;
+        margin: 0 0 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .floating-cart {
+        width: 80%;
+        bottom: 10px;
+        right: 10px;
+    }
+
+    .cart-toggle {
+        bottom: 10px;
+        right: 10px;
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+    }
+
+    .sidebar {
+        display: none;
+    }
+
+    .content {
+        margin: 0;
+        width: 100%;
+    }
+
+    .menu-section-image {
+        width: 80%;
+        max-width: 150px;
+    }
+
+    .menu-item img {
+        width: 60px;
+    }
+}
+/* Oculta el botón hamburguesa en pantallas grandes */
+.hamburger {
+    display: none;
+}
+
+/* Muestra el botón hamburguesa en pantallas pequeñas */
+@media (max-width: 768px) {
+    .hamburger {
+        display: block;
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        background-color: #2c3e50;
+        color: white;
+        border: none;
+        font-size: 24px;
+        padding: 10px;
+        cursor: pointer;
+        z-index: 100;
+    }
+
+    /* Oculta el menú lateral en dispositivos móviles inicialmente */
+    .sidebar {
+        position: fixed;
+        left: -220px;
+        transition: left 0.3s ease;
+    }
+
+    /* Cuando el menú lateral está activo, se muestra en dispositivos móviles */
+    .sidebar.active {
+        left: 0;
+    }
+
+    /* Ajusta el contenedor principal en pantallas móviles */
+    .content {
+        margin-left: 0;
+        padding-top: 60px;
+    }
+}
+    /* botón del terminar pedido del carrito */
+    .finish-order-button {
+        background-color: #28a745;
+        color: white;
+        padding: 10px 15px;
+        margin-top: 10px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        width: 100%;
+    }
+    
+    .finish-order-button:hover {
+        background-color: #218838;
+    }
+    
+    /* botón de cerrar del carrito */
+/* Estilo para el botón "Cerrar" */
+.close-button {
+    background-color: #dc3545; /* Rojo */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+.close-button:hover {
+    background-color: #c82333; /* Rojo oscuro en hover */
 }

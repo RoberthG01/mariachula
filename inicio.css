@@ -69,3 +69,26 @@ img {
     height: auto;
     border-radius: 8px; /* Bordes redondeados */
 }
+
+/* Estilos generales para el footer */
+.main-footer {
+    background-color: #333;
+    color: white;
+    padding: 20px;
+    text-align: center;
+    font-size: 14px;
+}
+
+.footer-content p {
+    margin: 5px 0;
+}
+
+.footer-content a {
+    color: #00C5A5;
+    text-decoration: none;
+    margin: 0 5px;
+}
+
+.footer-content a:hover {
+    text-decoration: underline;
+}

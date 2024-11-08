@@ -1,0 +1,94 @@
+/* Estilos generales */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f9;
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    background-color: #2c3e50;
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
+
+h1 {
+    font-size: 24px;
+    margin: 0;
+}
+
+/* Contenedor principal */
+main {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+#pedido-resumen h2, #pedido-total h3 {
+    color: #2c3e50;
+    margin-bottom: 10px;
+}
+
+/* Tabla de detalles del pedido */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th, td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+thead {
+    background-color: #2c3e50;
+    color: white;
+}
+
+/* Estilo del total */
+#total-pago {
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+/* Botón de confirmación */
+.confirm-button {
+    display: inline-block;
+    padding: 12px 20px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    text-align: center;
+    margin-top: 20px;
+    width: 100%;
+}
+
+.confirm-button:hover {
+    background-color: #218838;
+}
+
+/* Asegurarse de que el contenido se vea bien en pantallas pequeñas */
+@media (max-width: 600px) {
+    main {
+        padding: 15px;
+    }
+
+    th, td {
+        font-size: 14px;
+    }
+
+    .confirm-button {
+        padding: 10px 16px;
+        font-size: 14px;
+    }
+}

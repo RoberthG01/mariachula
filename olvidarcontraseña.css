@@ -1,5 +1,14 @@
+/* Estilo para el header */
+.header {
+    background-color: #2c3e50; /* Fondo oscuro */
+    color: white; /* Texto blanco */
+    text-align: center;
+    padding: 20px;
+    font-size: 24px;
+}
+
 body {
-    background-color: #8B468D;
+    background-color: #ffffff;
     font-family: Arial, sans-serif;
 }
 
@@ -14,6 +23,10 @@ body {
 }
 
 h2 {
+    color: #ffffff;
+}
+
+h3 {
     color: #8B468D;
 }
 
