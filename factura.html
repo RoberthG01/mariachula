@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Facturación - María Chula</title>
+  <link rel="stylesheet" href="factura.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="icon" href="fotos/iconomch.ico" type="image/x-icon">
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar card">
+      <div class="logo">
+        <img src="fotos/logomch.png" alt="Logo María Chula">
+        <h2>María Chula</h2>
+      </div>
+      <div class="menu-list">
+        <a href="menu.html" class="menu-item">Menú</a>
+        <a href="inventory.html" class="menu-item">Inventario</a>
+        <a href="index.html" class="menu-item">Inicio</a>
+        <a href="admin-menus.html" class="menu-item">Administración de Menús</a>
+        <a href="admin-users.html" class="menu-item">Administración de usuarios</a>
+        <a href="billing.html" class="menu-item active">Facturación</a>
+        <a href="events.html" class="menu-item">Eventos</a>
+        <a href="history-events.html" class="menu-item">Historial de Eventos</a>
+        <a href="history-orders.html" class="menu-item">Historial de Pedidos</a>
+        <a href="queue.html" class="menu-item">Cola de pedidos</a>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="header">
+        <div class="title">Facturación</div>
+        <a href="panel.html" class="back-button">
+          <i class="fas fa-arrow-left"></i> Regresar
+        </a>
+      </div>
+
+      <div class="card">
+        <h2>Generar Factura</h2>
+        
+        <div class="form-row">
+          <div class="input-group">
+            <label for="bill_client">Cliente</label>
+            <input class="input" id="bill_client" placeholder="Nombre del cliente">
+          </div>
+          <div class="input-group">
+            <label for="bill_nit">NIT (Opcional)</label>
+            <input class="input" id="bill_nit" placeholder="Número de NIT">
+          </div>
+        </div>
+
+        <h3 style="margin-top:16px">Items de la Factura</h3>
+        <div id="billItemsContainer">
+          <div class="bill-item">
+            <select class="input" onchange="updateItemPrice(this)">
+              <option value="">Seleccionar platillo</option>
+              <!-- Las opciones se llenarán con JavaScript -->
+            </select>
+            <input type="number" class="input" min="1" value="1" placeholder="Cantidad" onchange="calculateItemTotal(this)">
+            <input type="number" class="input" step="0.01" placeholder="Precio" onchange="calculateItemTotal(this)">
+            <input type="text" class="input" placeholder="Total" readonly>
+            <button class="btn ghost" onclick="removeBillItem(this)" style="color:var(--color-error)">×</button>
+          </div>
+        </div>
+
+        <button class="btn ghost" onclick="addBillItem()" style="margin-top:8px">
+          <i class="fas fa-plus"></i> Añadir otro item
+        </button>
+
+        <div style="margin-top:16px">
+          <button class="btn primary" onclick="generateBill()">
+            <i class="fas fa-file-invoice"></i> Generar Factura
+          </button>
+          <button class="btn" onclick="printBill()" id="printBtn" disabled>
+            <i class="fas fa-print"></i> Imprimir Factura
+          </button>
+          <button class="btn btn-sat" onclick="goToSAT()">
+            <i class="fas fa-external-link-alt"></i> Facturación SAT
+          </button>
+        </div>
+
+        <div id="billView" style="margin-top:24px; display:none">
+          <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center">
+              <div>
+                <h3>María Chula</h3>
+                <p>Restaurante de comida tradicional</p>
+              </div>
+              <div style="text-align:right">
+                <h3>FACTURA</h3>
+                <p id="billNumber">FAC-001</p>
+                <p id="billDate"></p>
+              </div>
+            </div>
+
+            <hr style="margin:12px 0; border-color:rgba(0,0,0,0.1)">
+
+            <div style="display:flex; justify-content:space-between; margin-bottom:16px">
+              <div>
+                <strong>Cliente:</strong>
+                <p id="billClientName"></p>
+                <p id="billClientNIT"></p>
+              </div>
+              <div>
+                <strong>Fecha:</strong>
+                <p id="billFullDate"></p>
+              </div>
+            </div>
+
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Descripción</th>
+                  <th>Cant.</th>
+                  <th>P. Unitario</th>
+                  <th>Total</th>
+                </tr>
+              </thead>
+              <tbody id="billItemsList">
+              </tbody>
+            </table>
+
+            <div style="text-align:right; margin-top:16px">
+              <div style="margin-bottom:8px">
+                <span style="margin-right:40px">Subtotal:</span>
+                <span id="billSubtotal">Q 0.00</span>
+              </div>
+              <div style="margin-bottom:8px">
+                <span style="margin-right:40px">IVA (12%):</span>
+                <span id="billIVA">Q 0.00</span>
+              </div>
+              <div style="font-size:1.2em; font-weight:bold">
+                <span style="margin-right:40px">TOTAL:</span>
+                <span id="billTotal">Q 0.00</span>
+              </div>
+            </div>
+
+            <hr style="margin:16px 0; border-color:rgba(0,0,0,0.1)">
+
+            <div style="text-align:center; color:var(--muted); font-size:0.9em">
+              <p>¡Gracias por su preferencia!</p>
+              <p>Teléfono: 1234-5678 | Dirección: Calle Principal, Ciudad</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+  // Variables globales
+  let menuItems = [];
+  let lastBillNumber = 0;
+
+  document.addEventListener('DOMContentLoaded', () => {
+    // Cargar items del menú
+    menuItems = getMenu();
+    populateItemDropdowns();
+    
+    // Configurar fecha actual
+    const now = new Date();
+    document.getElementById('billDate').textContent = formatDate(now);
+    document.getElementById('billFullDate').textContent = formatFullDate(now);
+    
+    // Obtener último número de factura
+    const lastBill = localStorage.getItem('lastBillNumber');
+    lastBillNumber = lastBill ? parseInt(lastBill) : 0;
+  });
+
+  // Función para simular la obtención del menú (deberías reemplazarla con tu implementación real)
+  function getMenu() {
+    // En una implementación real, esto vendría de tu base de datos o localStorage
+    return [
+      { id: 1, name: "Tacos al Pastor", price: 25.00 },
+      { id: 2, name: "Enchiladas", price: 35.00 },
+      { id: 3, name: "Mole Poblano", price: 45.00 },
+      { id: 4, name: "Chiles Rellenos", price: 40.00 },
+      { id: 5, name: "Guacamole", price: 20.00 },
+      { id: 6, name: "Quesadillas", price: 30.00 },
+      { id: 7, name: "Tamales", price: 15.00 },
+      { id: 8, name: "Pozole", price: 50.00 }
+    ];
+  }
+
+  function populateItemDropdowns() {
+    const dropdowns = document.querySelectorAll('#billItemsContainer select');
+    dropdowns.forEach(dropdown => {
+      dropdown.innerHTML = '<option value="">Seleccionar platillo</option>' + 
+        menuItems.map(item => 
+          `<option value="${item.id}" data-price="${item.price}">${item.name} - Q${item.price.toFixed(2)}</option>`
+        ).join('');
+    });
+  }
+
+  function addBillItem() {
+    const container = document.getElementById('billItemsContainer');
+    const newItem = document.createElement('div');
+    newItem.className = 'bill-item';
+    newItem.innerHTML = `
+      <select class="input" onchange="updateItemPrice(this)">
+        <option value="">Seleccionar platillo</option>
+        ${menuItems.map(item => 
+          `<option value="${item.id}" data-price="${item.price}">${item.name} - Q${item.price.toFixed(2)}</option>`
+        ).join('')}
+      </select>
+      <input type="number" class="input" min="1" value="1" placeholder="Cantidad" onchange="calculateItemTotal(this)">
+      <input type="number" class="input" step="0.01" placeholder="Precio" onchange="calculateItemTotal(this)">
+      <input type="text" class="input" placeholder="Total" readonly>
+      <button class="btn ghost" onclick="removeBillItem(this)" style="color:var(--color-error)">×</button>
+    `;
+    container.appendChild(newItem);
+  }
+
+  function removeBillItem(button) {
+    const item = button.parentElement;
+    if(document.querySelectorAll('.bill-item').length > 1) {
+      item.remove();
+    } else {
+      // Si es el último item, limpiar sus valores
+      item.querySelector('select').value = '';
+      item.querySelectorAll('input')[0].value = '1';
+      item.querySelectorAll('input')[1].value = '';
+      item.querySelectorAll('input')[2].value = '';
+    }
+  }
+
+  function updateItemPrice(select) {
+    const selectedOption = select.options[select.selectedIndex];
+    const priceInput = select.parentElement.querySelectorAll('input')[1];
+    if(selectedOption && selectedOption.dataset.price) {
+      priceInput.value = selectedOption.dataset.price;
+      calculateItemTotal(select);
+    } else {
+      priceInput.value = '';
+    }
+  }
+
+  function calculateItemTotal(input) {
+    const item = input.parentElement;
+    const qty = item.querySelectorAll('input')[0].value;
+    const price = item.querySelectorAll('input')[1].value;
+    const totalInput = item.querySelectorAll('input')[2];
+    
+    if(qty && price) {
+      const total = parseFloat(qty) * parseFloat(price);
+      totalInput.value = total.toFixed(2);
+    } else {
+      totalInput.value = '';
+    }
+  }
+
+  function generateBill() {
+    const clientName = document.getElementById('bill_client').value;
+    const clientNIT = document.getElementById('bill_nit').value;
+    
+    if(!clientName) {
+      alert('Por favor ingrese el nombre del cliente');
+      return;
+    }
+    
+    // Validar items
+    const items = [];
+    let isValid = true;
+    
+    document.querySelectorAll('.bill-item').forEach(item => {
+      const select = item.querySelector('select');
+      const name = select.options[select.selectedIndex]?.text.split(' - ')[0] || '';
+      const qty = item.querySelectorAll('input')[0].value;
+      const price = item.querySelectorAll('input')[1].value;
+      const total = item.querySelectorAll('input')[2].value;
+      
+      if(name && qty && price && total) {
+        items.push({
+          name,
+          qty: parseFloat(qty),
+          price: parseFloat(price),
+          total: parseFloat(total)
+        });
+      } else if(select.value || qty || price) {
+        isValid = false;
+      }
+    });
+    
+    if(!isValid) {
+      alert('Por favor complete correctamente todos los items');
+      return;
+    }
+    
+    if(items.length === 0) {
+      alert('Por favor agregue al menos un item a la factura');
+      return;
+    }
+    
+    // Calcular totales
+    const subtotal = items.reduce((sum, item) => sum + item.total, 0);
+    const iva = subtotal * 0.12;
+    const total = subtotal + iva;
+    
+    // Generar número de factura
+    lastBillNumber++;
+    const billNumber = `FAC-${lastBillNumber.toString().padStart(3, '0')}`;
+    localStorage.setItem('lastBillNumber', lastBillNumber.toString());
+    
+    // Actualizar vista de factura
+    document.getElementById('billNumber').textContent = billNumber;
+    document.getElementById('billClientName').textContent = clientName;
+    document.getElementById('billClientNIT').textContent = clientNIT ? `NIT: ${clientNIT}` : '';
+    
+    const now = new Date();
+    document.getElementById('billDate').textContent = formatDate(now);
+    document.getElementById('billFullDate').textContent = formatFullDate(now);
+    
+    document.getElementById('billItemsList').innerHTML = items.map(item => `
+      <tr>
+        <td>${item.name}</td>
+        <td>${item.qty}</td>
+        <td>Q ${item.price.toFixed(2)}</td>
+        <td>Q ${item.total.toFixed(2)}</td>
+      </tr>
+    `).join('');
+    
+    document.getElementById('billSubtotal').textContent = `Q ${subtotal.toFixed(2)}`;
+    document.getElementById('billIVA').textContent = `Q ${iva.toFixed(2)}`;
+    document.getElementById('billTotal').textContent = `Q ${total.toFixed(2)}`;
+    
+    // Mostrar factura y habilitar botón de impresión
+    document.getElementById('billView').style.display = 'block';
+    document.getElementById('printBtn').disabled = false;
+    
+    // Desplazarse a la factura generada
+    document.getElementById('billView').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function printBill() {
+    window.print();
+  }
+
+  function goToSAT() {
+    // Redirección al portal de facturación electrónica de la SAT Guatemala
+    window.open('https://felgt.guatemala.gob.gt/login', '_blank');
+  }
+
+  function formatDate(date) {
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  }
+
+  function formatFullDate(date) {
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    return date.toLocaleDateString('es-ES', options);
+  }
+  </script>
+</body>
+</html>

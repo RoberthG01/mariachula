@@ -1,27 +1,201 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Selección - Sistema de Restaurante</title>
-    <link rel="stylesheet" href="panel.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Panel Principal - María Chula</title>
+  <link rel="stylesheet" href="panel.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="icon" href="fotos/iconomch.ico" type="image/x-icon">
 </head>
 <body>
-
-    <header class="header">
-        <h2>Elija su opción preferida</h2>
-    </header>
-
-    <div class="option-container">
-        <button onclick="window.location.href='menu.html'">Menú del Restaurante</button>
-        <button onclick="window.location.href='eventos.html'">Eventos</button>
-        <button onclick="window.location.href='dashboard.html'">Reportes</button>
-        <button onclick="window.location.href='cola_pedidos_admin.html'">Cola de Pedidos</button>
-        <button onclick="window.location.href='historial_eventos.html'">Historial de Eventos</button>
-        <button onclick="window.location.href='historial_pedidos.html'">Historial de Pedidos</button>
-        <button onclick="window.location.href='gestionar_admin.html'">Gestionar Administradores</button>
-        <button onclick="window.location.href='gestionar_menu.html'">Gestionar Menú</button>
+<div class="app">
+  <main class="main">
+    <div class="header">
+      <div class="title">Panel de Control - María Chula</div>
+      <div class="actions">
+        <div class="user-info">
+          <i class="fas fa-user"></i>
+          <span id="username">Administrador</span>
+        </div>
+        <button class="btn ghost" id="logoutBtn">
+          <i class="fas fa-sign-out-alt"></i>Cerrar Sesión
+        </button>
+      </div>
     </div>
 
+    <div class="card">
+      <div class="options-container">
+        <h1 class="page-title">Seleccione una opción del sistema</h1>
+        
+        <div class="edit-mode-message" id="editModeMessage">
+          <i class="fas fa-info-circle"></i> Modo de edición activado: Arrastra y suelta para reordenar los módulos
+        </div>
+        
+        <div class="options-grid" id="optionsGrid">
+          <!-- Las opciones se cargarán dinámicamente desde JS -->
+        </div>
+      </div>
+    </div>
+    
+    <button class="edit-mode-btn" id="editModeBtn">✏️</button>
+  </main>
+</div>
+
+<!-- Modal de confirmación de cierre de sesión -->
+<div class="modal" id="logoutModal">
+  <div class="modal-content">
+    <h2><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</h2>
+    <p>¿Estás seguro de que deseas cerrar la sesión?</p>
+    <div class="modal-buttons">
+      <button class="btn ghost" id="cancelLogout">Cancelar</button>
+      <button class="btn primary" id="confirmLogout">Sí, Cerrar Sesión</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Verificar token y sesión
+    const token = localStorage.getItem('token');
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+  
+    if (!token || !currentUser) {
+      window.location.href = 'login.html';
+      return;
+    }
+  
+    // Mostrar nombre del usuario (fallback a "Usuario")
+    document.getElementById('username').textContent =
+      currentUser.nombre || currentUser.name || "Usuario";
+  
+    // Elementos del DOM
+    const optionsGrid = document.getElementById('optionsGrid');
+    const editModeBtn = document.getElementById('editModeBtn');
+    const editModeMessage = document.getElementById('editModeMessage');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const logoutModal = document.getElementById('logoutModal');
+    const cancelLogout = document.getElementById('cancelLogout');
+    const confirmLogout = document.getElementById('confirmLogout');
+  
+    let editMode = false;
+    let draggedItem = null;
+  
+    // Opciones del sistema
+    const systemOptions = [
+      { id: 'menu', icon: '🍽️', title: 'Menú', desc: 'Gestión de platos y productos', url: 'menu.html' },
+      { id: 'inventory', icon: '📦', title: 'Inventario', desc: 'Control de existencias', url: 'inventario.html' },
+      { id: 'admin-menus', icon: '📝', title: 'Administración de Menús', desc: 'Configuración de categorías y platos', url: 'gestionar_menu.html' },
+      { id: 'admin-users', icon: '👥', title: 'Administración de usuarios', desc: 'Gestión de roles y permisos', url: 'gestionar_admin.html' },
+      { id: 'factura', icon: '💰', title: 'Facturación', desc: 'Registro de ventas y cobros', url: 'factura.html' },
+      { id: 'cash_register', icon: '🏦', title: 'Caja', desc: 'Control de efectivo y cortes', url: 'cash_register.html' },
+      { id: 'eventos', icon: '🎉', title: 'Eventos', desc: 'Gestión de reservas y eventos', url: 'eventos.html' },
+      { id: 'historial_eventos', icon: '📅', title: 'Historial de Eventos', desc: 'Registro de eventos pasados', url: 'historial_eventos.html' },
+      { id: 'historial_pedidos', icon: '📋', title: 'Historial de Pedidos', desc: 'Consultar pedidos anteriores', url: 'historial_pedidos.html' },
+      { id: 'cola_pedidos_chef', icon: '⏳', title: 'Cola de pedidos', desc: 'Seguimiento de pedidos en curso', url: 'cola_pedidos_chef.html' }
+    ];
+  
+    // Cargar orden guardado
+    function loadOptions() {
+      const savedOrder = JSON.parse(localStorage.getItem('optionsOrder')) || [];
+      const orderedOptions = [];
+  
+      systemOptions.forEach(option => {
+        if (savedOrder.includes(option.id)) {
+          orderedOptions[savedOrder.indexOf(option.id)] = option;
+        } else {
+          orderedOptions.push(option);
+        }
+      });
+  
+      const finalOptions = orderedOptions.filter(opt => opt).concat(
+        systemOptions.filter(opt => !orderedOptions.includes(opt))
+      );
+  
+      renderOptions(finalOptions);
+    }
+  
+    // Renderizar opciones
+    function renderOptions(options) {
+      optionsGrid.innerHTML = '';
+      options.forEach(option => {
+        const optionCard = document.createElement('a');
+        optionCard.className = 'option-card';
+        optionCard.href = editMode ? 'javascript:void(0);' : option.url;
+        optionCard.dataset.id = option.id;
+        optionCard.innerHTML = `
+          <div class="option-icon">${option.icon}</div>
+          <h3>${option.title}</h3>
+          <p>${option.desc}</p>
+        `;
+  
+        if (editMode) {
+          optionCard.draggable = true;
+          optionCard.addEventListener('dragstart', handleDragStart);
+          optionCard.addEventListener('dragover', handleDragOver);
+          optionCard.addEventListener('drop', handleDrop);
+          optionCard.addEventListener('dragend', handleDragEnd);
+          optionCard.style.cursor = 'grab';
+        } else {
+          optionCard.draggable = false;
+          optionCard.style.cursor = 'pointer';
+        }
+  
+        optionsGrid.appendChild(optionCard);
+      });
+    }
+  
+    // Drag & drop
+    function handleDragStart(e) {
+      draggedItem = this;
+      this.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/html', this.innerHTML);
+    }
+    function handleDragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }
+    function handleDrop(e) {
+      e.preventDefault();
+      if (draggedItem !== this) {
+        const options = Array.from(optionsGrid.children);
+        const draggedIndex = options.indexOf(draggedItem);
+        const targetIndex = options.indexOf(this);
+  
+        if (draggedIndex < targetIndex) optionsGrid.insertBefore(draggedItem, this.nextSibling);
+        else optionsGrid.insertBefore(draggedItem, this);
+  
+        saveOrder();
+      }
+    }
+    function handleDragEnd() { this.classList.remove('dragging'); }
+    function saveOrder() { 
+      const newOrder = Array.from(optionsGrid.children).map(card => card.dataset.id);
+      localStorage.setItem('optionsOrder', JSON.stringify(newOrder));
+    }
+  
+    // Edit mode
+    function toggleEditMode() {
+      editMode = !editMode;
+      editModeBtn.textContent = editMode ? '💾' : '✏️';
+      editModeBtn.style.background = editMode ? 'var(--color-accent)' : 'var(--color-primary)';
+      editModeMessage.style.display = editMode ? 'block' : 'none';
+      loadOptions();
+    }
+    editModeBtn.addEventListener('click', toggleEditMode);
+  
+    // Logout
+    function logout() {
+      localStorage.removeItem('currentUser');
+      localStorage.removeItem('token');
+      window.location.href = 'login.html';
+    }
+    logoutBtn.addEventListener('click', () => { logoutModal.style.display = 'flex'; });
+    cancelLogout.addEventListener('click', () => { logoutModal.style.display = 'none'; });
+    confirmLogout.addEventListener('click', logout);
+    logoutModal.addEventListener('click', e => { if (e.target === logoutModal) logoutModal.style.display = 'none'; });
+  
+    // Inicializar
+    loadOptions();
+  });
+  </script>  
 </body>
 </html>

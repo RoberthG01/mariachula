@@ -3,59 +3,150 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iniciar Sesión</title>
+    <title>Iniciar Sesión - María Chula</title>
     <link rel="stylesheet" href="login.css">
-    <link rel="stylesheet" href="menutodos.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="icon" href="fotos/iconomch.ico" type="image/x-icon">
 </head>
 <body>
-    <aside class="sidebar">
-        <div class="logo">
-            <img src="fotos/logomch.png" alt="Logo del Sistema">
-        </div>
-        <nav>
-            <ul>
-                <li><a href="inicio.html"><i class="fas fa-home"></i> Inicio</a></li>
-                <li><a href="login.html"><i class="fas fa-sign-in-alt"></i> Login</a></li>
-                <li><a href="menu.html"><i class="fas fa-utensils"></i> Menú del Restaurante</a></li>
-                <li><a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Reportes</a></li>
-                <li><a href="cola-pedidos.html"><i class="fas fa-clipboard-list"></i> Cola de Pedidos</a></li>
-                <li><a href="eventos.html"><i class="fas fa-calendar-alt"></i> Eventos</a></li>
-            </ul>
-        </nav>
-    </aside>
-
-    <header>
-        <h2>Inicio de Sesión</h2>
-    </header>
-    
     <div class="login-container">
+        <!-- Decoraciones temáticas -->
+        <i class="fas fa-pepper-hot decoration decoration-1"></i>
+        <i class="fas fa-utensils decoration decoration-2"></i>
+        
         <img src="fotos/logomch.png" alt="Logo de María Chula" class="logo">
-        <h2>Iniciar Sesión</h2>
-        <form id="loginForm" onsubmit="return handleLogin()">
-            <label for="email">Correo electrónico:</label>
-            <input type="email" id="email" required>
-
-            <label for="password">Contraseña:</label>
-            <input type="password" id="password" required>
-
-            <button type="submit">Iniciar sesión</button>
+        
+        <header>
+            <h2>Iniciar Sesión</h2>
+        </header>
+        
+        <!-- Mensajes de alerta -->
+        <div class="alert alert-error" id="errorAlert">
+            <i class="fas fa-exclamation-circle"></i>
+            <span id="errorMessage">Correo o contraseña incorrectos</span>
+        </div>
+        
+        <div class="alert alert-success" id="successAlert">
+            <i class="fas fa-check-circle"></i>
+            <span>Inicio de sesión exitoso. Redirigiendo...</span>
+        </div>
+        
+        <form id="loginForm">
+            <div class="input-group">
+                <label for="email">Correo electrónico:</label>
+                <div class="input-with-icon">
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" id="email" placeholder="usuario@ejemplo.com" required>
+                </div>
+            </div>
+            
+            <div class="input-group">
+                <label for="password">Contraseña:</label>
+                <div class="input-with-icon">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="password" placeholder="Ingresa tu contraseña" required>
+                </div>
+            </div>
+            
+            <button type="submit" class="login-button" id="loginBtn">Iniciar sesión</button>
+            
+            <!-- Spinner de carga -->
+            <div class="spinner" id="spinner"></div>
         </form>
 
         <div class="links">
-            <a href="registrouser.html">Crear usuario</a>
-            <a href="olvidacontraseña.html">¿Olvidaste tu contraseña?</a>
+            <a href="registrouser.html"><i class="fas fa-user-plus"></i> Crear usuario</a>
+            <a href="olvidacontraseña.html"><i class="fas fa-key"></i> ¿Olvidaste tu contraseña?</a>
         </div>
 
-        <button class="back-button" onclick="window.location.href='inicio.html'">Volver al Inicio</button>
+        <button class="back-button" onclick="window.location.href='inicio.html'"><i class="fas fa-arrow-left"></i> Volver al Inicio</button>
     </div>
 
+    <footer>
+        <p>© 2025 Restaurante María Chula - Todos los derechos reservados</p>
+    </footer>
+
     <script>
-        function handleLogin() {
-            // Aquí puedes añadir validaciones o autenticación
+        document.addEventListener('DOMContentLoaded', function() {
+          const loginForm = document.getElementById('loginForm');
+          const errorAlert = document.getElementById('errorAlert');
+          const successAlert = document.getElementById('successAlert');
+          const errorMessage = document.getElementById('errorMessage');
+          const spinner = document.getElementById('spinner');
+          const loginBtn = document.getElementById('loginBtn');
+        
+          loginForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+        
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+        
+            if (!email || !password) {
+              showError('Por favor, complete todos los campos');
+              return;
+            }
+            if (!isValidEmail(email)) {
+              showError('Por favor, ingrese un correo electrónico válido');
+              return;
+            }
+        
+            spinner.style.display = 'block';
+            loginBtn.disabled = true;
+        
+            try {
+              const response = await fetch('http://localhost:3000/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ correo: email, password })
+              });
+        
+              const data = await response.json();
+              spinner.style.display = 'none';
+              loginBtn.disabled = false;
+        
+              if (response.ok) {
+                showSuccess();
+        
+                // Guardar token y usuario
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('currentUser', JSON.stringify(data.usuario));
+        
+                setTimeout(() => {
+                  window.location.href = 'panel.html';
+                }, 2000);
+              } else {
+                showError(data.error || 'Correo electrónico o contraseña incorrectos');
+              }
+        
+            } catch (err) {
+              spinner.style.display = 'none';
+              loginBtn.disabled = false;
+              showError('Error al conectarse al servidor');
+              console.error(err);
+            }
+          });
+        
+          function showError(message) {
+            errorMessage.textContent = message;
+            errorAlert.style.display = 'block';
+            successAlert.style.display = 'none';
+          }
+        
+          function showSuccess() {
+            errorAlert.style.display = 'none';
+            successAlert.style.display = 'block';
+          }
+        
+          function isValidEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+          }
+        
+          // 🔑 Verificar si ya hay sesión activa
+          if (localStorage.getItem('token') && localStorage.getItem('currentUser')) {
             window.location.href = 'panel.html';
-            return false; // Evita que el formulario se envíe de forma predeterminada
-        }
-    </script>
+          }
+        });
+        </script>
 </body>
 </html>

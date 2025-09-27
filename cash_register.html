@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Caja Registradora - María Chula</title>
+    <link rel="stylesheet" href="cash_register.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo-container">
+                <img src="fotos/logomch.png" alt="Logo María Chula" class="logo">
+                <h1 class="title">Caja Registradora</h1>
+            </div>
+            <a href="panel.html" class="back-button">
+                <i class="fas fa-arrow-left"></i> Regresar
+            </a>
+        </div>
+
+        <!-- Estado de caja -->
+        <div class="section">
+            <h2>Estado de Caja</h2>
+            <div class="cash-status">
+                <div class="status-card">
+                    <h3>Estado</h3>
+                    <div class="amount" id="statusText">Cerrada</div>
+                    <div class="status status-closed" id="statusBadge">CERRADA</div>
+                </div>
+                <div class="status-card">
+                    <h3>Fondo Inicial</h3>
+                    <div class="amount" id="initialAmount">Q0.00</div>
+                </div>
+                <div class="status-card">
+                    <h3>Ventas del Día</h3>
+                    <div class="amount" id="salesAmount">Q0.00</div>
+                </div>
+                <div class="status-card">
+                    <h3>Total en Caja</h3>
+                    <div class="amount" id="totalAmount">Q0.00</div>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <button class="btn success" id="openCashBtn" onclick="openCash()">
+                    <i class="fas fa-lock-open"></i> Apertura de Caja
+                </button>
+                <button class="btn error" id="closeCashBtn" onclick="closeCash()" disabled>
+                    <i class="fas fa-lock"></i> Cierre de Caja
+                </button>
+            </div>
+        </div>
+
+        <!-- Registrar venta -->
+        <div class="section">
+            <h2>Registrar Venta</h2>
+            <form id="cashForm">
+                <div class="form-row">
+                    <div class="input-group">
+                        <label for="total">Total de la compra (Q):</label>
+                        <input type="number" id="total" class="input" required step="0.01" min="0">
+                    </div>
+                    <div class="input-group">
+                        <label for="recibido">Monto recibido (Q):</label>
+                        <input type="number" id="recibido" class="input" required step="0.01" min="0">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <button type="submit" class="btn primary" id="calculateBtn">
+                        <i class="fas fa-calculator"></i> Calcular y Registrar
+                    </button>
+                    <button type="button" class="btn ghost" onclick="limpiarFormulario()">
+                        <i class="fas fa-broom"></i> Limpiar formulario
+                    </button>
+                </div>
+            </form>
+            
+            <div id="resultado" class="result"></div>
+        </div>
+
+        <!-- Movimientos de caja -->
+        <div class="section">
+            <h2>Movimientos de Caja</h2>
+            <table id="movimientos">
+                <thead>
+                    <tr>
+                        <th>Fecha y Hora</th>
+                        <th>Total (Q)</th>
+                        <th>Recibido (Q)</th>
+                        <th>Cambio (Q)</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Los movimientos se insertarán aquí -->
+                </tbody>
+            </table>
+            
+            <div class="form-row" style="margin-top: 20px;">
+                <button class="btn error" onclick="resetearCaja()">
+                    <i class="fas fa-trash"></i> Resetear caja
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        let cashRegister = {
+            isOpen: false,
+            initialAmount: 0,
+            sales: 0,
+            movements: []
+        };
+
+        // Elementos del DOM
+        const cashForm = document.getElementById("cashForm");
+        const resultado = document.getElementById("resultado");
+        const tabla = document.getElementById("movimientos").getElementsByTagName("tbody")[0];
+        const statusText = document.getElementById("statusText");
+        const statusBadge = document.getElementById("statusBadge");
+        const initialAmount = document.getElementById("initialAmount");
+        const salesAmount = document.getElementById("salesAmount");
+        const totalAmount = document.getElementById("totalAmount");
+        const openCashBtn = document.getElementById("openCashBtn");
+        const closeCashBtn = document.getElementById("closeCashBtn");
+        const calculateBtn = document.getElementById("calculateBtn");
+
+        // Cargar datos desde localStorage al iniciar
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCashRegister();
+            updateCashStatus();
+            renderMovements();
+        });
+
+        // Cargar estado de caja desde localStorage
+        function loadCashRegister() {
+            const savedData = localStorage.getItem('mariaChulaCashRegister');
+            if (savedData) {
+                cashRegister = JSON.parse(savedData);
+            }
+        }
+
+        // Guardar estado de caja en localStorage
+        function saveCashRegister() {
+            localStorage.setItem('mariaChulaCashRegister', JSON.stringify(cashRegister));
+        }
+
+        // Actualizar interfaz con el estado de caja
+        function updateCashStatus() {
+            if (cashRegister.isOpen) {
+                statusText.textContent = "Abierta";
+                statusBadge.textContent = "ABIERTA";
+                statusBadge.className = "status status-open";
+                initialAmount.textContent = `Q${cashRegister.initialAmount.toFixed(2)}`;
+                salesAmount.textContent = `Q${cashRegister.sales.toFixed(2)}`;
+                totalAmount.textContent = `Q${(cashRegister.initialAmount + cashRegister.sales).toFixed(2)}`;
+                
+                openCashBtn.disabled = true;
+                closeCashBtn.disabled = false;
+                calculateBtn.disabled = false;
+            } else {
+                statusText.textContent = "Cerrada";
+                statusBadge.textContent = "CERRADA";
+                statusBadge.className = "status status-closed";
+                initialAmount.textContent = "Q0.00";
+                salesAmount.textContent = "Q0.00";
+                totalAmount.textContent = "Q0.00";
+                
+                openCashBtn.disabled = false;
+                closeCashBtn.disabled = true;
+                calculateBtn.disabled = true;
+            }
+        }
+
+        // Apertura de caja
+        function openCash() {
+            const amount = parseFloat(prompt("Ingrese el monto inicial para abrir caja:"));
+            
+            if (isNaN(amount) || amount <= 0) {
+                alert("Por favor ingrese un monto válido.");
+                return;
+            }
+            
+            cashRegister.isOpen = true;
+            cashRegister.initialAmount = amount;
+            cashRegister.sales = 0;
+            cashRegister.movements = [];
+            
+            saveCashRegister();
+            updateCashStatus();
+            renderMovements();
+            
+            resultado.innerHTML = `<div class="result success">Caja abierta con Q${amount.toFixed(2)}</div>`;
+        }
+
+        // Cierre de caja
+        function closeCash() {
+            if (!cashRegister.isOpen) return;
+            
+            const total = cashRegister.initialAmount + cashRegister.sales;
+            const report = `
+                REPORTE DE CIERRE DE CAJA:
+                - Fondo inicial: Q${cashRegister.initialAmount.toFixed(2)}
+                - Ventas del día: Q${cashRegister.sales.toFixed(2)}
+                - Total en caja: Q${total.toFixed(2)}
+                - Movimientos registrados: ${cashRegister.movements.length}
+            `;
+            
+            if (confirm(`¿Está seguro de cerrar la caja?\n\n${report}`)) {
+                // Guardar reporte de cierre
+                const closeReport = {
+                    date: new Date().toLocaleString(),
+                    initial: cashRegister.initialAmount,
+                    sales: cashRegister.sales,
+                    total: total,
+                    movements: cashRegister.movements.length
+                };
+                
+                // Guardar en historial de cierres
+                let closeHistory = JSON.parse(localStorage.getItem('mariaChulaCloseHistory') || '[]');
+                closeHistory.push(closeReport);
+                localStorage.setItem('mariaChulaCloseHistory', JSON.stringify(closeHistory));
+                
+                // Reiniciar caja
+                cashRegister.isOpen = false;
+                cashRegister.initialAmount = 0;
+                cashRegister.sales = 0;
+                cashRegister.movements = [];
+                
+                saveCashRegister();
+                updateCashStatus();
+                renderMovements();
+                
+                resultado.innerHTML = `<div class="result success">Caja cerrada correctamente. Total: Q${total.toFixed(2)}</div>`;
+            }
+        }
+
+        // Procesar formulario de venta
+        cashForm.addEventListener("submit", function(e) {
+            e.preventDefault();
+            
+            if (!cashRegister.isOpen) {
+                resultado.innerHTML = `<div class="result error">La caja está cerrada. Debe abrirla primero.</div>`;
+                return;
+            }
+            
+            const total = parseFloat(document.getElementById("total").value);
+            const recibido = parseFloat(document.getElementById("recibido").value);
+            
+            if (isNaN(total) || isNaN(recibido) || total <= 0 || recibido <= 0) {
+                resultado.innerHTML = `<div class="result error">Por favor ingrese valores válidos.</div>`;
+                return;
+            }
+            
+            let cambio = recibido - total;
+            let estado = "";
+            
+            if (recibido >= total) {
+                resultado.innerHTML = `<div class="result success">Pago aceptado. Cambio: Q${cambio.toFixed(2)}</div>`;
+                estado = "Pagado";
+                
+                // Registrar venta
+                cashRegister.sales += total;
+            } else {
+                resultado.innerHTML = `<div class="result error">Monto insuficiente. Faltan Q${(total - recibido).toFixed(2)}</div>`;
+                cambio = 0;
+                estado = "Insuficiente";
+            }
+            
+            // Registrar movimiento
+            const movement = {
+                date: new Date().toLocaleString(),
+                total: total,
+                received: recibido,
+                change: cambio,
+                status: estado
+            };
+            
+            cashRegister.movements.push(movement);
+            saveCashRegister();
+            updateCashStatus();
+            renderMovements();
+            
+            limpiarFormulario();
+        });
+
+        // Renderizar movimientos en tabla
+        function renderMovements() {
+            tabla.innerHTML = '';
+            
+            if (cashRegister.movements.length === 0) {
+                const row = tabla.insertRow();
+                const cell = row.insertCell(0);
+                cell.colSpan = 5;
+                cell.textContent = "No hay movimientos registrados";
+                cell.style.textAlign = "center";
+                cell.style.padding = "20px";
+                cell.style.color = "#999";
+                return;
+            }
+            
+            cashRegister.movements.forEach(movement => {
+                const row = tabla.insertRow();
+                row.insertCell(0).textContent = movement.date;
+                row.insertCell(1).textContent = movement.total.toFixed(2);
+                row.insertCell(2).textContent = movement.received.toFixed(2);
+                row.insertCell(3).textContent = movement.change.toFixed(2);
+                
+                const statusCell = row.insertCell(4);
+                statusCell.textContent = movement.status;
+                
+                if (movement.status === "Pagado") {
+                    statusCell.style.color = "var(--color-success)";
+                    statusCell.style.fontWeight = "600";
+                } else {
+                    statusCell.style.color = "var(--color-error)";
+                    statusCell.style.fontWeight = "600";
+                }
+            });
+        }
+
+        // Limpiar formulario
+        function limpiarFormulario() {
+            document.getElementById("total").value = "";
+            document.getElementById("recibido").value = "";
+        }
+
+        // Resetear caja
+        function resetearCaja() {
+            if (confirm("¿Está seguro de resetear toda la caja? Se perderán todos los datos.")) {
+                cashRegister.isOpen = false;
+                cashRegister.initialAmount = 0;
+                cashRegister.sales = 0;
+                cashRegister.movements = [];
+                
+                saveCashRegister();
+                updateCashStatus();
+                renderMovements();
+                limpiarFormulario();
+                
+                resultado.innerHTML = `<div class="result success">Caja reseteada correctamente.</div>`;
+            }
+        }
+    </script>
+</body>
+</html>

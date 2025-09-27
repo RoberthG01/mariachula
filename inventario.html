@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Inventario - María Chula</title>
+    <link rel="stylesheet" href="inventario.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="icon" href="fotos/iconomch.ico" type="image/x-icon">
+</head>
+<body>
+    <div class="overlay" id="overlay"></div>
+    <button class="mobile-menu-toggle" id="mobileMenuToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div class="app">
+        <aside class="sidebar" id="sidebar">
+            <button class="toggle-sidebar" id="toggleSidebar">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            
+            <div class="logo">
+                <img src="fotos/logomch.png" alt="Logo María Chula">
+                <h2>María Chula</h2>
+            </div>
+            
+            <div class="menu-list">
+                <a href="menu.html" class="menu-item">
+                    <i class="fas fa-utensils"></i>
+                    <span class="menu-text">Menú</span>
+                </a>
+                <a href="inventory.html" class="menu-item">
+                    <i class="fas fa-boxes"></i>
+                    <span class="menu-text">Inventario</span>
+                </a>
+                <a href="index.html" class="menu-item">
+                    <i class="fas fa-home"></i>
+                    <span class="menu-text">Inicio</span>
+                </a>
+                <a href="admin-menus.html" class="menu-item">
+                    <i class="fas fa-list-alt"></i>
+                    <span class="menu-text">Admin Menús</span>
+                </a>
+                <a href="admin-users.html" class="menu-item">
+                    <i class="fas fa-users"></i>
+                    <span class="menu-text">Admin Usuarios</span>
+                </a>
+                <a href="billing.html" class="menu-item">
+                    <i class="fas fa-receipt"></i>
+                    <span class="menu-text">Facturación</span>
+                </a>
+                <a href="events.html" class="menu-item">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span class="menu-text">Eventos</span>
+                </a>
+                <a href="history-events.html" class="menu-item">
+                    <i class="fas fa-history"></i>
+                    <span class="menu-text">Historial Eventos</span>
+                </a>
+                <a href="history-orders.html" class="menu-item">
+                    <i class="fas fa-clipboard-list"></i>
+                    <span class="menu-text">Historial Pedidos</span>
+                </a>
+                <a href="queue.html" class="menu-item">
+                    <i class="fas fa-tasks"></i>
+                    <span class="menu-text">Cola de pedidos</span>
+                </a>
+            </div>
+        </aside>
+
+        <main class="main">
+            <div class="header">
+                <div class="title">Inventario</div>
+            </div>
+            
+            <div class="card">
+                <form id="invForm" onsubmit="handleInvForm(event)">
+                    <div class="form-row">
+                        <input class="input" id="inv_name" placeholder="Ingrediente" required>
+                        <input class="input" id="inv_qty" placeholder="Cantidad" type="number" step="0.01" required>
+                        <input class="input" id="inv_unit" placeholder="Unidad (kg, l, etc.)" required>
+                    </div>
+                    <div style="margin-top:8px">
+                        <button class="btn primary" type="submit"><i class="fas fa-save"></i> Guardar</button>
+                    </div>
+                </form>
+                <hr>
+                <table class="table" id="invTable">
+                    <thead>
+                        <tr>
+                            <th>Ingrediente</th>
+                            <th>Cantidad</th>
+                            <th>Unidad</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Función auxiliar para seleccionar elementos
+        function qs(selector) {
+            return document.querySelector(selector);
+        }
+
+        // Variables para el estado del menú
+        const sidebar = qs('#sidebar');
+        const toggleSidebarBtn = qs('#toggleSidebar');
+        const mobileMenuToggle = qs('#mobileMenuToggle');
+        const overlay = qs('#overlay');
+        let isCollapsed = false;
+
+        // Función para alternar el menú lateral
+        function toggleSidebar() {
+            if (window.innerWidth <= 900) {
+                // En móvil: mostrar/ocultar completamente
+                sidebar.classList.toggle('active');
+                overlay.style.display = sidebar.classList.contains('active') ? 'block' : 'none';
+            } else {
+                // En desktop: colapsar/expandir
+                isCollapsed = !isCollapsed;
+                sidebar.classList.toggle('collapsed');
+                toggleSidebarBtn.innerHTML = isCollapsed ? 
+                    '<i class="fas fa-chevron-right"></i>' : 
+                    '<i class="fas fa-chevron-left"></i>';
+            }
+        }
+
+        // Event listeners para los botones del menú
+        toggleSidebarBtn.addEventListener('click', toggleSidebar);
+        mobileMenuToggle.addEventListener('click', toggleSidebar);
+        overlay.addEventListener('click', toggleSidebar);
+
+        // Cerrar menú al hacer clic en un enlace (en móvil)
+        const menuItems = document.querySelectorAll('.menu-item');
+        menuItems.forEach(item => {
+            item.addEventListener('click', () => {
+                if (window.innerWidth <= 900) {
+                    sidebar.classList.remove('active');
+                    overlay.style.display = 'none';
+                }
+            });
+        });
+
+        // Funciones para el inventario
+        function getInv(){ 
+            return JSON.parse(localStorage.getItem('mc_inv')||'[]'); 
+        }
+
+        function saveInv(arr){ 
+            localStorage.setItem('mc_inv', JSON.stringify(arr)); 
+        }
+
+        function renderInv(){
+            const tb = document.querySelector('#invTable tbody');
+            const inventory = getInv();
+            
+            if (inventory.length === 0) {
+                tb.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px; color: var(--color-dark);">No hay ingredientes en el inventario</td></tr>';
+                return;
+            }
+            
+            tb.innerHTML = inventory.map((item, index) => `
+                <tr>
+                    <td>${item.name}</td>
+                    <td>${item.qty}</td>
+                    <td>${item.unit}</td>
+                    <td>
+                        <button class="btn ghost" onclick="delInv(${index})">
+                            <i class="fas fa-trash"></i> Eliminar
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function handleInvForm(e){
+            e.preventDefault();
+            const arr = getInv();
+            arr.push({
+                name: qs('#inv_name').value, 
+                qty: parseFloat(qs('#inv_qty').value), 
+                unit: qs('#inv_unit').value
+            });
+            saveInv(arr); 
+            e.target.reset(); 
+            renderInv();
+        }
+
+        function delInv(index){
+            if (confirm('¿Estás seguro de que deseas eliminar este ingrediente?')) {
+                const arr = getInv(); 
+                arr.splice(index, 1); 
+                saveInv(arr); 
+                renderInv();
+            }
+        }
+
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', renderInv);
+    </script>
+</body>
+</html>

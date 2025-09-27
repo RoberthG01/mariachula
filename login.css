@@ -1,104 +1,251 @@
-/* Fondo general */
-body {
-    background-color: #f4f4f4;
-    font-family: Arial, sans-serif;
+/* Paleta de colores para restaurante Mariachula */
+:root {
+    --color-primary: #D35400;     /* Naranja oscuro - color principal */
+    --color-secondary: #C0392B;   /* Rojo terroso - acentos */
+    --color-accent: #F39C12;      /* Amarillo dorado - destacados */
+    --color-light: #FDEBD0;       /* Beige claro - fondos */
+    --color-dark: #7E5109;        /* Marrón oscuro - texto */
+}
+
+/* Estilos generales */
+* {
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* Sidebar */
-.sidebar {
-    width: 220px;
-    background-color: #2c3e50;
-    color: white;
-    height: 100vh;
-    position: fixed;
-    padding-top: 20px;
-}
-
-.sidebar .logo {
-    text-align: center;
-    padding: 10px 0;
-}
-
-.sidebar img {
-    max-width: 100px;
-}
-
-.sidebar nav ul {
-    list-style-type: none;
-    padding: 0;
-}
-
-.sidebar nav ul li {
-    padding: 15px 0;
-    text-align: center;
-}
-
-.sidebar nav ul li a {
-    color: white;
-    text-decoration: none;
-    display: block;
-    padding: 10px 0;
-}
-
-.sidebar nav ul li a:hover {
-    background-color: #34495e;
-}
-
-/* Header */
-header {
-    background-color: #2c3e50;
-    color: white;
+body {
+    background: linear-gradient(to bottom, var(--color-primary), var(--color-secondary));
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     padding: 20px;
-    text-align: center;
-    margin-left: 220px; /* Espacio para el sidebar */
 }
 
-/* Contenedor de inicio de sesión */
+/* Contenedor de login */
 .login-container {
-    width: 300px;
-    margin: 100px auto;
-    padding: 20px;
-    background-color: #fff;
-    border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    text-align: center;
-}
-
-h2 {
-    color: #2c3e50;
-}
-
-input {
     width: 100%;
-    padding: 10px;
-    margin: 10px 0;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+    max-width: 420px;
+    padding: 35px 30px;
+    background-color: white;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
 }
 
-button {
-    background-color: #2c3e50;
+.login-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 8px;
+    background: linear-gradient(to right, var(--color-primary), var(--color-secondary), var(--color-accent));
+}
+
+/* Logo */
+.logo {
+    width: 130px;
+    height: 130px;
+    margin: 5px auto 20px;
+    display: block;
+    border-radius: 50%;
+    border: 5px solid var(--color-light);
+    padding: 5px;
+    background: white;
+    object-fit: contain;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Encabezado */
+header {
+    margin-bottom: 25px;
+}
+
+header h2 {
+    color: var(--color-dark);
+    font-size: 28px;
+    margin-bottom: 10px;
+    font-weight: 700;
+}
+
+/* Formulario */
+form {
+    margin-top: 20px;
+}
+
+.input-group {
+    margin-bottom: 22px;
+    text-align: left;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--color-dark);
+    font-weight: 600;
+}
+
+.input-with-icon {
+    position: relative;
+}
+
+.input-with-icon i {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--color-primary);
+}
+
+input[type="email"],
+input[type="password"] {
+    width: 100%;
+    padding: 15px 15px 15px 45px;
+    border: 2px solid #EDE7E0;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    background-color: #FEF9F3;
+}
+
+input[type="email"]:focus,
+input[type="password"]:focus {
+    border-color: var(--color-primary);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(211, 84, 0, 0.2);
+}
+
+/* Botón de login */
+.login-button {
+    background: linear-gradient(to right, var(--color-primary), var(--color-secondary));
     color: white;
-    padding: 10px;
+    padding: 16px;
     border: none;
-    border-radius: 5px;
+    border-radius: 8px;
+    font-size: 17px;
+    font-weight: 600;
     cursor: pointer;
     width: 100%;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+    box-shadow: 0 4px 10px rgba(211, 84, 0, 0.3);
 }
 
-button:hover {
-    background-color: #34495e;
+.login-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(211, 84, 0, 0.4);
+}
+
+/* Enlaces */
+.links {
+    margin: 22px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
 }
 
 .links a {
-    display: block;
-    margin: 10px 0;
-    color: #2c3e50;
+    color: var(--color-primary);
     text-decoration: none;
+    font-size: 15px;
+    transition: color 0.3s ease;
+    font-weight: 500;
 }
 
 .links a:hover {
+    color: var(--color-secondary);
     text-decoration: underline;
+}
+
+.links a i {
+    margin-right: 8px;
+}
+
+/* Botón de volver */
+.back-button {
+    background-color: transparent;
+    color: var(--color-dark);
+    padding: 13px;
+    border: 2px solid #EDE7E0;
+    border-radius: 8px;
+    font-size: 15px;
+    cursor: pointer;
+    width: 100%;
+    transition: all 0.3s ease;
+    margin-top: 15px;
+    font-weight: 500;
+}
+
+.back-button:hover {
+    background-color: var(--color-light);
+    border-color: var(--color-primary);
+}
+
+.back-button i {
+    margin-right: 8px;
+}
+
+/* Footer */
+footer {
+    margin-top: 35px;
+    color: white;
+    text-align: center;
+    font-size: 14px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+footer p {
+    background-color: rgba(0, 0, 0, 0.2);
+    display: inline-block;
+    padding: 8px 15px;
+    border-radius: 20px;
+}
+
+/* Decoraciones temáticas */
+.decoration {
+    position: absolute;
+    opacity: 0.1;
+    z-index: -1;
+}
+
+.decoration-1 {
+    top: -30px;
+    right: -30px;
+    font-size: 150px;
+    color: var(--color-accent);
+    transform: rotate(45deg);
+}
+
+.decoration-2 {
+    bottom: -40px;
+    left: -40px;
+    font-size: 140px;
+    color: var(--color-primary);
+    transform: rotate(-20deg);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .login-container {
+        padding: 25px 20px;
+    }
+    
+    .logo {
+        width: 110px;
+        height: 110px;
+    }
+    
+    header h2 {
+        font-size: 24px;
+    }
+    
+    .decoration {
+        display: none;
+    }
 }

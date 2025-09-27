@@ -1,9 +1,18 @@
 {
+  "type": "module",
   "dependencies": {
-    "pg": "^8.13.0"
+    "bcryptjs": "^3.0.2",
+    "corns": "^0.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "env": "^0.0.2",
+    "express": "^4.21.1",
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.13.1"
   },
   "scripts": {
-    "start": "node server.js"
+    "start": "node index.js",
+    "dev": "nodemon index.js"
   },
   "name": "restmariachula",
   "version": "1.0.0",
@@ -11,5 +20,8 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": ""
+  "description": "",
+  "devDependencies": {
+    "nodemon": "^3.1.7"
+  }
 }

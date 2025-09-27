@@ -1,85 +1,276 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión del Menú</title>
-    <link rel="stylesheet" href="gestionar_menu.css">
-    <link rel="stylesheet" href="menutodos.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Admin Menús - María Chula</title>
+  <link rel="stylesheet" href="gestionar_menu.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="icon" href="fotos/iconomch.ico" type="image/x-icon">
 </head>
 <body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="logo">
+        <img src="fotos/logomch.png" alt="Logo María Chula">
+        <h2>María Chula</h2>
+    </div>
+    <div class="menu-list">
+      <a href="menu.html" class="menu-item"><i class="fas fa-utensils"></i> Menú</a>
+      <a href="inventory.html" class="menu-item"><i class="fas fa-boxes"></i> Inventario</a>
+      <a href="index.html" class="menu-item"><i class="fas fa-home"></i> Inicio</a>
+      <a href="admin-menus.html" class="menu-item"><i class="fas fa-list-alt"></i> Admin Menús</a>
+      <a href="admin-users.html" class="menu-item"><i class="fas fa-users"></i> Admin Usuarios</a>
+      <a href="billing.html" class="menu-item"><i class="fas fa-receipt"></i> Facturación</a>
+      <a href="events.html" class="menu-item"><i class="fas fa-calendar-alt"></i> Eventos</a>
+      <a href="history-events.html" class="menu-item"><i class="fas fa-history"></i> Historial Eventos</a>
+      <a href="history-orders.html" class="menu-item"><i class="fas fa-clipboard-list"></i> Historial Pedidos</a>
+      <a href="queue.html" class="menu-item"><i class="fas fa-tasks"></i> Cola de pedidos</a>
+    </div>
+  </aside>
 
-    <aside class="sidebar">
-        <div class="logo">
-          <img src="fotos/logomch.png" alt="Logo del Sistema">
+  <main class="main">
+    <div class="header">
+      <div class="title">Administración de Menús</div>
+      <a href="panel.html" class="back-button">
+        <i class="fas fa-arrow-left"></i> Regresar
+      </a>
+    </div>
+
+    <div class="card">
+      <form id="menuForm" onsubmit="handleMenuForm(event)" enctype="multipart/form-data">
+        <div class="form-row">
+          <input class="input" id="m_name" placeholder="Nombre del platillo" required>
+          <input class="input" id="m_price" placeholder="Precio" type="number" step="0.01" required>
+          <select class="input" id="m_cat" required>
+            <option value="">Seleccionar categoría</option>
+            <option value="comidas">Comidas</option>
+            <option value="postres">Postres</option>
+            <option value="antojitos">Antojitos</option>
+            <option value="bebidas-frias">Bebidas Frías</option>
+            <option value="bebidas-calientes">Bebidas Calientes</option>
+            <option value="licores">Licores</option>
+          </select>
         </div>
-        <nav>
-          <ul>
-            <li><a href="inicio.html"><i class="fas fa-home"></i> Inicio</a></li>
-            <li><a href="login.html"><i class="fas fa-sign-in-alt"></i> Login</a></li>
-            <li><a href="menu.html"><i class="fas fa-utensils"></i> Menú del Restaurante</a></li>
-            <li><a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Reportes</a></li>
-            <li><a href="cola-pedidos.html"><i class="fas fa-clipboard-list"></i> Cola de Pedidos</a></li>
-            <li><a href="eventos.html"><i class="fas fa-calendar-alt"></i> Eventos</a></li>
-          </ul>
-        </nav>
-      </aside>
+        
+        <div class="form-row">
+          <div class="file-input-container">
+            <label class="file-input-label">Imagen del platillo:</label>
+            <div class="file-input-wrapper">
+              <input type="file" id="m_img_file" accept="image/*">
+              <div class="file-input-button">
+                <i class="fas fa-upload"></i> Seleccionar imagen
+              </div>
+            </div>
+            <div id="file-name" class="file-name">No se ha seleccionado ningún archivo</div>
+            
+            <small style="color:var(--muted); margin-top: 10px;">O ingresa una URL:</small>
+            <input class="input" id="m_img_url" placeholder="URL imagen (opcional)" style="margin-top: 8px;">
+          </div>
+        </div>
+        
+        <div style="margin-top:8px">
+          <button class="btn primary" type="submit">
+            <i class="fas fa-save"></i> Guardar
+          </button>
+          <button class="btn ghost" type="button" onclick="resetForm()">
+            <i class="fas fa-times"></i> Cancelar
+          </button>
+        </div>
+      </form>
 
-    <header>
-        <h1>Gestión del Menú del Restaurante</h1>
-    </header>
+      <hr>
+      <div id="adminList"></div>
+    </div>
+  </main>
+</div>
 
-    <main>
-        <section id="menu">
-            <h2>Lista de Platillos</h2>
-            <button class="crud-button add" onclick="addDish()">Agregar Platillo</button>
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Nombre del Platillo</th>
-                        <th>Descripción</th>
-                        <th>Precio</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>1</td>
-                        <td>Ejemplo de Platillo</td>
-                        <td>Descripción del platillo</td>
-                        <td>Q50.00</td>
-                        <td>
-                            <button class="crud-button view" onclick="viewDish(1)">Ver</button>
-                            <button class="crud-button edit" onclick="editDish(1)">Editar</button>
-                            <button class="crud-button delete" onclick="deleteDish(1)">Eliminar</button>
-                        </td>
-                    </tr>
-                    <!-- Más platillos se agregarán aquí -->
-                </tbody>
-            </table>
-        </section>
-    </main>
+<script>
+// Función auxiliar para seleccionar elementos
+function qs(selector) {
+  return document.querySelector(selector);
+}
 
-    <script>
-        function addDish() {
-            alert("Función para agregar un nuevo platillo.");
-        }
+// Variables globales
+let editingId = null;
 
-        function viewDish(id) {
-            alert("Función para ver los detalles del platillo con ID: " + id);
-        }
+// Datos de ejemplo del menú
+function getMenu() {
+  return JSON.parse(localStorage.getItem('mc_menu') || '[]');
+}
 
-        function editDish(id) {
-            alert("Función para editar el platillo con ID: " + id);
-        }
+function saveMenu(menu) {
+  localStorage.setItem('mc_menu', JSON.stringify(menu));
+}
 
-        function deleteDish(id) {
-            if (confirm("¿Estás seguro de que deseas eliminar este platillo?")) {
-                alert("Platillo con ID " + id + " eliminado.");
-            }
-        }
-    </script>
+function addMenuItem(item) {
+  const menu = getMenu();
+  const id = Date.now();
+  menu.push({ id, ...item });
+  saveMenu(menu);
+}
+
+function updateMenuItem(updatedItem) {
+  const menu = getMenu();
+  const index = menu.findIndex(item => item.id === updatedItem.id);
+  if (index !== -1) {
+    menu[index] = { ...menu[index], ...updatedItem };
+    saveMenu(menu);
+  }
+}
+
+function deleteMenuItem(id) {
+  const menu = getMenu();
+  const updatedMenu = menu.filter(item => item.id !== id);
+  saveMenu(updatedMenu);
+}
+
+// Función para formatear dinero
+function formatMoney(amount) {
+  return `Q${amount.toFixed(2)}`;
+}
+
+// Función para obtener el nombre de la categoría
+function getCategoryName(category) {
+  const categories = {
+    'comidas': 'Comidas',
+    'postres': 'Postres',
+    'antojitos': 'Antojitos',
+    'bebidas-frias': 'Bebidas Frías',
+    'bebidas-calientes': 'Bebidas Calientes',
+    'licores': 'Licores'
+  };
+  return categories[category] || category;
+}
+
+// Función para obtener la clase CSS de la categoría
+function getCategoryClass(category) {
+  return `category-${category}`;
+}
+
+// Actualizar la lista de elementos del menú
+function refreshList(){
+  const menu = getMenu();
+  const el = document.getElementById('adminList');
+  
+  if (menu.length === 0) {
+    el.innerHTML = '<div style="text-align: center; padding: 30px; color: var(--color-muted);"><i class="fas fa-utensils" style="font-size: 48px; margin-bottom: 15px;"></i><p>No hay platillos en el menú</p></div>';
+    return;
+  }
+  
+  el.innerHTML = menu.map(item => `
+    <div class="menu-item-card">
+      <img src="${item.img || 'https://via.placeholder.com/80?text=Imagen'}" class="menu-item-image">
+      <div class="menu-item-info">
+        <strong>${item.name}</strong>
+        <div>
+          <span class="category-badge ${getCategoryClass(item.cat)}">${getCategoryName(item.cat)}</span>
+          ${formatMoney(item.price)}
+        </div>
+      </div>
+      <div class="menu-item-actions">
+        <button class="btn" onclick='startEdit(${item.id})'>
+          <i class="fas fa-edit"></i> Editar
+        </button>
+        <button class="btn ghost" onclick='doDelete(${item.id})'>
+          <i class="fas fa-trash"></i> Eliminar
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// Manejar envío del formulario
+async function handleMenuForm(e){
+  e.preventDefault();
+  const name = qs('#m_name').value;
+  const price = parseFloat(qs('#m_price').value);
+  const cat = qs('#m_cat').value;
+  const imgUrl = qs('#m_img_url').value;
+  const imgFile = qs('#m_img_file').files[0];
+  
+  let img = imgUrl;
+  
+  // Si hay un archivo seleccionado, procesarlo
+  if(imgFile) {
+    try {
+      const base64Image = await convertToBase64(imgFile);
+      img = base64Image;
+    } catch(error) {
+      console.error("Error al procesar la imagen:", error);
+      alert("Error al procesar la imagen. Intente nuevamente.");
+      return;
+    }
+  }
+  
+  if(editingId){
+    updateMenuItem({id:editingId, name, price, cat, img});
+    editingId = null;
+  } else {
+    addMenuItem({name, price, cat, img});
+  }
+  
+  resetForm(); 
+  refreshList();
+  alert(editingId ? 'Platillo actualizado correctamente' : 'Platillo agregado correctamente');
+}
+
+// Función para convertir imagen a Base64
+function convertToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = error => reject(error);
+  });
+}
+
+// Iniciar edición de un elemento
+function startEdit(id){
+  const item = getMenu().find(m => m.id === id);
+  if(!item) return;
+  
+  editingId = id;
+  qs('#m_name').value = item.name; 
+  qs('#m_price').value = item.price;
+  qs('#m_cat').value = item.cat; 
+  qs('#m_img_url').value = item.img || '';
+  
+  // Mostrar nombre de archivo si es una imagen base64
+  if (item.img && item.img.startsWith('data:image')) {
+    document.getElementById('file-name').textContent = 'Imagen actual (editar para cambiar)';
+  } else {
+    document.getElementById('file-name').textContent = 'No se ha seleccionado ningún archivo';
+  }
+}
+
+// Resetear formulario
+function resetForm(){
+  editingId = null; 
+  qs('#menuForm').reset();
+  qs('#m_img_file').value = '';
+  document.getElementById('file-name').textContent = 'No se ha seleccionado ningún archivo';
+}
+
+// Eliminar elemento
+function doDelete(id){
+  if(confirm('¿Estás seguro de que deseas eliminar este platillo?')){ 
+    deleteMenuItem(id); 
+    refreshList(); 
+    alert('Platillo eliminado correctamente');
+  }
+}
+
+// Mostrar nombre del archivo seleccionado
+document.getElementById('m_img_file').addEventListener('change', function(e) {
+  const fileName = e.target.files[0] ? e.target.files[0].name : 'No se ha seleccionado ningún archivo';
+  document.getElementById('file-name').textContent = fileName;
+});
+
+// Inicializar
+document.addEventListener('DOMContentLoaded', () => { 
+  refreshList(); 
+});
+</script>
 </body>
 </html>

@@ -1,134 +1,446 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eventos - Restaurante María Chula</title>
-    <link rel="stylesheet" href="eventos.css">
-    <link rel="stylesheet" href="menutodos.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Eventos - María Chula</title>
+  <link rel="stylesheet" href="eventos.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="icon" href="fotos/iconomch.ico" type="image/x-icon">
 </head>
 <body>
-
-<div class="container">
-    <aside class="sidebar">
-        <div class="logo">
-            <img src="fotos/logomch.png" alt="Logo del Sistema">
-        </div>
-        <nav>
-            <ul>
-                <li><a href="inicio.html"><i class="fas fa-home"></i> Inicio</a></li>
-                <li><a href="login.html"><i class="fas fa-sign-in-alt"></i> Login</a></li>
-                <li><a href="menu.html"><i class="fas fa-utensils"></i> Menú del Restaurante</a></li>
-                <li><a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Reportes</a></li>
-                <li><a href="cola_pedidos_admin.html"><i class="fas fa-clipboard-list"></i> Cola de Pedidos</a></li>
-                <li><a href="eventos.html"><i class="fas fa-calendar-alt"></i> Eventos</a></li>
-            </ul>
-        </nav>
+  <div class="app">
+    <aside class="sidebar card">
+      <div class="logo">
+        <img src="fotos/logomch.png" alt="Logo María Chula">
+        <h2>María Chula</h2>
+      </div>
+      <div class="menu-list">
+        <a href="menu.html" class="menu-item">Menú</a>
+        <a href="inventory.html" class="menu-item">Inventario</a>
+        <a href="index.html" class="menu-item">Inicio</a>
+        <a href="admin-menus.html" class="menu-item">Administración de Menús</a>
+        <a href="admin-users.html" class="menu-item">Administración de usuarios</a>
+        <a href="billing.html" class="menu-item">Facturación</a>
+        <a href="events.html" class="menu-item active">Eventos</a>
+        <a href="history-events.html" class="menu-item">Historial de Eventos</a>
+        <a href="history-orders.html" class="menu-item">Historial de Pedidos</a>
+        <a href="queue.html" class="menu-item">Cola de pedidos</a>
+      </div>
     </aside>
 
-    <header>
-        <h2>Eventos</h2>
-    </header>
+    <main class="main">
+      <div class="header">
+        <div class="title">Eventos</div>
+        <a href="panel.html" class="back-button">
+          <i class="fas fa-arrow-left"></i> Regresar
+        </a>
+      </div>
 
-    <main class="content">
-
-        <!-- Formulario de selección de evento -->
-        <form class="event-form" id="event-form">
-            <div class="form-group">
-                <label for="vajilla">Tipo de Vajilla:</label>
-                <select id="vajilla" name="vajilla" onchange="updateTotal()">
-                    <option value="losa" data-precio="50">Losa - Q50.00</option>
-                    <option value="desechable" data-precio="20">Desechables - Q20.00</option>
-                </select>
+      <div class="card">
+        <h2>Registro de Eventos</h2>
+        
+        <form id="eventForm">
+          <div class="form-row">
+            <div class="input-group">
+              <label for="evt_client">Cliente</label>
+              <input class="input" id="evt_client" placeholder="Nombre del cliente" required>
             </div>
-
-            <div class="form-group">
-                <label for="evento">Tipo de Evento:</label>
-                <select id="evento" name="evento">
-                    <option value="cumpleaños">Cumpleaños</option>
-                    <option value="boda">Boda</option>
-                    <option value="formal">Evento formal</option>
-                </select>
+            <div class="input-group">
+              <label for="evt_date">Fecha del Evento</label>
+              <input class="input" id="evt_date" type="date" required>
             </div>
-
-            <div class="form-group">
-                <label for="menu-seleccion">Selecciona los platillos del menú:</label>
-                <div id="menu-seleccion">
-                    <div class="menu-item">
-                        <span>Boloñesa (spaguetti o canelones) - Q55.00</span>
-                        <input type="number" name="bolonesa" min="0" value="0" onchange="updateTotal()">
-                    </div>
-                    <div class="menu-item">
-                        <span>Pesto (fusilli o fetuccini) - Q50.00</span>
-                        <input type="number" name="pesto" min="0" value="0" onchange="updateTotal()">
-                    </div>
-                    <div class="menu-item">
-                        <span>Mar y Tierra (res y camarones) - Q70.00</span>
-                        <input type="number" name="mary-tierra" min="0" value="0" onchange="updateTotal()">
-                    </div>
-                </div>
+          </div>
+          
+          <div class="form-row">
+            <div class="input-group">
+              <label for="evt_people">Número de Personas</label>
+              <input class="input" id="evt_people" placeholder="Cantidad de personas" type="number" min="1" required>
             </div>
-
-            <div class="form-group">
-                <label for="bebidas-seleccion">Selecciona las bebidas del menú:</label>
-                <div id="bebidas-seleccion">
-                    <div class="menu-item">
-                        <span>Limonada - Q18.00</span>
-                        <input type="number" name="limonada" min="0" value="0" onchange="updateTotal()">
-                    </div>
-                    <div class="menu-item">
-                        <span>Vino de la Casa - Q25.00</span>
-                        <input type="number" name="vino" min="0" value="0" onchange="updateTotal()">
-                    </div>
-                </div>
+            <div class="input-group">
+              <label for="evt_type">Tipo de Evento</label>
+              <select class="input" id="evt_type" required>
+                <option value="">Seleccionar tipo</option>
+                <option value="cumpleaños">Cumpleaños</option>
+                <option value="boda">Boda</option>
+                <option value="formal">Evento formal</option>
+                <option value="reunion">Reunión familiar</option>
+                <option value="corporativo">Evento corporativo</option>
+              </select>
             </div>
-
-            <div class="form-group">
-                <label for="fecha">Fecha del Evento:</label>
-                <input type="date" id="fecha" name="fecha" required>
+          </div>
+          
+          <div class="form-row">
+            <div class="input-group">
+              <label for="evt_vajilla">Tipo de Vajilla</label>
+              <select class="input" id="evt_vajilla" onchange="updateTotal()">
+                <option value="losa" data-precio="50">Losa - Q50.00</option>
+                <option value="desechable" data-precio="20">Desechables - Q20.00</option>
+              </select>
             </div>
-
-            <div class="form-group">
-                <label for="detalles">Detalles adicionales:</label>
-                <textarea id="detalles" name="detalles" rows="4" placeholder="Ingresa detalles adicionales sobre el evento..."></textarea>
+            <div class="input-group">
+              <label for="evt_details">Detalles Adicionales</label>
+              <textarea class="input" id="evt_details" rows="3" placeholder="Detalles adicionales sobre el evento..."></textarea>
             </div>
+          </div>
 
-            <h2>Total: Q<span id="total">0.00</span></h2>
+          <h3 style="margin-top:16px">Selección de Menú</h3>
+          <div id="menuItemsContainer">
+            <div class="menu-item-selector">
+              <select class="input" onchange="updateItemPrice(this)" required>
+                <option value="">Seleccionar platillo</option>
+                <!-- Las opciones se llenarán con JavaScript -->
+              </select>
+              <input type="number" class="input" min="1" value="1" placeholder="Cantidad" onchange="calculateItemTotal(this)" required>
+              <input type="number" class="input" step="0.01" placeholder="Precio" readonly>
+              <input type="text" class="input" placeholder="Total" readonly>
+              <button class="btn ghost" onclick="removeMenuItem(this)" style="color:var(--color-error)">×</button>
+            </div>
+          </div>
 
-            <button type="submit" class="submit-button">Reservar Evento</button>
+          <button class="btn ghost" type="button" onclick="addMenuItem()" style="margin-top:8px">
+            <i class="fas fa-plus"></i> Añadir otro platillo
+          </button>
+
+          <h2 style="margin-top: 20px;">Total: Q<span id="totalAmount">0.00</span></h2>
+
+          <div style="margin-top:16px">
+            <button type="button" class="btn primary" onclick="calculateQuote()">
+              <i class="fas fa-calculator"></i> Cotizar
+            </button>
+            <button type="button" class="btn success" id="confirmBtn" onclick="confirmEvent()" disabled>
+              <i class="fas fa-check-circle"></i> Confirmar Evento
+            </button>
+            <button type="reset" class="btn ghost">
+              <i class="fas fa-broom"></i> Limpiar formulario
+            </button>
+          </div>
         </form>
+      </div>
+
+      <div class="card">
+        <h2>Eventos Registrados</h2>
+        <table class="table" id="eventsTable">
+          <thead>
+            <tr>
+              <th>Cliente</th>
+              <th>Fecha</th>
+              <th>Personas</th>
+              <th>Tipo</th>
+              <th>Total</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Los eventos se insertarán aquí -->
+          </tbody>
+        </table>
+      </div>
     </main>
-</div>
+  </div>
 
-<script>
-    function updateTotal() {
-        let total = 0;
-        // Sumar el costo de la vajilla
-        const vajilla = document.getElementById('vajilla');
-        total += parseFloat(vajilla.options[vajilla.selectedIndex].getAttribute('data-precio'));
+  <script>
+    // Variables globales
+    let menuItems = [];
+    let events = [];
+    let currentQuote = 0;
 
-        // Sumar los precios de los platillos seleccionados
-        const menuSeleccion = document.querySelectorAll('#menu-seleccion input[type="number"]');
-        menuSeleccion.forEach(input => {
-            const precio = parseFloat(input.parentElement.textContent.split('- Q')[1]);
-            total += precio * parseInt(input.value || 0);
-        });
-        // Sumar los precios de las bebidas seleccionadas
-        const bebidasSeleccion = document.querySelectorAll('#bebidas-seleccion input[type="number"]');
-        bebidasSeleccion.forEach(input => {
-            const precio = parseFloat(input.parentElement.textContent.split('- Q')[1]);
-            total += precio * parseInt(input.value || 0);
-        });
-        // Actualizar el total mostrado
-        document.getElementById('total').textContent = total.toFixed(2);
+    // Cargar datos al iniciar
+    document.addEventListener('DOMContentLoaded', () => {
+      loadMenuItems();
+      loadEvents();
+      renderEvents();
+    });
+
+    // Cargar platillos desde la administración de menús
+    function loadMenuItems() {
+      const savedMenu = localStorage.getItem('mc_menu');
+      menuItems = savedMenu ? JSON.parse(savedMenu) : [];
+      populateMenuDropdowns();
     }
 
-    document.getElementById('event-form').addEventListener('submit', function (e) {
-        e.preventDefault();
-        alert('Evento reservado exitosamente. Total: Q' + document.getElementById('total').textContent);
-    });
-</script>
+    // Cargar eventos guardados
+    function loadEvents() {
+      const savedEvents = localStorage.getItem('mc_events');
+      events = savedEvents ? JSON.parse(savedEvents) : [];
+    }
 
+    // Guardar eventos
+    function saveEvents() {
+      localStorage.setItem('mc_events', JSON.stringify(events));
+    }
+
+    // Llenar los dropdowns de selección de platillos
+    function populateMenuDropdowns() {
+      const dropdowns = document.querySelectorAll('#menuItemsContainer select');
+      dropdowns.forEach(dropdown => {
+        dropdown.innerHTML = '<option value="">Seleccionar platillo</option>' + 
+          menuItems.map(item => 
+            `<option value="${item.id}" data-price="${item.price}">${item.name} - Q${item.price.toFixed(2)}</option>`
+          ).join('');
+      });
+    }
+
+    // Añadir nuevo campo de platillo
+    function addMenuItem() {
+      const container = document.getElementById('menuItemsContainer');
+      const newItem = document.createElement('div');
+      newItem.className = 'menu-item-selector';
+      newItem.innerHTML = `
+        <select class="input" onchange="updateItemPrice(this)" required>
+          <option value="">Seleccionar platillo</option>
+          ${menuItems.map(item => 
+            `<option value="${item.id}" data-price="${item.price}">${item.name} - Q${item.price.toFixed(2)}</option>`
+          ).join('')}
+        </select>
+        <input type="number" class="input" min="1" value="1" placeholder="Cantidad" onchange="calculateItemTotal(this)" required>
+        <input type="number" class="input" step="0.01" placeholder="Precio" readonly>
+        <input type="text" class="input" placeholder="Total" readonly>
+        <button class="btn ghost" onclick="removeMenuItem(this)" style="color:var(--color-error)">×</button>
+      `;
+      container.appendChild(newItem);
+    }
+
+    // Eliminar campo de platillo
+    function removeMenuItem(button) {
+      const item = button.parentElement;
+      if (document.querySelectorAll('.menu-item-selector').length > 1) {
+        item.remove();
+      } else {
+        // Si es el último item, limpiar sus valores
+        item.querySelector('select').value = '';
+        item.querySelectorAll('input')[0].value = '1';
+        item.querySelectorAll('input')[1].value = '';
+        item.querySelectorAll('input')[2].value = '';
+      }
+      updateTotal();
+    }
+
+    // Actualizar precio cuando se selecciona un platillo
+    function updateItemPrice(select) {
+      const selectedOption = select.options[select.selectedIndex];
+      const priceInput = select.parentElement.querySelectorAll('input')[1];
+      if (selectedOption && selectedOption.dataset.price) {
+        priceInput.value = selectedOption.dataset.price;
+        calculateItemTotal(select);
+      } else {
+        priceInput.value = '';
+      }
+    }
+
+    // Calcular total por item
+    function calculateItemTotal(input) {
+      const item = input.parentElement;
+      const qty = item.querySelectorAll('input')[0].value;
+      const price = item.querySelectorAll('input')[1].value;
+      const totalInput = item.querySelectorAll('input')[2];
+      
+      if (qty && price) {
+        const total = parseFloat(qty) * parseFloat(price);
+        totalInput.value = total.toFixed(2);
+      } else {
+        totalInput.value = '';
+      }
+      updateTotal();
+    }
+
+    // Calcular cotización total
+    function updateTotal() {
+      let total = 0;
+      
+      // Sumar el costo de la vajilla
+      const vajilla = document.getElementById('evt_vajilla');
+      total += parseFloat(vajilla.options[vajilla.selectedIndex].getAttribute('data-precio'));
+      
+      // Sumar los precios de los platillos seleccionados
+      document.querySelectorAll('.menu-item-selector').forEach(item => {
+        const totalInput = item.querySelectorAll('input')[2];
+        if (totalInput.value) {
+          total += parseFloat(totalInput.value);
+        }
+      });
+      
+      // Actualizar el total mostrado
+      document.getElementById('totalAmount').textContent = total.toFixed(2);
+      currentQuote = total;
+      return total;
+    }
+
+    // Calcular cotización
+    function calculateQuote() {
+      const client = document.getElementById('evt_client').value;
+      const date = document.getElementById('evt_date').value;
+      
+      if (!client || !date) {
+        alert('Por favor complete los campos obligatorios: Cliente y Fecha');
+        return;
+      }
+      
+      const total = updateTotal();
+      document.getElementById('confirmBtn').disabled = false;
+      
+      alert(`Cotización calculada: Q${total.toFixed(2)}\n\nAhora puede confirmar el evento.`);
+    }
+
+    // Confirmar evento
+    function confirmEvent() {
+      const client = document.getElementById('evt_client').value;
+      const date = document.getElementById('evt_date').value;
+      const people = document.getElementById('evt_people').value;
+      const type = document.getElementById('evt_type').value;
+      const vajilla = document.getElementById('evt_vajilla').value;
+      const details = document.getElementById('evt_details').value;
+      
+      // Validar items
+      const items = [];
+      let isValid = true;
+      
+      document.querySelectorAll('.menu-item-selector').forEach(item => {
+        const select = item.querySelector('select');
+        const name = select.options[select.selectedIndex]?.text.split(' - ')[0] || '';
+        const qty = item.querySelectorAll('input')[0].value;
+        const price = item.querySelectorAll('input')[1].value;
+        const total = item.querySelectorAll('input')[2].value;
+        
+        if (name && qty && price && total) {
+          items.push({
+            name,
+            qty: parseFloat(qty),
+            price: parseFloat(price),
+            total: parseFloat(total)
+          });
+        } else if (select.value || qty || price) {
+          isValid = false;
+        }
+      });
+      
+      if (!isValid) {
+        alert('Por favor complete correctamente todos los items del menú');
+        return;
+      }
+      
+      if (items.length === 0) {
+        alert('Por favor agregue al menos un platillo al evento');
+        return;
+      }
+      
+      // Crear evento
+      const event = {
+        id: Date.now(),
+        client,
+        date,
+        people: parseInt(people),
+        type,
+        vajilla,
+        details,
+        items,
+        total: currentQuote,
+        status: 'Confirmado',
+        createdAt: new Date().toLocaleString()
+      };
+      
+      // Guardar evento
+      events.push(event);
+      saveEvents();
+      renderEvents();
+      
+      // Limpiar formulario
+      document.getElementById('eventForm').reset();
+      document.getElementById('menuItemsContainer').innerHTML = `
+        <div class="menu-item-selector">
+          <select class="input" onchange="updateItemPrice(this)" required>
+            <option value="">Seleccionar platillo</option>
+            ${menuItems.map(item => 
+              `<option value="${item.id}" data-price="${item.price}">${item.name} - Q${item.price.toFixed(2)}</option>`
+            ).join('')}
+          </select>
+          <input type="number" class="input" min="1" value="1" placeholder="Cantidad" onchange="calculateItemTotal(this)" required>
+          <input type="number" class="input" step="0.01" placeholder="Precio" readonly>
+          <input type="text" class="input" placeholder="Total" readonly>
+          <button class="btn ghost" onclick="removeMenuItem(this)" style="color:var(--color-error)">×</button>
+        </div>
+      `;
+      document.getElementById('totalAmount').textContent = '0.00';
+      document.getElementById('confirmBtn').disabled = true;
+      
+      alert('Evento confirmado exitosamente!');
+    }
+
+    // Renderizar eventos en la tabla
+    function renderEvents() {
+      const tableBody = document.querySelector('#eventsTable tbody');
+      tableBody.innerHTML = '';
+      
+      if (events.length === 0) {
+        tableBody.innerHTML = `
+          <tr>
+            <td colspan="7" style="text-align: center; padding: 20px; color: var(--color-muted);">
+              <i class="fas fa-calendar-times" style="font-size: 24px; margin-bottom: 10px;"></i>
+              <p>No hay eventos registrados</p>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+      
+      events.forEach(event => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${event.client}</td>
+          <td>${event.date}</td>
+          <td>${event.people}</td>
+          <td>${event.type}</td>
+          <td>Q${event.total.toFixed(2)}</td>
+          <td>${event.status}</td>
+          <td>
+            <button class="btn" onclick="viewEvent(${event.id})">
+              <i class="fas fa-eye"></i> Ver
+            </button>
+            <button class="btn ghost" onclick="deleteEvent(${event.id})" style="color:var(--color-error)">
+              <i class="fas fa-trash"></i> Eliminar
+            </button>
+          </td>
+        `;
+        tableBody.appendChild(row);
+      });
+    }
+
+    // Ver detalles de evento
+    function viewEvent(id) {
+      const event = events.find(e => e.id === id);
+      if (!event) return;
+      
+      let itemsList = '';
+      event.items.forEach(item => {
+        itemsList += `${item.qty} x ${item.name} (Q${item.price.toFixed(2)}) = Q${item.total.toFixed(2)}\n`;
+      });
+      
+      alert(`Detalles del Evento:\n
+Cliente: ${event.client}
+Fecha: ${event.date}
+Personas: ${event.people}
+Tipo: ${event.type}
+Vajilla: ${event.vajilla}
+Total: Q${event.total.toFixed(2)}
+Estado: ${event.status}
+
+Platillos:
+${itemsList}
+Detalles: ${event.details || 'Ninguno'}
+
+Registrado: ${event.createdAt}`);
+    }
+
+    // Eliminar evento
+    function deleteEvent(id) {
+      if (confirm('¿Está seguro de eliminar este evento?')) {
+        events = events.filter(e => e.id !== id);
+        saveEvents();
+        renderEvents();
+        alert('Evento eliminado correctamente');
+      }
+    }
+  </script>
 </body>
 </html>

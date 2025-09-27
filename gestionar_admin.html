@@ -1,87 +1,224 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Administradores - Restaurante María Chula</title>
-    <link rel="stylesheet" href="gestionar_admin.css">
-    <link rel="stylesheet" href="menutodos.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Admin Usuarios - María Chula</title>
+  <link rel="stylesheet" href="gestionar_admin.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="icon" href="fotos/iconomch.ico" type="image/x-icon">
 </head>
 <body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="logo">
+      <img src="fotos/logomch.png" alt="Logo María Chula">
+      <h2>María Chula</h2>
+    </div>
+    <div class="menu-list">
+      <a href="menu.html" class="menu-item"><i class="fas fa-utensils"></i> Menú</a>
+      <a href="inventory.html" class="menu-item"><i class="fas fa-boxes"></i> Inventario</a>
+      <a href="index.html" class="menu-item"><i class="fas fa-home"></i> Inicio</a>
+      <a href="admin-menus.html" class="menu-item"><i class="fas fa-list-alt"></i> Admin Menús</a>
+      <a href="admin-users.html" class="menu-item"><i class="fas fa-users"></i> Admin Usuarios</a>
+      <a href="billing.html" class="menu-item"><i class="fas fa-receipt"></i> Facturación</a>
+      <a href="events.html" class="menu-item"><i class="fas fa-calendar-alt"></i> Eventos</a>
+      <a href="history-events.html" class="menu-item"><i class="fas fa-history"></i> Historial Eventos</a>
+      <a href="history-orders.html" class="menu-item"><i class="fas fa-clipboard-list"></i> Historial Pedidos</a>
+      <a href="queue.html" class="menu-item"><i class="fas fa-tasks"></i> Cola de pedidos</a>
+    </div>
+  </aside>
 
-    <aside class="sidebar">
-        <div class="logo">
-          <img src="fotos/logomch.png" alt="Logo del Sistema">
+  <main class="main">
+    <div class="header">
+      <div class="title">Administración de Usuarios</div>
+      <a href="panel.html" class="back-button">
+        <i class="fas fa-arrow-left"></i> Regresar
+      </a>
+    </div>
+    
+    <div class="card">
+      <form id="userForm">
+        <input type="hidden" id="u_id"> <!-- campo oculto para editar -->
+
+        <div class="form-row">
+          <input id="u_name" class="input" placeholder="Nombre" required>
+          <input id="u_lastname" class="input" placeholder="Apellido" required>
+          <input id="u_user" class="input" placeholder="Nombre de usuario" required>
+          <input id="u_pass" class="input" placeholder="Contraseña" type="password">
+          <select id="u_role" class="input" required>
+            <option value="mesero">Mesero</option>
+            <option value="cocinero">Cocinero</option>
+            <option value="admin">Administrador</option>
+          </select>
         </div>
-        <nav>
-          <ul>
-            <li><a href="inicio.html"><i class="fas fa-home"></i> Inicio</a></li>
-            <li><a href="login.html"><i class="fas fa-sign-in-alt"></i> Login</a></li>
-            <li><a href="menu.html"><i class="fas fa-utensils"></i> Menú del Restaurante</a></li>
-            <li><a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Reportes</a></li>
-            <li><a href="cola-pedidos.html"><i class="fas fa-clipboard-list"></i> Cola de Pedidos</a></li>
-            <li><a href="eventos.html"><i class="fas fa-calendar-alt"></i> Eventos</a></li>
-          </ul>
-        </nav>
-      </aside>
+        <div style="margin-top:8px">
+          <button class="btn primary" type="submit"><i class="fas fa-save"></i> Guardar Usuario</button>
+          <button type="button" class="btn ghost" onclick="cancelEdit()">Cancelar</button>
+        </div>
+      </form>
+      <hr>
+      <div id="usersList"></div>
+    </div>
+  </main>
+</div>
 
-    <header>
-        <h2>Gestión de Administradores</h2>
-    </header>
+<!-- === MODAL MENSAJE === -->
+<div id="modalMensaje" class="modal" style="display:none;">
+  <div class="modal-content">
+    <p id="modalTexto"></p>
+    <div class="modal-actions">
+      <button class="btn primary" onclick="cerrarModal()">Aceptar</button>
+    </div>
+  </div>
+</div>
 
-    <main>
-        <section id="administradores">
-            <h2>Lista de Administradores</h2>
-            <button class="crud-button add" onclick="addAdmin()">Agregar Administrador</button>
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Nombre</th>
-                        <th>Email</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>1</td>
-                        <td>Admin Ejemplo</td>
-                        <td>admin@ejemplo.com</td>
-                        <td>
-                            <button class="crud-button view" onclick="viewAdmin(1)">Ver</button>
-                            <button class="crud-button edit" onclick="editAdmin(1)">Editar</button>
-                            <button class="crud-button delete" onclick="deleteAdmin(1)">Eliminar</button>
-                        </td>
-                    </tr>
-                    <!-- Más administradores se agregarán aquí -->
-                </tbody>
-            </table>
-        </section>
-    </main>
+<script>
+  const API_URL = "http://localhost:3000/usuarios";
+  const token = localStorage.getItem("token");
 
-    <script>
-        // Función para agregar un nuevo administrador
-        function addAdmin() {
-            alert("Función para agregar un nuevo administrador");
-        }
+  let editMode = false;
 
-        // Función para ver detalles del administrador
-        function viewAdmin(id) {
-            alert(`Ver detalles del administrador con ID ${id}`);
-        }
+  // === LISTAR USUARIOS ===
+  async function refreshUsers() {
+    const res = await fetch(API_URL, {
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+    const users = await res.json();
 
-        // Función para editar un administrador
-        function editAdmin(id) {
-            alert(`Editar administrador con ID ${id}`);
-        }
+    const usersList = document.getElementById("usersList");
+    if (!Array.isArray(users) || users.length === 0) {
+      usersList.innerHTML = '<p style="text-align:center;color:gray;">No hay usuarios registrados</p>';
+      return;
+    }
 
-        // Función para eliminar un administrador
-        function deleteAdmin(id) {
-            if (confirm(`¿Estás seguro de que quieres eliminar el administrador con ID ${id}?`)) {
-                alert(`Administrador con ID ${id} eliminado.`);
-            }
-        }
-    </script>
+    usersList.innerHTML = users.map(user => `
+      <div class="user-card">
+        <div class="user-info">
+          <strong>${user.nombre} ${user.apellido}</strong>
+          <div>${user.correo} · ${user.rol || 'Sin rol'}</div>
+        </div>
+        <div class="user-actions">
+          <button class="btn" onclick='editUser(${JSON.stringify(user)})'>
+            <i class="fas fa-edit"></i> Editar
+          </button>
+          <button class="btn ghost" onclick='deleteUser(${user.id_usuario})'>
+            <i class="fas fa-trash"></i> Eliminar
+          </button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // === CREAR / ACTUALIZAR USUARIO ===
+  document.getElementById("userForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    const id = document.getElementById("u_id").value;
+    const body = {
+      nombre: document.getElementById("u_name").value,
+      apellido: document.getElementById("u_lastname").value,
+      correo: document.getElementById("u_user").value + "@mariachula.com",
+      password: document.getElementById("u_pass").value || undefined,
+      telefono: "-",
+      estado: "activo",
+      rol: document.getElementById("u_role").value
+    };
+
+    if (!editMode) {
+      // Crear
+      await fetch(API_URL, {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(body)
+      });
+    } else {
+      // Actualizar
+      await fetch(`${API_URL}/${id}`, {
+        method: "PUT",
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(body)
+      });
+    }
+
+    e.target.reset();
+    document.getElementById("u_id").value = "";
+    editMode = false;
+    refreshUsers();
+  });
+
+  // === ELIMINAR USUARIO ===
+  async function deleteUser(id) {
+    if (!confirm("¿Seguro que deseas eliminar este usuario?")) return;
+    await fetch(`${API_URL}/${id}`, {
+      method: "DELETE",
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+    refreshUsers();
+  }
+
+  // === EDITAR USUARIO ===
+  function editUser(user) {
+    editMode = true;
+    document.getElementById("u_id").value = user.id_usuario;
+    document.getElementById("u_name").value = user.nombre;
+    document.getElementById("u_lastname").value = user.apellido;
+    document.getElementById("u_user").value = user.correo.split("@")[0];
+    document.getElementById("u_role").value = user.rol || "";
+    document.getElementById("u_pass").value = ""; // contraseña vacía por seguridad
+
+    mostrarModal("Modo edición activado: al guardar, se actualizará el usuario.");
+  }
+
+  // === CANCELAR EDICIÓN ===
+  function cancelEdit() {
+    editMode = false;
+    document.getElementById("userForm").reset();
+    document.getElementById("u_id").value = "";
+  }
+
+  // === MODAL ===
+  function mostrarModal(mensaje) {
+    document.getElementById("modalTexto").textContent = mensaje;
+    document.getElementById("modalMensaje").style.display = "flex";
+  }
+
+  function cerrarModal() {
+    document.getElementById("modalMensaje").style.display = "none";
+  }
+
+  document.addEventListener("DOMContentLoaded", refreshUsers);
+</script>
+
+<style>
+  /* === ESTILOS DEL MODAL === */
+  .modal {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.6);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  .modal-content {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  }
+  .modal-actions {
+    margin-top: 15px;
+  }
+</style>
 </body>
 </html>

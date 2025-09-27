@@ -1,94 +1,207 @@
-/* Estilo general */
-body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #8B468D; /* Fondo naranja */
-    color: #333; /* Color de texto por defecto */
+/* Paleta de colores para restaurante mariachula */
+:root {
+    --color-primary: #D35400;     /* Naranja oscuro - color principal */
+    --color-secondary: #C0392B;   /* Rojo terroso - acentos */
+    --color-accent: #F39C12;      /* Amarillo dorado - destacados */
+    --color-light: #FDEBD0;       /* Beige claro - fondos */
+    --color-dark: #7E5109;        /* Marrón oscuro - texto */
 }
 
-/* Estilo del encabezado */
+/* Estilos generales */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background: linear-gradient(to bottom, var(--color-primary), var(--color-secondary));
+    min-height: 100vh;
+    color: white;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header */
 header {
-    background-color: #333;
-    color: #fff;
+    background-color: white;
     padding: 20px;
     text-align: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .logo {
-    max-width: 150px;
+    width: 120px;
+    height: 120px;
+    margin-bottom: 15px;
+    border-radius: 50%;
+    border: 4px solid var(--color-light);
+    padding: 5px;
+    background: white;
+    object-fit: contain;
+}
+
+header h1 {
+    color: var(--color-dark);
+    font-size: 2.5rem;
+    margin: 0;
+    font-weight: 700;
 }
 
 /* Contenedor principal */
 .container {
+    max-width: 1000px;
+    margin: 30px auto;
     padding: 20px;
-    text-align: center;
-    background-color: #fff; /* Fondo blanco para el contenido principal */
-    border-radius: 8px; /* Bordes redondeados */
-    margin: 20px auto;
-    max-width: 1000px; /* Ancho máximo */
+    flex: 1;
 }
 
 /* Secciones */
 .section {
-    margin-bottom: 20px;
+    background-color: white;
+    border-radius: 15px;
+    padding: 25px;
+    margin-bottom: 25px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    text-align: center;
 }
 
-/* Enlaces de redes sociales */
+.section h2 {
+    color: var(--color-primary);
+    margin-bottom: 15px;
+    font-size: 1.8rem;
+    position: relative;
+    padding-bottom: 10px;
+}
+
+.section h2::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(to right, var(--color-primary), var(--color-secondary));
+    border-radius: 2px;
+}
+
+.section p, .section li {
+    color: var(--color-dark);
+    line-height: 1.6;
+    font-size: 1.1rem;
+}
+
+.section ul {
+    list-style: none;
+    padding: 0;
+}
+
+.section li {
+    margin-bottom: 10px;
+    padding: 8px;
+    background-color: var(--color-light);
+    border-radius: 8px;
+    display: inline-block;
+    margin: 5px;
+}
+
+/* Redes sociales */
+.social-links {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
 .social-links a {
-    margin: 0 10px;
-    text-decoration: none;
+    display: inline-block;
+    margin: 10px;
+    transition: transform 0.3s ease;
+}
+
+.social-links a:hover {
+    transform: scale(1.1);
 }
 
 .social-links img {
-    width: 30px;
-    height: 30px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
+/* Imagen del lugar */
+.section img {
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    max-width: 100%;
+    height: auto;
+}
 
-/* Botón de login */
+/* Botón de inicio de sesión */
 .login-button {
     display: inline-block;
-    padding: 10px 20px;
-    font-size: 16px;
-    color: #fff;
-    background-color: #000000;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
+    padding: 15px 30px;
+    background: linear-gradient(to right, var(--color-primary), var(--color-secondary));
+    color: white;
     text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(211, 84, 0, 0.3);
 }
 
 .login-button:hover {
-    background-color: #333;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(211, 84, 0, 0.4);
 }
 
-/* Imagen del restaurante */
-img {
-    max-width: 100%;
-    height: auto;
-    border-radius: 8px; /* Bordes redondeados */
-}
-
-/* Estilos generales para el footer */
+/* Footer */
 .main-footer {
-    background-color: #333;
+    background-color: var(--color-dark);
     color: white;
-    padding: 20px;
     text-align: center;
-    font-size: 14px;
+    padding: 20px;
+    margin-top: auto;
 }
 
 .footer-content p {
     margin: 5px 0;
 }
 
-.footer-content a {
-    color: #00C5A5;
-    text-decoration: none;
-    margin: 0 5px;
+/* Responsive */
+@media (max-width: 768px) {
+    header h1 {
+        font-size: 2rem;
+    }
+    
+    .section {
+        padding: 20px;
+    }
+    
+    .section h2 {
+        font-size: 1.5rem;
+    }
 }
 
-.footer-content a:hover {
-    text-decoration: underline;
+@media (max-width: 480px) {
+    .logo {
+        width: 100px;
+        height: 100px;
+    }
+    
+    header h1 {
+        font-size: 1.8rem;
+    }
+    
+    .social-links img {
+        width: 40px;
+        height: 40px;
+    }
 }

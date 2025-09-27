@@ -3,166 +3,409 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Historial de Eventos</title>
+    <title>Historial de Eventos - María Chula</title>
     <link rel="stylesheet" href="historial_eventos.css">
-    <link rel="stylesheet" href="menutodos.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="icon" href="fotos/iconomch.ico" type="image/x-icon">
+    <!-- Biblioteca para generar PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 </head>
 <body>
+    <div class="app">
+        <aside class="sidebar card">
+            <div class="logo">
+                <img src="fotos/logomch.png" alt="Logo María Chula">
+                <h2>María Chula</h2>
+            </div>
+            <div class="menu-list">
+                <a href="menu.html" class="menu-item">Menú</a>
+                <a href="inventory.html" class="menu-item">Inventario</a>
+                <a href="index.html" class="menu-item">Inicio</a>
+                <a href="admin-menus.html" class="menu-item">Administración de Menús</a>
+                <a href="admin-users.html" class="menu-item">Administración de usuarios</a>
+                <a href="billing.html" class="menu-item">Facturación</a>
+                <a href="events.html" class="menu-item">Eventos</a>
+                <a href="history-events.html" class="menu-item active">Historial de Eventos</a>
+                <a href="history-orders.html" class="menu-item">Historial de Pedidos</a>
+                <a href="queue.html" class="menu-item">Cola de pedidos</a>
+            </div>
+        </aside>
 
-    <aside class="sidebar">
-        <div class="logo">
-          <img src="fotos/logomch.png" alt="Logo del Sistema">
-        </div>
-        <nav>
-          <ul>
-            <li><a href="inicio.html"><i class="fas fa-home"></i> Inicio</a></li>
-            <li><a href="login.html"><i class="fas fa-sign-in-alt"></i> Login</a></li>
-            <li><a href="menu.html"><i class="fas fa-utensils"></i> Menú del Restaurante</a></li>
-            <li><a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Reportes</a></li>
-            <li><a href="cola-pedidos.html"><i class="fas fa-clipboard-list"></i> Cola de Pedidos</a></li>
-            <li><a href="eventos.html"><i class="fas fa-calendar-alt"></i> Eventos</a></li>
-          </ul>
-        </nav>
-      </aside>
-
-    <header>
-        <h2>Historial de Eventos</h2>
-    </header>
-    
-    <main>
-        <section class="eventos-pasados">
-            <h2>Eventos Pasados</h2>
-
-            <!-- Evento 1 -->
-            <div class="evento">
-                <h3>1. Evento: Celebración de Aniversario</h3>
-                <p><strong>Cliente:</strong> Juan Pérez</p>
-                <p><strong>Teléfono:</strong> +502 1234-5678</p>
-                <p><strong>Email:</strong> juan.perez@example.com</p>
-                <p><strong>Fecha:</strong> 10 de octubre, 2023</p>
-                <p><strong>Ubicación:</strong> Salón Principal</p>
-                <p><strong>Tipo de Evento:</strong> Aniversario</p>
-                <p><strong>Descripción:</strong> Evento formal para 50 personas con música en vivo y un menú personalizado.</p>
-                
-                <div class="detalles-evento">
-                    <h4>Detalles del Pedido</h4>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Concepto</th>
-                                <th>Detalles</th>
-                                <th>Precio Unitario</th>
-                                <th>Cantidad</th>
-                                <th>Subtotal</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Ejemplo de platillos -->
-                            <tr>
-                                <td>Platillo</td>
-                                <td>Mar y Tierra</td>
-                                <td>Q70.00</td>
-                                <td>25</td>
-                                <td>Q1,750.00</td>
-                            </tr>
-                            <tr>
-                                <td>Platillo</td>
-                                <td>Pasta Boloñesa</td>
-                                <td>Q55.00</td>
-                                <td>25</td>
-                                <td>Q1,375.00</td>
-                            </tr>
-                            <!-- Ejemplo de bebidas -->
-                            <tr>
-                                <td>Bebida</td>
-                                <td>Limonada</td>
-                                <td>Q18.00</td>
-                                <td>50</td>
-                                <td>Q900.00</td>
-                            </tr>
-                            <tr>
-                                <td>Bebida</td>
-                                <td>Vino de la Casa</td>
-                                <td>Q25.00</td>
-                                <td>20</td>
-                                <td>Q500.00</td>
-                            </tr>
-                            <!-- Vajilla -->
-                            <tr>
-                                <td>Vajilla</td>
-                                <td>Losa</td>
-                                <td>Q50.00</td>
-                                <td>50</td>
-                                <td>Q2,500.00</td>
-                            </tr>
-                            <!-- Indumentaria -->
-                            <tr>
-                                <td>Indumentaria</td>
-                                <td>Sillas y Mesas</td>
-                                <td>Q100.00</td>
-                                <td>10</td>
-                                <td>Q1,000.00</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <h4>Total del Evento: Q8,025.00</h4>
+        <main class="main">
+            <div class="header">
+                <div class="title">Historial de Eventos</div>
+                <div>
+                    <a href="panel.html" class="back-button">
+                        <i class="fas fa-arrow-left"></i> Regresar
+                    </a>
+                    <button class="btn success" onclick="generatePDF()" style="margin-left: 10px;">
+                        <i class="fas fa-file-pdf"></i> Generar PDF
+                    </button>
                 </div>
             </div>
 
-            <!-- Evento 2 -->
-            <div class="evento">
-                <h3>2. Evento: Fiesta de Cumpleaños</h3>
-                <p><strong>Cliente:</strong> Ana García</p>
-                <p><strong>Teléfono:</strong> +502 8765-4321</p>
-                <p><strong>Email:</strong> ana.garcia@example.com</p>
-                <p><strong>Fecha:</strong> 15 de noviembre, 2023</p>
-                <p><strong>Ubicación:</strong> Terraza</p>
-                <p><strong>Tipo de Evento:</strong> Cumpleaños</p>
-                <p><strong>Descripción:</strong> Celebración de cumpleaños con temática tropical para 30 personas.</p>
-                
-                <div class="detalles-evento">
-                    <h4>Detalles del Pedido</h4>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Concepto</th>
-                                <th>Detalles</th>
-                                <th>Precio Unitario</th>
-                                <th>Cantidad</th>
-                                <th>Subtotal</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Platillo</td>
-                                <td>Enchiladas</td>
-                                <td>Q40.00</td>
-                                <td>30</td>
-                                <td>Q1,200.00</td>
-                            </tr>
-                            <tr>
-                                <td>Bebida</td>
-                                <td>Ponche de Frutas</td>
-                                <td>Q15.00</td>
-                                <td>30</td>
-                                <td>Q450.00</td>
-                            </tr>
-                            <tr>
-                                <td>Vajilla</td>
-                                <td>Desechables</td>
-                                <td>Q20.00</td>
-                                <td>30</td>
-                                <td>Q600.00</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <h4>Total del Evento: Q2,250.00</h4>
+            <div class="card">
+                <h2>Filtros de Búsqueda</h2>
+                <div class="filters">
+                    <div class="filter-group">
+                        <label for="searchClient">Buscar por Cliente:</label>
+                        <input type="text" id="searchClient" class="filter-input" placeholder="Nombre del cliente" onkeyup="filterEvents()">
+                    </div>
+                    <div class="filter-group">
+                        <label for="searchDate">Buscar por Fecha:</label>
+                        <input type="month" id="searchDate" class="filter-input" onchange="filterEvents()">
+                    </div>
+                    <div class="filter-group">
+                        <label for="searchType">Filtrar por Tipo:</label>
+                        <select id="searchType" class="filter-input" onchange="filterEvents()">
+                            <option value="">Todos los tipos</option>
+                            <option value="Aniversario">Aniversario</option>
+                            <option value="Cumpleaños">Cumpleaños</option>
+                            <option value="Boda">Boda</option>
+                            <option value="Corporativo">Corporativo</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 
-        </section>
-    </main>
+            <div class="card">
+                <h2>Eventos Pasados</h2>
+                
+                <div id="eventsContainer">
+                    <!-- Evento 1 -->
+                    <div class="evento">
+                        <h3>1. Evento: Celebración de Aniversario</h3>
+                        <div class="evento-info">
+                            <p><strong>Cliente:</strong> Juan Pérez</p>
+                            <p><strong>Teléfono:</strong> +502 1234-5678</p>
+                            <p><strong>Email:</strong> juan.perez@example.com</p>
+                            <p><strong>Fecha:</strong> 10 de octubre, 2023</p>
+                            <p><strong>Ubicación:</strong> Salón Principal</p>
+                            <p><strong>Tipo de Evento:</strong> Aniversario</p>
+                        </div>
+                        <p><strong>Descripción:</strong> Evento formal para 50 personas con música en vivo y un menú personalizado.</p>
+                        
+                        <div class="detalles-evento">
+                            <h4>Detalles del Pedido</h4>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Concepto</th>
+                                        <th>Detalles</th>
+                                        <th>Precio Unitario</th>
+                                        <th>Cantidad</th>
+                                        <th>Subtotal</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Ejemplo de platillos -->
+                                    <tr>
+                                        <td>Platillo</td>
+                                        <td>Mar y Tierra</td>
+                                        <td>Q70.00</td>
+                                        <td>25</td>
+                                        <td>Q1,750.00</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Platillo</td>
+                                        <td>Pasta Boloñesa</td>
+                                        <td>Q55.00</td>
+                                        <td>25</td>
+                                        <td>Q1,375.00</td>
+                                    </tr>
+                                    <!-- Ejemplo de bebidas -->
+                                    <tr>
+                                        <td>Bebida</td>
+                                        <td>Limonada</td>
+                                        <td>Q18.00</td>
+                                        <td>50</td>
+                                        <td>Q900.00</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Bebida</td>
+                                        <td>Vino de la Casa</td>
+                                        <td>Q25.00</td>
+                                        <td>20</td>
+                                        <td>Q500.00</td>
+                                    </tr>
+                                    <!-- Vajilla -->
+                                    <tr>
+                                        <td>Vajilla</td>
+                                        <td>Losa</td>
+                                        <td>Q50.00</td>
+                                        <td>50</td>
+                                        <td>Q2,500.00</td>
+                                    </tr>
+                                    <!-- Indumentaria -->
+                                    <tr>
+                                        <td>Indumentaria</td>
+                                        <td>Sillas y Mesas</td>
+                                        <td>Q100.00</td>
+                                        <td>10</td>
+                                        <td>Q1,000.00</td>
+                                    </tr>
+                                    <tr class="total-row">
+                                        <td colspan="4" style="text-align: right;"><strong>Total del Evento:</strong></td>
+                                        <td><strong>Q8,025.00</strong></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
 
+                    <!-- Evento 2 -->
+                    <div class="evento">
+                        <h3>2. Evento: Fiesta de Cumpleaños</h3>
+                        <div class="evento-info">
+                            <p><strong>Cliente:</strong> Ana García</p>
+                            <p><strong>Teléfono:</strong> +502 8765-4321</p>
+                            <p><strong>Email:</strong> ana.garcia@example.com</p>
+                            <p><strong>Fecha:</strong> 15 de noviembre, 2023</p>
+                            <p><strong>Ubicación:</strong> Terraza</p>
+                            <p><strong>Tipo de Evento:</strong> Cumpleaños</p>
+                        </div>
+                        <p><strong>Descripción:</strong> Celebración de cumpleaños con temática tropical para 30 personas.</p>
+                        
+                        <div class="detalles-evento">
+                            <h4>Detalles del Pedido</h4>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Concepto</th>
+                                        <th>Detalles</th>
+                                        <th>Precio Unitario</th>
+                                        <th>Cantidad</th>
+                                        <th>Subtotal</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Platillo</td>
+                                        <td>Enchiladas</td>
+                                        <td>Q40.00</td>
+                                        <td>30</td>
+                                        <td>Q1,200.00</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Bebida</td>
+                                        <td>Ponche de Frutas</td>
+                                        <td>Q15.00</td>
+                                        <td>30</td>
+                                        <td>Q450.00</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Vajilla</td>
+                                        <td>Desechables</td>
+                                        <td>Q20.00</td>
+                                        <td>30</td>
+                                        <td>Q600.00</td>
+                                    </tr>
+                                    <tr class="total-row">
+                                        <td colspan="4" style="text-align: right;"><strong>Total del Evento:</strong></td>
+                                        <td><strong>Q2,250.00</strong></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Evento 3 -->
+                    <div class="evento">
+                        <h3>3. Evento: Boda</h3>
+                        <div class="evento-info">
+                            <p><strong>Cliente:</strong> Carlos Rodríguez</p>
+                            <p><strong>Teléfono:</strong> +502 5555-1234</p>
+                            <p><strong>Email:</strong> carlos.rodriguez@example.com</p>
+                            <p><strong>Fecha:</strong> 5 de diciembre, 2023</p>
+                            <p><strong>Ubicación:</strong> Jardín</p>
+                            <p><strong>Tipo de Evento:</strong> Boda</p>
+                        </div>
+                        <p><strong>Descripción:</strong> Ceremonia y recepción de boda para 80 invitados.</p>
+                        
+                        <div class="detalles-evento">
+                            <h4>Detalles del Pedido</h4>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Concepto</th>
+                                        <th>Detalles</th>
+                                        <th>Precio Unitario</th>
+                                        <th>Cantidad</th>
+                                        <th>Subtotal</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Platillo</td>
+                                        <td>Menú Especial de Boda</td>
+                                        <td>Q120.00</td>
+                                        <td>80</td>
+                                        <td>Q9,600.00</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Bebida</td>
+                                        <td>Champán</td>
+                                        <td>Q80.00</td>
+                                        <td>80</td>
+                                        <td>Q6,400.00</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Postre</td>
+                                        <td>Pastel de Bodas</td>
+                                        <td>Q500.00</td>
+                                        <td>1</td>
+                                        <td>Q500.00</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Vajilla</td>
+                                        <td>Losa Premium</td>
+                                        <td>Q80.00</td>
+                                        <td>80</td>
+                                        <td>Q6,400.00</td>
+                                    </tr>
+                                    <tr class="total-row">
+                                        <td colspan="4" style="text-align: right;"><strong>Total del Evento:</strong></td>
+                                        <td><strong>Q22,900.00</strong></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Inicializar jsPDF
+        const { jsPDF } = window.jspdf;
+
+        // Filtrar eventos
+        function filterEvents() {
+            const clientFilter = document.getElementById('searchClient').value.toLowerCase();
+            const dateFilter = document.getElementById('searchDate').value;
+            const typeFilter = document.getElementById('searchType').value;
+            
+            const eventos = document.querySelectorAll('.evento');
+            
+            eventos.forEach(evento => {
+                const client = evento.querySelector('p:first-child').textContent.toLowerCase();
+                const date = evento.querySelector('p:nth-child(4)').textContent;
+                const type = evento.querySelector('p:nth-child(6)').textContent;
+                
+                let clientMatch = client.includes(clientFilter);
+                let dateMatch = !dateFilter || date.includes(dateFilter);
+                let typeMatch = !typeFilter || type.includes(typeFilter);
+                
+                if (clientMatch && dateMatch && typeMatch) {
+                    evento.style.display = 'block';
+                } else {
+                    evento.style.display = 'none';
+                }
+            });
+        }
+
+        // Generar PDF
+        function generatePDF() {
+            const doc = new jsPDF();
+            
+            // Título
+            doc.setFontSize(20);
+            doc.setTextColor(211, 84, 0); // Color naranja
+            doc.text('Historial de Eventos - María Chula', 105, 15, { align: 'center' });
+            
+            // Fecha de generación
+            doc.setFontSize(12);
+            doc.setTextColor(0, 0, 0);
+            doc.text(`Generado el: ${new Date().toLocaleDateString()}`, 105, 25, { align: 'center' });
+            
+            let yPosition = 35;
+            
+            // Obtener eventos visibles
+            const eventos = document.querySelectorAll('.evento');
+            
+            eventos.forEach((evento, index) => {
+                if (evento.style.display !== 'none') {
+                    // Salto de página si es necesario (excepto para el primer evento)
+                    if (yPosition > 250 && index > 0) {
+                        doc.addPage();
+                        yPosition = 20;
+                    }
+                    
+                    // Título del evento
+                    doc.setFontSize(16);
+                    doc.setTextColor(211, 84, 0);
+                    doc.text(evento.querySelector('h3').textContent, 14, yPosition);
+                    yPosition += 10;
+                    
+                    // Información del evento
+                    doc.setFontSize(12);
+                    doc.setTextColor(0, 0, 0);
+                    
+                    const infoItems = evento.querySelectorAll('.evento-info p');
+                    infoItems.forEach(item => {
+                        doc.text(item.textContent, 14, yPosition);
+                        yPosition += 7;
+                    });
+                    
+                    // Descripción
+                    const descripcion = evento.querySelector('p:last-child').textContent;
+                    const splitDesc = doc.splitTextToSize(descripcion, 180);
+                    doc.text(splitDesc, 14, yPosition);
+                    yPosition += (splitDesc.length * 7) + 5;
+                    
+                    // Tabla de detalles
+                    const table = evento.querySelector('.table');
+                    const rows = [];
+                    
+                    // Encabezados de la tabla
+                    const headers = [];
+                    table.querySelectorAll('thead th').forEach(th => {
+                        headers.push(th.textContent);
+                    });
+                    
+                    // Datos de la tabla
+                    table.querySelectorAll('tbody tr').forEach(tr => {
+                        const row = [];
+                        tr.querySelectorAll('td').forEach(td => {
+                            row.push(td.textContent);
+                        });
+                        rows.push(row);
+                    });
+                    
+                    // Generar tabla
+                    doc.autoTable({
+                        head: [headers],
+                        body: rows,
+                        startY: yPosition,
+                        theme: 'grid',
+                        headStyles: {
+                            fillColor: [211, 84, 0],
+                            textColor: [255, 255, 255]
+                        },
+                        alternateRowStyles: {
+                            fillColor: [253, 235, 208]
+                        }
+                    });
+                    
+                    // Actualizar posición Y después de la tabla
+                    yPosition = doc.lastAutoTable.finalY + 15;
+                }
+            });
+            
+            // Guardar PDF
+            doc.save('historial-eventos-maria-chula.pdf');
+        }
+
+        // Cargar eventos desde localStorage si existen
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedEvents = localStorage.getItem('mc_events');
+            if (savedEvents) {
+                // En una implementación real, aquí se cargarían los eventos guardados
+                console.log('Eventos cargados desde localStorage');
+            }
+        });
+    </script>
 </body>
 </html>
