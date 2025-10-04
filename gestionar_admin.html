@@ -18,7 +18,7 @@
     <div class="menu-list">
       <a href="menu.html" class="menu-item"><i class="fas fa-utensils"></i> Menú</a>
       <a href="inventory.html" class="menu-item"><i class="fas fa-boxes"></i> Inventario</a>
-      <a href="index.html" class="menu-item"><i class="fas fa-home"></i> Inicio</a>
+      <a href="dashboard.html" class="menu-item"><i class="fas fa-home"></i> Dashboard</a>
       <a href="admin-menus.html" class="menu-item"><i class="fas fa-list-alt"></i> Admin Menús</a>
       <a href="admin-users.html" class="menu-item"><i class="fas fa-users"></i> Admin Usuarios</a>
       <a href="billing.html" class="menu-item"><i class="fas fa-receipt"></i> Facturación</a>
@@ -47,10 +47,10 @@
           <input id="u_user" class="input" placeholder="Nombre de usuario" required>
           <input id="u_pass" class="input" placeholder="Contraseña" type="password">
           <select id="u_role" class="input" required>
-            <option value="mesero">Mesero</option>
-            <option value="cocinero">Cocinero</option>
-            <option value="admin">Administrador</option>
-          </select>
+            <option value="Administrador">Administrador</option>
+            <option value="Mesero">Mesero</option>
+            <option value="Cocinero">Cocinero</option>
+          </select>          
         </div>
         <div style="margin-top:8px">
           <button class="btn primary" type="submit"><i class="fas fa-save"></i> Guardar Usuario</button>
@@ -63,7 +63,7 @@
   </main>
 </div>
 
-<!-- === MODAL MENSAJE === -->
+<!-- === MODAL MENSAJES === -->
 <div id="modalMensaje" class="modal" style="display:none;">
   <div class="modal-content">
     <p id="modalTexto"></p>
@@ -135,6 +135,7 @@
         },
         body: JSON.stringify(body)
       });
+      mostrarModal("Usuario creado con éxito ✅");
     } else {
       // Actualizar
       await fetch(`${API_URL}/${id}`, {
@@ -145,6 +146,7 @@
         },
         body: JSON.stringify(body)
       });
+      mostrarModal("Usuario actualizado con éxito ✅");
     }
 
     e.target.reset();
@@ -160,6 +162,7 @@
       method: "DELETE",
       headers: { "Authorization": `Bearer ${token}` }
     });
+    mostrarModal("Usuario eliminado correctamente 🗑️");
     refreshUsers();
   }
 

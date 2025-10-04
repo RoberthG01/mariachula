@@ -392,3 +392,46 @@ hr {
         font-size: 24px;
     }
 }
+
+/* ==== MODALES ==== */
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+.modal.hidden { display: none; }
+
+.modal-content {
+    background: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+.modal-content h3 { margin:0 0 10px; font-size:20px; }
+.modal-content p { margin:10px 0; }
+.modal-buttons { display:flex; justify-content:center; gap:10px; margin-top:15px; flex-wrap: wrap; }
+.btn-modal { padding:8px 16px; border:none; border-radius:4px; cursor:pointer; }
+.btn-primary { background:#D35400; color:#fff; }
+.btn-ghost { background:#eee; color:#333; }
+.success h3 { color:green; }
+.error h3 { color:red; }
+.input { width: 80%; padding:6px; margin:5px 0; }
+
+/* ==== FILTROS ==== */
+.filters {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+.filters .input {
+    flex: 1;
+    min-width: 150px;
+}

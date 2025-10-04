@@ -9,199 +9,329 @@
     <link rel="icon" href="fotos/iconomch.ico" type="image/x-icon">
 </head>
 <body>
-    <div class="overlay" id="overlay"></div>
-    <button class="mobile-menu-toggle" id="mobileMenuToggle">
-        <i class="fas fa-bars"></i>
-    </button>
+<div class="overlay" id="overlay"></div>
+<div class="app">
+    <aside class="sidebar" id="sidebar">
+        <div class="logo">
+            <img src="fotos/logomch.png" alt="Logo María Chula">
+            <h2>María Chula</h2>
+        </div>
+        <div class="menu-list">
+            <a href="menu.html" class="menu-item"><i class="fas fa-utensils"></i> Menú</a>
+            <a href="inventory.html" class="menu-item"><i class="fas fa-boxes"></i> Inventario</a>
+            <a href="dashboard.html" class="menu-item"><i class="fas fa-home"></i> Dashboard</a>
+            <a href="admin-menus.html" class="menu-item"><i class="fas fa-list-alt"></i> Admin Menús</a>
+            <a href="admin-users.html" class="menu-item"><i class="fas fa-users"></i> Admin Usuarios</a>
+            <a href="billing.html" class="menu-item"><i class="fas fa-receipt"></i> Facturación</a>
+            <a href="events.html" class="menu-item"><i class="fas fa-calendar-alt"></i> Eventos</a>
+            <a href="history-events.html" class="menu-item"><i class="fas fa-history"></i> Historial Eventos</a>
+            <a href="history-orders.html" class="menu-item"><i class="fas fa-clipboard-list"></i> Historial Pedidos</a>
+            <a href="cola_pedidos_chef.html" class="menu-item"><i class="fas fa-tasks"></i> Cola de pedidos</a>
+        </div>
+    </aside>
 
-    <div class="app">
-        <aside class="sidebar" id="sidebar">
-            <button class="toggle-sidebar" id="toggleSidebar">
-                <i class="fas fa-chevron-left"></i>
+    <main class="main">
+        <div class="header">
+            <h1>Inventario</h1>
+            <button class="btn ghost" onclick="window.history.back()" style="margin-left: auto;">
+                <i class="fas fa-arrow-left"></i> Regresar
             </button>
-            
-            <div class="logo">
-                <img src="fotos/logomch.png" alt="Logo María Chula">
-                <h2>María Chula</h2>
-            </div>
-            
-            <div class="menu-list">
-                <a href="menu.html" class="menu-item">
-                    <i class="fas fa-utensils"></i>
-                    <span class="menu-text">Menú</span>
-                </a>
-                <a href="inventory.html" class="menu-item">
-                    <i class="fas fa-boxes"></i>
-                    <span class="menu-text">Inventario</span>
-                </a>
-                <a href="index.html" class="menu-item">
-                    <i class="fas fa-home"></i>
-                    <span class="menu-text">Inicio</span>
-                </a>
-                <a href="admin-menus.html" class="menu-item">
-                    <i class="fas fa-list-alt"></i>
-                    <span class="menu-text">Admin Menús</span>
-                </a>
-                <a href="admin-users.html" class="menu-item">
-                    <i class="fas fa-users"></i>
-                    <span class="menu-text">Admin Usuarios</span>
-                </a>
-                <a href="billing.html" class="menu-item">
-                    <i class="fas fa-receipt"></i>
-                    <span class="menu-text">Facturación</span>
-                </a>
-                <a href="events.html" class="menu-item">
-                    <i class="fas fa-calendar-alt"></i>
-                    <span class="menu-text">Eventos</span>
-                </a>
-                <a href="history-events.html" class="menu-item">
-                    <i class="fas fa-history"></i>
-                    <span class="menu-text">Historial Eventos</span>
-                </a>
-                <a href="history-orders.html" class="menu-item">
-                    <i class="fas fa-clipboard-list"></i>
-                    <span class="menu-text">Historial Pedidos</span>
-                </a>
-                <a href="queue.html" class="menu-item">
-                    <i class="fas fa-tasks"></i>
-                    <span class="menu-text">Cola de pedidos</span>
-                </a>
-            </div>
-        </aside>
+        </div>
+        
+        <div class="card">
+            <form id="invForm">
+                <div class="form-row">
+                    <input class="input" id="inv_name" placeholder="Ingrediente" required>
+                    <input class="input" id="inv_qty" placeholder="Cantidad (stock inicial)" type="number" step="0.01" required>
+                    <input class="input" id="inv_unit" placeholder="Unidad (kg, l, etc.)" required>
+                </div>
+                <div style="margin-top:8px">
+                    <button class="btn primary" type="submit"><i class="fas fa-save"></i> Guardar</button>
+                    <button class="btn ghost" type="button" id="invCancelEdit" style="display:none;">Cancelar</button>
+                </div>
+            </form>
 
-        <main class="main">
-            <div class="header">
-                <div class="title">Inventario</div>
+            <hr>
+
+            <div class="filters">
+                <input id="searchName" class="input" placeholder="Buscar por nombre">
+                <select id="filterUnit" class="input">
+                    <option value="">Todas las unidades</option>
+                </select>
+                <select id="filterStock" class="input">
+                    <option value="">Todo stock</option>
+                    <option value="low">Stock bajo (&lt; 10)</option>
+                </select>
             </div>
-            
-            <div class="card">
-                <form id="invForm" onsubmit="handleInvForm(event)">
-                    <div class="form-row">
-                        <input class="input" id="inv_name" placeholder="Ingrediente" required>
-                        <input class="input" id="inv_qty" placeholder="Cantidad" type="number" step="0.01" required>
-                        <input class="input" id="inv_unit" placeholder="Unidad (kg, l, etc.)" required>
-                    </div>
-                    <div style="margin-top:8px">
-                        <button class="btn primary" type="submit"><i class="fas fa-save"></i> Guardar</button>
-                    </div>
-                </form>
-                <hr>
-                <table class="table" id="invTable">
-                    <thead>
-                        <tr>
-                            <th>Ingrediente</th>
-                            <th>Cantidad</th>
-                            <th>Unidad</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-        </main>
+
+            <table class="table" id="invTable">
+                <thead>
+                    <tr>
+                        <th data-column="nombre">Ingrediente</th>
+                        <th data-column="stock_actual">Cantidad</th>
+                        <th data-column="unidad_medida">Unidad</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </main>
+</div>
+
+<!-- MODAL DE MENSAJE -->
+<div id="modalMsg" class="modal hidden">
+    <div class="modal-content" id="modalMsgContent">
+        <h3 id="modalMsgTitle">Mensaje</h3>
+        <p id="modalMsgText"></p>
+        <div class="modal-buttons">
+            <button id="modalMsgOk" class="btn-modal btn-primary">Aceptar</button>
+        </div>
     </div>
+</div>
 
-    <script>
-        // Función auxiliar para seleccionar elementos
-        function qs(selector) {
-            return document.querySelector(selector);
-        }
+<!-- MODAL DE MOVIMIENTO (MEJORADO) -->
+<div id="modalMove" class="modal hidden">
+    <div class="modal-content" id="modalMoveContent">
+        <h3 id="modalMoveTitle">Movimiento de Inventario</h3>
+        <p id="modalMoveText"></p>
+        <input id="moveCantidad" class="input" type="number" step="0.01" placeholder="Cantidad" required>
+        <input id="moveObs" class="input" type="text" placeholder="Observación (opcional)">
+        <div class="modal-buttons">
+            <button id="btnEntrada" class="btn-modal btn-primary">Entrada</button>
+            <button id="btnSalida" class="btn-modal btn-ghost">Salida</button>
+        </div>
+    </div>
+</div>
 
-        // Variables para el estado del menú
-        const sidebar = qs('#sidebar');
-        const toggleSidebarBtn = qs('#toggleSidebar');
-        const mobileMenuToggle = qs('#mobileMenuToggle');
-        const overlay = qs('#overlay');
-        let isCollapsed = false;
+<script>
+const API = 'http://localhost:3000';
+let inventoryData = [];
+let currentSort = {column:null, asc:true};
 
-        // Función para alternar el menú lateral
-        function toggleSidebar() {
-            if (window.innerWidth <= 900) {
-                // En móvil: mostrar/ocultar completamente
-                sidebar.classList.toggle('active');
-                overlay.style.display = sidebar.classList.contains('active') ? 'block' : 'none';
-            } else {
-                // En desktop: colapsar/expandir
-                isCollapsed = !isCollapsed;
-                sidebar.classList.toggle('collapsed');
-                toggleSidebarBtn.innerHTML = isCollapsed ? 
-                    '<i class="fas fa-chevron-right"></i>' : 
-                    '<i class="fas fa-chevron-left"></i>';
-            }
-        }
+// Helpers
+function qs(sel){ return document.querySelector(sel); }
+function getToken(){ return localStorage.getItem('token'); }
+function requireAuth(){ if(!getToken()){ window.location.href='login.html'; throw new Error('No autorizado'); } }
 
-        // Event listeners para los botones del menú
-        toggleSidebarBtn.addEventListener('click', toggleSidebar);
-        mobileMenuToggle.addEventListener('click', toggleSidebar);
-        overlay.addEventListener('click', toggleSidebar);
+// ==== MODALES ====
+// Mensajes simples
+function showMsg({title='Mensaje', text='', type='info'}) {
+    return new Promise(resolve=>{
+        const modal = qs('#modalMsg');
+        const titleEl = qs('#modalMsgTitle');
+        const textEl = qs('#modalMsgText');
+        const okBtn = qs('#modalMsgOk');
 
-        // Cerrar menú al hacer clic en un enlace (en móvil)
-        const menuItems = document.querySelectorAll('.menu-item');
-        menuItems.forEach(item => {
-            item.addEventListener('click', () => {
-                if (window.innerWidth <= 900) {
-                    sidebar.classList.remove('active');
-                    overlay.style.display = 'none';
-                }
-            });
+        titleEl.textContent = title;
+        textEl.textContent = text;
+        modal.classList.remove('hidden');
+
+        okBtn.onclick = ()=>{ modal.classList.add('hidden'); resolve(true); };
+    });
+}
+
+function showSuccess(text){ return showMsg({title:'Éxito',text,type:'success'}); }
+function showError(text){ return showMsg({title:'Error',text,type:'error'}); }
+
+// Modal de movimiento mejorado (de la versión resumida)
+function showMoveModal(nombre){
+    return new Promise(resolve=>{
+        const modal = qs('#modalMove');
+        qs('#modalMoveText').textContent = `Registrar movimiento para "${nombre}"`;
+        const inputCantidad = qs('#moveCantidad');
+        const inputObs = qs('#moveObs');
+        inputCantidad.value = '';
+        inputObs.value = '';
+        modal.classList.remove('hidden');
+
+        const clean = ()=>{ modal.classList.add('hidden'); btnEntrada.onclick=null; btnSalida.onclick=null; };
+
+        const btnEntrada = qs('#btnEntrada');
+        const btnSalida = qs('#btnSalida');
+
+        btnEntrada.onclick = ()=>{
+            const cant = parseFloat(inputCantidad.value);
+            if(isNaN(cant)||cant<=0) return showError('Cantidad inválida');
+            clean();
+            resolve({tipo:'entrada', cantidad:cant, obs:inputObs.value||null});
+        };
+        btnSalida.onclick = ()=>{
+            const cant = parseFloat(inputCantidad.value);
+            if(isNaN(cant)||cant<=0) return showError('Cantidad inválida');
+            clean();
+            resolve({tipo:'salida', cantidad:cant, obs:inputObs.value||null});
+        };
+    });
+}
+
+// ==== RENDER TABLA ====
+async function renderInv(){
+    requireAuth();
+    const res = await fetch(API+'/inventario',{headers:{'Authorization':'Bearer '+getToken()}});
+    if(!res.ok) return showError('Error al obtener inventario');
+    const data = await res.json();
+    inventoryData = data;
+    populateUnitFilter();
+    filterAndRenderTable();
+}
+
+function populateUnitFilter(){
+    const select = qs('#filterUnit');
+    const units = Array.from(new Set(inventoryData.map(x=>x.unidad_medida))).sort();
+    select.innerHTML = '<option value="">Todas las unidades</option>'+units.map(u=>`<option value="${u}">${u}</option>`).join('');
+}
+
+function filterAndRenderTable(){
+    let filtered = inventoryData.filter(item=>{
+        const nameFilter = qs('#searchName').value.toLowerCase();
+        const unitFilter = qs('#filterUnit').value;
+        const stockFilter = qs('#filterStock').value;
+        let ok = true;
+        if(nameFilter) ok = ok && item.nombre.toLowerCase().includes(nameFilter);
+        if(unitFilter) ok = ok && item.unidad_medida===unitFilter;
+        if(stockFilter==='low') ok = ok && Number(item.stock_actual)<10;
+        return ok;
+    });
+
+    if(currentSort.column){
+        filtered.sort((a,b)=>{
+            let valA = a[currentSort.column];
+            let valB = b[currentSort.column];
+            if(typeof valA==='string') valA=valA.toLowerCase();
+            if(typeof valB==='string') valB=valB.toLowerCase();
+            if(valA<valB) return currentSort.asc?-1:1;
+            if(valA>valB) return currentSort.asc?1:-1;
+            return 0;
         });
+    }
 
-        // Funciones para el inventario
-        function getInv(){ 
-            return JSON.parse(localStorage.getItem('mc_inv')||'[]'); 
-        }
+    const tb = qs('#invTable tbody');
+    if(!filtered.length){
+        tb.innerHTML='<tr><td colspan="4" style="text-align:center;">No hay ingredientes</td></tr>';
+        return;
+    }
 
-        function saveInv(arr){ 
-            localStorage.setItem('mc_inv', JSON.stringify(arr)); 
-        }
+    tb.innerHTML = filtered.map(item=>`
+        <tr>
+            <td>${item.nombre}</td>
+            <td>${Number(item.stock_actual).toFixed(2)}</td>
+            <td>${item.unidad_medida}</td>
+            <td>
+                <button class="btn" onclick="editInsumo(${item.id_insumo})"><i class="fas fa-edit"></i></button>
+                <button class="btn ghost" onclick="delInsumo(${item.id_insumo})"><i class="fas fa-trash"></i></button>
+                <button class="btn" onclick="movimientoPrompt(${item.id_insumo},'${item.nombre}')"><i class="fas fa-exchange-alt"></i></button>
+            </td>
+        </tr>
+    `).join('');
+}
 
-        function renderInv(){
-            const tb = document.querySelector('#invTable tbody');
-            const inventory = getInv();
-            
-            if (inventory.length === 0) {
-                tb.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px; color: var(--color-dark);">No hay ingredientes en el inventario</td></tr>';
-                return;
-            }
-            
-            tb.innerHTML = inventory.map((item, index) => `
-                <tr>
-                    <td>${item.name}</td>
-                    <td>${item.qty}</td>
-                    <td>${item.unit}</td>
-                    <td>
-                        <button class="btn ghost" onclick="delInv(${index})">
-                            <i class="fas fa-trash"></i> Eliminar
-                        </button>
-                    </td>
-                </tr>
-            `).join('');
-        }
+// ==== CRUD ====
+async function createInsumo({nombre,cantidad,unidad}){
+    requireAuth();
+    const res = await fetch(API+'/insumos',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+getToken()},
+        body: JSON.stringify({nombre,descripcion:null,stock:Number(cantidad)||0,unidad_medida:unidad,estado:"activo"})
+    });
+    if(!res.ok) return showError('Error al crear insumo');
+    await showSuccess('Insumo creado');
+    renderInv();
+}
 
-        function handleInvForm(e){
-            e.preventDefault();
-            const arr = getInv();
-            arr.push({
-                name: qs('#inv_name').value, 
-                qty: parseFloat(qs('#inv_qty').value), 
-                unit: qs('#inv_unit').value
-            });
-            saveInv(arr); 
-            e.target.reset(); 
-            renderInv();
-        }
+async function delInsumo(id){
+    requireAuth();
+    if(!confirm('¿Deseas eliminar este insumo?')) return;
+    const res = await fetch(API+`/insumos/${id}`,{method:'DELETE',headers:{'Authorization':'Bearer '+getToken()}});
+    if(!res.ok) return showError('Error al eliminar insumo');
+    await showSuccess('Insumo eliminado');
+    renderInv();
+}
 
-        function delInv(index){
-            if (confirm('¿Estás seguro de que deseas eliminar este ingrediente?')) {
-                const arr = getInv(); 
-                arr.splice(index, 1); 
-                saveInv(arr); 
-                renderInv();
-            }
-        }
+async function editInsumo(id){
+    requireAuth();
+    const res = await fetch(API+'/insumos',{headers:{'Authorization':'Bearer '+getToken()}});
+    const list = await res.json();
+    const ins = list.find(x=>x.id_insumo===id);
+    if(!ins) return showError('Insumo no encontrado');
+    qs('#inv_name').value = ins.nombre;
+    qs('#inv_qty').value = Number(ins.stock_actual)||0;
+    qs('#inv_unit').value = ins.unidad_medida||'';
+    qs('#invForm').dataset.editing = id;
+    qs('#invForm button[type="submit"]').innerHTML='Guardar (actualizar)';
+    qs('#invCancelEdit').style.display='inline-block';
+}
 
-        // Inicializar
-        document.addEventListener('DOMContentLoaded', renderInv);
-    </script>
+qs('#invCancelEdit').addEventListener('click', ()=>{
+    qs('#invForm').reset();
+    delete qs('#invForm').dataset.editing;
+    qs('#invForm button[type="submit"]').innerHTML='<i class="fas fa-save"></i> Guardar';
+    qs('#invCancelEdit').style.display='none';
+});
+
+async function handleInvForm(e){
+    e.preventDefault();
+    requireAuth();
+    const nombre = qs('#inv_name').value.trim();
+    const cantidad = parseFloat(qs('#inv_qty').value);
+    const unidad = qs('#inv_unit').value.trim();
+    const editingId = qs('#invForm').dataset.editing;
+
+    if(!nombre || !unidad) return showError('Nombre y unidad requeridos');
+
+    if(!editingId){
+        await createInsumo({nombre,cantidad,unidad});
+    } else {
+        const res = await fetch(API+`/insumos/${editingId}`,{
+            method:'PUT',
+            headers:{'Content-Type':'application/json','Authorization':'Bearer '+getToken()},
+            body: JSON.stringify({nombre,descripcion:null,stock:cantidad,unidad_medida:unidad,estado:'activo'})
+        });
+        if(!res.ok) return showError('Error al actualizar insumo');
+        await showSuccess('Insumo actualizado');
+        delete qs('#invForm').dataset.editing;
+        qs('#invForm button[type="submit"]').innerHTML='<i class="fas fa-save"></i> Guardar';
+        qs('#invCancelEdit').style.display='none';
+    }
+
+    qs('#invForm').reset();
+    renderInv();
+}
+
+// ==== MOVIMIENTO ====
+async function movimientoPrompt(id_insumo,nombre){
+    requireAuth();
+    const data = await showMoveModal(nombre);
+    const res = await fetch(API+'/inventario/movimiento',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+getToken()},
+        body: JSON.stringify({id_insumo,tipo_movimiento:data.tipo,cantidad:data.cantidad,observacion:data.obs})
+    });
+    if(!res.ok) return showError('Error al registrar movimiento');
+    await showSuccess('Movimiento registrado');
+    renderInv();
+}
+
+// FILTROS
+qs('#searchName').addEventListener('input',filterAndRenderTable);
+qs('#filterUnit').addEventListener('change',filterAndRenderTable);
+qs('#filterStock').addEventListener('change',filterAndRenderTable);
+
+// ORDEN
+document.querySelectorAll('#invTable th[data-column]').forEach(th=>{
+    th.addEventListener('click',()=>{
+        const col = th.getAttribute('data-column');
+        if(currentSort.column===col) currentSort.asc=!currentSort.asc;
+        else currentSort={column:col,asc:true};
+        filterAndRenderTable();
+    });
+});
+
+document.addEventListener('DOMContentLoaded', ()=>{
+    requireAuth();
+    renderInv();
+    qs('#invForm').addEventListener('submit',handleInvForm);
+});
+</script>
 </body>
 </html>
