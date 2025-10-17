@@ -18,7 +18,7 @@
     <div class="menu-list">
       <a href="menu.html" class="menu-item"><i class="fas fa-utensils"></i> Menú</a>
       <a href="inventory.html" class="menu-item"><i class="fas fa-boxes"></i> Inventario</a>
-      <a href="index.html" class="menu-item"><i class="fas fa-home"></i> Inicio</a>
+      <a href="dashboard.html" class="menu-item"><i class="fas fa-home"></i> Dashboard</a>
       <a href="admin-menus.html" class="menu-item"><i class="fas fa-list-alt"></i> Admin Menús</a>
       <a href="admin-users.html" class="menu-item"><i class="fas fa-users"></i> Admin Usuarios</a>
       <a href="billing.html" class="menu-item"><i class="fas fa-receipt"></i> Facturación</a>
@@ -36,9 +36,6 @@
         <a href="panel.html" class="back-button">
           <i class="fas fa-arrow-left"></i> Regresar
         </a>
-        <button class="btn ghost" onclick="location.href='login.html'">
-          <i class="fas fa-sign-out-alt"></i> Salir
-        </button>
       </div>
     </div>
 
@@ -46,11 +43,11 @@
       <div class="order-header">
         <h3>Platos disponibles</h3>
         <div class="order-actions">
-          <button class="btn" onclick="submitOrder({type:'domicilio',address:'Dirección demo'})">
-            <i class="fas fa-truck"></i> Enviar pedido (domicilio)
+          <button class="btn" onclick="openOrderTypeModal()">
+            <i class="fas fa-truck"></i> Enviar pedido
           </button>
-          <button class="btn primary" onclick="submitOrder({type:'mesa',table:5})">
-            <i class="fas fa-utensils"></i> Enviar pedido (mesa)
+          <button id="cartToggle" class="btn primary">
+            <i class="fas fa-shopping-cart"></i> Ver Carrito (<span id="cartCount">0</span>)
           </button>
         </div>
       </div>
@@ -58,9 +55,15 @@
       <div class="order-container">
         <div id="menuGrid" class="menu-grid"></div>
         
-        <div class="cart-container">
-          <div class="cart">
+        <!-- Carrito flotante -->
+        <div id="floatingCart" class="cart-container floating-cart">
+          <div class="cart-header">
             <h3>Tu Pedido</h3>
+            <button class="btn ghost close-cart" onclick="toggleCart()">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div class="cart-content">
             <div id="cartItems"></div>
             <div id="emptyCart" class="empty-cart">No hay items en el carrito</div>
             <div class="cart-total">Total: <span id="cartTotal">$0.00</span></div>
@@ -76,10 +79,53 @@
   </main>
 </div>
 
+<!-- Modal para seleccionar tipo de pedido -->
+<div id="orderTypeModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Seleccionar tipo de pedido</h3>
+      <button class="close-modal" onclick="closeOrderTypeModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p>¿Cómo será el pedido?</p>
+      <div class="modal-actions">
+        <button class="btn" onclick="submitOrder({type:'domicilio',address:'Dirección demo'})">
+          <i class="fas fa-truck"></i> Domicilio
+        </button>
+        <button class="btn primary" onclick="submitOrder({type:'mesa',table:5})">
+          <i class="fas fa-utensils"></i> Mesa
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de confirmación -->
+<div id="confirmationModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 id="confirmationTitle">Confirmación</h3>
+      <button class="close-modal" onclick="closeConfirmationModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p id="confirmationMessage"></p>
+      <div class="modal-actions">
+        <button class="btn" onclick="closeConfirmationModal()">Cancelar</button>
+        <button id="confirmAction" class="btn primary">Confirmar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 // Variables globales
 let cart = [];
 let orderNotes = '';
+let cartVisible = false;
 
 // Obtener menú desde localStorage (desde admin-menus.html)
 function getMenu() {
@@ -158,6 +204,56 @@ function renderMenuGrid(selector) {
   `).join('');
 }
 
+// Toggle del carrito flotante
+function toggleCart() {
+  const cart = document.getElementById('floatingCart');
+  cartVisible = !cartVisible;
+  
+  if (cartVisible) {
+    cart.classList.add('active');
+  } else {
+    cart.classList.remove('active');
+  }
+}
+
+// Actualizar contador del carrito
+function updateCartCount() {
+  const count = cart.reduce((total, item) => total + item.quantity, 0);
+  document.getElementById('cartCount').textContent = count;
+}
+
+// Modales
+function openOrderTypeModal() {
+  if (cart.length === 0) {
+    showConfirmation('Carrito vacío', 'No hay items en el carrito. Agrega productos antes de enviar un pedido.', false);
+    return;
+  }
+  document.getElementById('orderTypeModal').classList.add('active');
+}
+
+function closeOrderTypeModal() {
+  document.getElementById('orderTypeModal').classList.remove('active');
+}
+
+function showConfirmation(title, message, hasConfirm = true) {
+  document.getElementById('confirmationTitle').textContent = title;
+  document.getElementById('confirmationMessage').textContent = message;
+  
+  const confirmBtn = document.getElementById('confirmAction');
+  if (hasConfirm) {
+    confirmBtn.style.display = 'inline-flex';
+  } else {
+    confirmBtn.style.display = 'none';
+  }
+  
+  document.getElementById('confirmationModal').classList.add('active');
+}
+
+function closeConfirmationModal() {
+  document.getElementById('confirmationModal').classList.remove('active');
+}
+
+// Inicialización
 document.addEventListener('DOMContentLoaded', () => {
   renderMenuGrid('#menuGrid');
   updateCartUI();
@@ -181,6 +277,9 @@ document.addEventListener('DOMContentLoaded', () => {
     orderNotes = e.target.value;
     localStorage.setItem('mariaChulaOrderNotes', orderNotes);
   });
+  
+  // Botón para toggle del carrito
+  document.getElementById('cartToggle').addEventListener('click', toggleCart);
   
   // Escuchar cambios en el menú (por si se agregan platillos desde otra pestaña)
   window.addEventListener('storage', function(e) {
@@ -212,6 +311,11 @@ function addToCart(itemId) {
   
   saveCart();
   updateCartUI();
+  
+  // Mostrar el carrito automáticamente al agregar un producto
+  if (!cartVisible) {
+    toggleCart();
+  }
 }
 
 function updateCartItem(itemId, newQty) {
@@ -248,6 +352,7 @@ function updateCartUI() {
     cartItemsEl.innerHTML = '';
     emptyCartEl.style.display = 'block';
     cartTotalEl.textContent = formatMoney(0);
+    updateCartCount();
     return;
   }
   
@@ -272,11 +377,12 @@ function updateCartUI() {
   
   total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   cartTotalEl.textContent = formatMoney(total);
+  updateCartCount();
 }
 
 function submitOrder(orderDetails) {
   if(cart.length === 0) {
-    alert('No hay items en el carrito');
+    showConfirmation('Error', 'No hay items en el carrito', false);
     return;
   }
   
@@ -299,8 +405,9 @@ function submitOrder(orderDetails) {
   localStorage.removeItem('mariaChulaOrderNotes');
   document.getElementById('orderNotes').value = '';
   updateCartUI();
+  closeOrderTypeModal();
   
-  alert('Pedido enviado con éxito!');
+  showConfirmation('Éxito', 'Pedido enviado con éxito!', false);
 }
 
 function saveOrderToHistory(order) {

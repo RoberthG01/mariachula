@@ -9,117 +9,120 @@
   <link rel="icon" href="fotos/iconomch.ico" type="image/x-icon">
 </head>
 <body>
-  <div class="app">
-    <aside class="sidebar card">
-      <div class="logo">
+<div class="app">
+  <aside class="sidebar">
+    <div class="logo">
         <img src="fotos/logomch.png" alt="Logo María Chula">
         <h2>María Chula</h2>
-      </div>
-      <div class="menu-list">
-        <a href="menu.html" class="menu-item">Menú</a>
-        <a href="inventory.html" class="menu-item">Inventario</a>
-        <a href="index.html" class="menu-item">Inicio</a>
-        <a href="admin-menus.html" class="menu-item">Administración de Menús</a>
-        <a href="admin-users.html" class="menu-item">Administración de usuarios</a>
-        <a href="billing.html" class="menu-item">Facturación</a>
-        <a href="events.html" class="menu-item active">Eventos</a>
-        <a href="history-events.html" class="menu-item">Historial de Eventos</a>
-        <a href="history-orders.html" class="menu-item">Historial de Pedidos</a>
-        <a href="queue.html" class="menu-item">Cola de pedidos</a>
-      </div>
-    </aside>
+    </div>
+    <div class="menu-list">
+      <a href="menu.html" class="menu-item"><i class="fas fa-utensils"></i> Menú</a>
+      <a href="inventory.html" class="menu-item"><i class="fas fa-boxes"></i> Inventario</a>
+      <a href="dashboard.html" class="menu-item"><i class="fas fa-home"></i> Dashboard</a>
+      <a href="admin-menus.html" class="menu-item"><i class="fas fa-list-alt"></i> Admin Menús</a>
+      <a href="admin-users.html" class="menu-item"><i class="fas fa-users"></i> Admin Usuarios</a>
+      <a href="billing.html" class="menu-item"><i class="fas fa-receipt"></i> Facturación</a>
+      <a href="events.html" class="menu-item active"><i class="fas fa-calendar-alt"></i> Eventos</a>
+      <a href="history-events.html" class="menu-item"><i class="fas fa-history"></i> Historial Eventos</a>
+      <a href="history-orders.html" class="menu-item"><i class="fas fa-clipboard-list"></i> Historial Pedidos</a>
+      <a href="queue.html" class="menu-item"><i class="fas fa-tasks"></i> Cola de pedidos</a>
+    </div>
+  </aside>
 
-    <main class="main">
-      <div class="header">
-        <div class="title">Eventos</div>
+  <main class="main">
+    <div class="header">
+      <div class="title">Eventos</div>
+      <div class="actions">
         <a href="panel.html" class="back-button">
           <i class="fas fa-arrow-left"></i> Regresar
         </a>
       </div>
+    </div>
 
-      <div class="card">
-        <h2>Registro de Eventos</h2>
+    <div class="card">
+      <h2>Registro de Eventos</h2>
+      
+      <form id="eventForm">
+        <div class="form-row">
+          <div class="input-group">
+            <label for="evt_client">Cliente</label>
+            <input class="input" id="evt_client" placeholder="Nombre del cliente" required>
+          </div>
+          <div class="input-group">
+            <label for="evt_date">Fecha del Evento</label>
+            <input class="input" id="evt_date" type="date" required>
+          </div>
+        </div>
         
-        <form id="eventForm">
-          <div class="form-row">
-            <div class="input-group">
-              <label for="evt_client">Cliente</label>
-              <input class="input" id="evt_client" placeholder="Nombre del cliente" required>
-            </div>
-            <div class="input-group">
-              <label for="evt_date">Fecha del Evento</label>
-              <input class="input" id="evt_date" type="date" required>
-            </div>
+        <div class="form-row">
+          <div class="input-group">
+            <label for="evt_people">Número de Personas</label>
+            <input class="input" id="evt_people" placeholder="Cantidad de personas" type="number" min="1" required>
           </div>
-          
-          <div class="form-row">
-            <div class="input-group">
-              <label for="evt_people">Número de Personas</label>
-              <input class="input" id="evt_people" placeholder="Cantidad de personas" type="number" min="1" required>
-            </div>
-            <div class="input-group">
-              <label for="evt_type">Tipo de Evento</label>
-              <select class="input" id="evt_type" required>
-                <option value="">Seleccionar tipo</option>
-                <option value="cumpleaños">Cumpleaños</option>
-                <option value="boda">Boda</option>
-                <option value="formal">Evento formal</option>
-                <option value="reunion">Reunión familiar</option>
-                <option value="corporativo">Evento corporativo</option>
-              </select>
-            </div>
+          <div class="input-group">
+            <label for="evt_type">Tipo de Evento</label>
+            <select class="input" id="evt_type" required>
+              <option value="">Seleccionar tipo</option>
+              <option value="cumpleaños">Cumpleaños</option>
+              <option value="boda">Boda</option>
+              <option value="formal">Evento formal</option>
+              <option value="reunion">Reunión familiar</option>
+              <option value="corporativo">Evento corporativo</option>
+            </select>
           </div>
-          
-          <div class="form-row">
-            <div class="input-group">
-              <label for="evt_vajilla">Tipo de Vajilla</label>
-              <select class="input" id="evt_vajilla" onchange="updateTotal()">
-                <option value="losa" data-precio="50">Losa - Q50.00</option>
-                <option value="desechable" data-precio="20">Desechables - Q20.00</option>
-              </select>
-            </div>
-            <div class="input-group">
-              <label for="evt_details">Detalles Adicionales</label>
-              <textarea class="input" id="evt_details" rows="3" placeholder="Detalles adicionales sobre el evento..."></textarea>
-            </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="input-group">
+            <label for="evt_vajilla">Tipo de Vajilla</label>
+            <select class="input" id="evt_vajilla" onchange="updateTotal()">
+              <option value="losa" data-precio="50">Losa - Q50.00</option>
+              <option value="desechable" data-precio="20">Desechables - Q20.00</option>
+            </select>
           </div>
+          <div class="input-group">
+            <label for="evt_details">Detalles Adicionales</label>
+            <textarea class="input" id="evt_details" rows="3" placeholder="Detalles adicionales sobre el evento..."></textarea>
+          </div>
+        </div>
 
-          <h3 style="margin-top:16px">Selección de Menú</h3>
-          <div id="menuItemsContainer">
-            <div class="menu-item-selector">
-              <select class="input" onchange="updateItemPrice(this)" required>
-                <option value="">Seleccionar platillo</option>
-                <!-- Las opciones se llenarán con JavaScript -->
-              </select>
-              <input type="number" class="input" min="1" value="1" placeholder="Cantidad" onchange="calculateItemTotal(this)" required>
-              <input type="number" class="input" step="0.01" placeholder="Precio" readonly>
-              <input type="text" class="input" placeholder="Total" readonly>
-              <button class="btn ghost" onclick="removeMenuItem(this)" style="color:var(--color-error)">×</button>
-            </div>
+        <h3 style="margin-top:16px">Selección de Menú</h3>
+        <div id="menuItemsContainer">
+          <div class="menu-item-selector">
+            <select class="input" onchange="updateItemPrice(this)" required>
+              <option value="">Seleccionar platillo</option>
+              <!-- Las opciones se llenarán con JavaScript -->
+            </select>
+            <input type="number" class="input" min="1" value="1" placeholder="Cantidad" onchange="calculateItemTotal(this)" required>
+            <input type="number" class="input" step="0.01" placeholder="Precio" readonly>
+            <input type="text" class="input" placeholder="Total" readonly>
+            <button class="btn ghost" onclick="removeMenuItem(this)" style="color:var(--color-error)">×</button>
           </div>
+        </div>
 
-          <button class="btn ghost" type="button" onclick="addMenuItem()" style="margin-top:8px">
-            <i class="fas fa-plus"></i> Añadir otro platillo
+        <button class="btn ghost" type="button" onclick="addMenuItem()" style="margin-top:8px">
+          <i class="fas fa-plus"></i> Añadir otro platillo
+        </button>
+
+        <h2 style="margin-top: 20px;">Total: Q<span id="totalAmount">0.00</span></h2>
+
+        <div style="margin-top:16px">
+          <button type="button" class="btn primary" onclick="calculateQuote()">
+            <i class="fas fa-calculator"></i> Cotizar
           </button>
+          <button type="button" class="btn success" id="confirmBtn" onclick="confirmEvent()" disabled>
+            <i class="fas fa-check-circle"></i> Confirmar Evento
+          </button>
+          <button type="reset" class="btn ghost" onclick="resetForm()">
+            <i class="fas fa-broom"></i> Limpiar formulario
+          </button>
+        </div>
+      </form>
+    </div>
 
-          <h2 style="margin-top: 20px;">Total: Q<span id="totalAmount">0.00</span></h2>
-
-          <div style="margin-top:16px">
-            <button type="button" class="btn primary" onclick="calculateQuote()">
-              <i class="fas fa-calculator"></i> Cotizar
-            </button>
-            <button type="button" class="btn success" id="confirmBtn" onclick="confirmEvent()" disabled>
-              <i class="fas fa-check-circle"></i> Confirmar Evento
-            </button>
-            <button type="reset" class="btn ghost">
-              <i class="fas fa-broom"></i> Limpiar formulario
-            </button>
-          </div>
-        </form>
-      </div>
-
-      <div class="card">
-        <h2>Eventos Registrados</h2>
+    <div class="card">
+      <h2>Eventos Registrados</h2>
+      <div class="table-container">
         <table class="table" id="eventsTable">
           <thead>
             <tr>
@@ -137,57 +140,325 @@
           </tbody>
         </table>
       </div>
-    </main>
+    </div>
+  </main>
+</div>
+
+<!-- Modal de confirmación de cotización -->
+<div id="quoteModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Cotización Calculada</h3>
+      <button class="close-modal" onclick="closeQuoteModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p id="quoteMessage"></p>
+      <div class="modal-actions">
+        <button class="btn primary" onclick="closeQuoteModal()">Aceptar</button>
+      </div>
+    </div>
   </div>
+</div>
 
-  <script>
-    // Variables globales
-    let menuItems = [];
-    let events = [];
-    let currentQuote = 0;
+<!-- Modal de confirmación de evento -->
+<div id="eventConfirmModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Confirmar Evento</h3>
+      <button class="close-modal" onclick="closeEventConfirmModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p>¿Está seguro de confirmar este evento?</p>
+      <div class="event-summary">
+        <h4>Resumen del Evento:</h4>
+        <div id="eventSummaryContent"></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn" onclick="closeEventConfirmModal()">Cancelar</button>
+        <button class="btn success" onclick="processEventConfirmation()">Confirmar</button>
+      </div>
+    </div>
+  </div>
+</div>
 
-    // Cargar datos al iniciar
-    document.addEventListener('DOMContentLoaded', () => {
-      loadMenuItems();
-      loadEvents();
-      renderEvents();
+<!-- Modal de detalles del evento -->
+<div id="eventDetailsModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Detalles del Evento</h3>
+      <button class="close-modal" onclick="closeEventDetailsModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div id="eventDetailsContent"></div>
+      <div class="modal-actions">
+        <button class="btn primary" onclick="closeEventDetailsModal()">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de eliminación -->
+<div id="deleteModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Eliminar Evento</h3>
+      <button class="close-modal" onclick="closeDeleteModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p>¿Está seguro de eliminar este evento? Esta acción no se puede deshacer.</p>
+      <div class="modal-actions">
+        <button class="btn" onclick="closeDeleteModal()">Cancelar</button>
+        <button class="btn error" id="confirmDeleteBtn">Eliminar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Variables globales
+  let menuItems = [];
+  let events = [];
+  let currentQuote = 0;
+  let eventToDelete = null;
+  let pendingEvent = null;
+
+  // Cargar datos al iniciar
+  document.addEventListener('DOMContentLoaded', () => {
+    loadMenuItems();
+    loadEvents();
+    renderEvents();
+    
+    // Establecer fecha mínima como hoy
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('evt_date').min = today;
+  });
+
+  // Cargar platillos desde la administración de menús
+  function loadMenuItems() {
+    const savedMenu = localStorage.getItem('mc_menu');
+    menuItems = savedMenu ? JSON.parse(savedMenu) : [];
+    populateMenuDropdowns();
+  }
+
+  // Cargar eventos guardados
+  function loadEvents() {
+    const savedEvents = localStorage.getItem('mc_events');
+    events = savedEvents ? JSON.parse(savedEvents) : [];
+  }
+
+  // Guardar eventos
+  function saveEvents() {
+    localStorage.setItem('mc_events', JSON.stringify(events));
+  }
+
+  // Llenar los dropdowns de selección de platillos
+  function populateMenuDropdowns() {
+    const dropdowns = document.querySelectorAll('#menuItemsContainer select');
+    dropdowns.forEach(dropdown => {
+      dropdown.innerHTML = '<option value="">Seleccionar platillo</option>' + 
+        menuItems.map(item => 
+          `<option value="${item.id}" data-price="${item.price}">${item.name} - Q${item.price.toFixed(2)}</option>`
+        ).join('');
     });
+  }
 
-    // Cargar platillos desde la administración de menús
-    function loadMenuItems() {
-      const savedMenu = localStorage.getItem('mc_menu');
-      menuItems = savedMenu ? JSON.parse(savedMenu) : [];
-      populateMenuDropdowns();
+  // Añadir nuevo campo de platillo
+  function addMenuItem() {
+    const container = document.getElementById('menuItemsContainer');
+    const newItem = document.createElement('div');
+    newItem.className = 'menu-item-selector';
+    newItem.innerHTML = `
+      <select class="input" onchange="updateItemPrice(this)" required>
+        <option value="">Seleccionar platillo</option>
+        ${menuItems.map(item => 
+          `<option value="${item.id}" data-price="${item.price}">${item.name} - Q${item.price.toFixed(2)}</option>`
+        ).join('')}
+      </select>
+      <input type="number" class="input" min="1" value="1" placeholder="Cantidad" onchange="calculateItemTotal(this)" required>
+      <input type="number" class="input" step="0.01" placeholder="Precio" readonly>
+      <input type="text" class="input" placeholder="Total" readonly>
+      <button class="btn ghost" onclick="removeMenuItem(this)" style="color:var(--color-error)">×</button>
+    `;
+    container.appendChild(newItem);
+  }
+
+  // Eliminar campo de platillo
+  function removeMenuItem(button) {
+    const item = button.parentElement;
+    if (document.querySelectorAll('.menu-item-selector').length > 1) {
+      item.remove();
+    } else {
+      // Si es el último item, limpiar sus valores
+      item.querySelector('select').value = '';
+      item.querySelectorAll('input')[0].value = '1';
+      item.querySelectorAll('input')[1].value = '';
+      item.querySelectorAll('input')[2].value = '';
     }
+    updateTotal();
+  }
 
-    // Cargar eventos guardados
-    function loadEvents() {
-      const savedEvents = localStorage.getItem('mc_events');
-      events = savedEvents ? JSON.parse(savedEvents) : [];
+  // Actualizar precio cuando se selecciona un platillo
+  function updateItemPrice(select) {
+    const selectedOption = select.options[select.selectedIndex];
+    const priceInput = select.parentElement.querySelectorAll('input')[1];
+    if (selectedOption && selectedOption.dataset.price) {
+      priceInput.value = selectedOption.dataset.price;
+      calculateItemTotal(select);
+    } else {
+      priceInput.value = '';
     }
+  }
 
-    // Guardar eventos
-    function saveEvents() {
-      localStorage.setItem('mc_events', JSON.stringify(events));
+  // Calcular total por item
+  function calculateItemTotal(input) {
+    const item = input.parentElement;
+    const qty = item.querySelectorAll('input')[0].value;
+    const price = item.querySelectorAll('input')[1].value;
+    const totalInput = item.querySelectorAll('input')[2];
+    
+    if (qty && price) {
+      const total = parseFloat(qty) * parseFloat(price);
+      totalInput.value = total.toFixed(2);
+    } else {
+      totalInput.value = '';
     }
+    updateTotal();
+  }
 
-    // Llenar los dropdowns de selección de platillos
-    function populateMenuDropdowns() {
-      const dropdowns = document.querySelectorAll('#menuItemsContainer select');
-      dropdowns.forEach(dropdown => {
-        dropdown.innerHTML = '<option value="">Seleccionar platillo</option>' + 
-          menuItems.map(item => 
-            `<option value="${item.id}" data-price="${item.price}">${item.name} - Q${item.price.toFixed(2)}</option>`
-          ).join('');
-      });
+  // Calcular cotización total
+  function updateTotal() {
+    let total = 0;
+    
+    // Sumar el costo de la vajilla
+    const vajilla = document.getElementById('evt_vajilla');
+    total += parseFloat(vajilla.options[vajilla.selectedIndex].getAttribute('data-precio'));
+    
+    // Sumar los precios de los platillos seleccionados
+    document.querySelectorAll('.menu-item-selector').forEach(item => {
+      const totalInput = item.querySelectorAll('input')[2];
+      if (totalInput.value) {
+        total += parseFloat(totalInput.value);
+      }
+    });
+    
+    // Actualizar el total mostrado
+    document.getElementById('totalAmount').textContent = total.toFixed(2);
+    currentQuote = total;
+    return total;
+  }
+
+  // Calcular cotización
+  function calculateQuote() {
+    const client = document.getElementById('evt_client').value;
+    const date = document.getElementById('evt_date').value;
+    
+    if (!client || !date) {
+      showQuoteModal('Error', 'Por favor complete los campos obligatorios: Cliente y Fecha');
+      return;
     }
+    
+    const total = updateTotal();
+    document.getElementById('confirmBtn').disabled = false;
+    
+    showQuoteModal('Cotización Calculada', `Total: Q${total.toFixed(2)}\n\nAhora puede confirmar el evento.`);
+  }
 
-    // Añadir nuevo campo de platillo
-    function addMenuItem() {
-      const container = document.getElementById('menuItemsContainer');
-      const newItem = document.createElement('div');
-      newItem.className = 'menu-item-selector';
-      newItem.innerHTML = `
+  // Confirmar evento
+  function confirmEvent() {
+    const client = document.getElementById('evt_client').value;
+    const date = document.getElementById('evt_date').value;
+    const people = document.getElementById('evt_people').value;
+    const type = document.getElementById('evt_type').value;
+    const vajilla = document.getElementById('evt_vajilla').value;
+    const details = document.getElementById('evt_details').value;
+    
+    // Validar items
+    const items = [];
+    let isValid = true;
+    
+    document.querySelectorAll('.menu-item-selector').forEach(item => {
+      const select = item.querySelector('select');
+      const name = select.options[select.selectedIndex]?.text.split(' - ')[0] || '';
+      const qty = item.querySelectorAll('input')[0].value;
+      const price = item.querySelectorAll('input')[1].value;
+      const total = item.querySelectorAll('input')[2].value;
+      
+      if (name && qty && price && total) {
+        items.push({
+          name,
+          qty: parseFloat(qty),
+          price: parseFloat(price),
+          total: parseFloat(total)
+        });
+      } else if (select.value || qty || price) {
+        isValid = false;
+      }
+    });
+    
+    if (!isValid) {
+      showQuoteModal('Error', 'Por favor complete correctamente todos los items del menú');
+      return;
+    }
+    
+    if (items.length === 0) {
+      showQuoteModal('Error', 'Por favor agregue al menos un platillo al evento');
+      return;
+    }
+    
+    // Crear objeto de evento pendiente
+    pendingEvent = {
+      client,
+      date,
+      people: parseInt(people),
+      type,
+      vajilla,
+      details,
+      items,
+      total: currentQuote
+    };
+    
+    // Mostrar modal de confirmación
+    showEventConfirmModal();
+  }
+
+  // Procesar la confirmación del evento
+  function processEventConfirmation() {
+    // Crear evento con ID
+    const event = {
+      id: Date.now(),
+      ...pendingEvent,
+      status: 'Confirmado',
+      createdAt: new Date().toLocaleString()
+    };
+    
+    // Guardar evento
+    events.push(event);
+    saveEvents();
+    renderEvents();
+    
+    // Limpiar formulario
+    resetForm();
+    
+    // Cerrar modal
+    closeEventConfirmModal();
+    
+    // Mostrar mensaje de éxito
+    showQuoteModal('Éxito', 'Evento confirmado exitosamente!');
+  }
+
+  // Resetear formulario
+  function resetForm() {
+    document.getElementById('eventForm').reset();
+    document.getElementById('menuItemsContainer').innerHTML = `
+      <div class="menu-item-selector">
         <select class="input" onchange="updateItemPrice(this)" required>
           <option value="">Seleccionar platillo</option>
           ${menuItems.map(item => 
@@ -198,249 +469,204 @@
         <input type="number" class="input" step="0.01" placeholder="Precio" readonly>
         <input type="text" class="input" placeholder="Total" readonly>
         <button class="btn ghost" onclick="removeMenuItem(this)" style="color:var(--color-error)">×</button>
+      </div>
+    `;
+    document.getElementById('totalAmount').textContent = '0.00';
+    document.getElementById('confirmBtn').disabled = true;
+    pendingEvent = null;
+  }
+
+  // Renderizar eventos en la tabla
+  function renderEvents() {
+    const tableBody = document.querySelector('#eventsTable tbody');
+    tableBody.innerHTML = '';
+    
+    if (events.length === 0) {
+      tableBody.innerHTML = `
+        <tr>
+          <td colspan="7" style="text-align: center; padding: 20px; color: var(--color-muted);">
+            <i class="fas fa-calendar-times" style="font-size: 24px; margin-bottom: 10px;"></i>
+            <p>No hay eventos registrados</p>
+          </td>
+        </tr>
       `;
-      container.appendChild(newItem);
+      return;
     }
+    
+    // Ordenar eventos por fecha (más recientes primero)
+    const sortedEvents = [...events].sort((a, b) => new Date(b.date) - new Date(a.date));
+    
+    sortedEvents.forEach(event => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${event.client}</td>
+        <td>${event.date}</td>
+        <td>${event.people}</td>
+        <td>${event.type}</td>
+        <td>Q${event.total.toFixed(2)}</td>
+        <td><span class="status-badge status-${event.status.toLowerCase()}">${event.status}</span></td>
+        <td>
+          <button class="btn" onclick="viewEvent(${event.id})">
+            <i class="fas fa-eye"></i> Ver
+          </button>
+          <button class="btn ghost" onclick="deleteEvent(${event.id})" style="color:var(--color-error)">
+            <i class="fas fa-trash"></i> Eliminar
+          </button>
+        </td>
+      `;
+      tableBody.appendChild(row);
+    });
+  }
 
-    // Eliminar campo de platillo
-    function removeMenuItem(button) {
-      const item = button.parentElement;
-      if (document.querySelectorAll('.menu-item-selector').length > 1) {
-        item.remove();
-      } else {
-        // Si es el último item, limpiar sus valores
-        item.querySelector('select').value = '';
-        item.querySelectorAll('input')[0].value = '1';
-        item.querySelectorAll('input')[1].value = '';
-        item.querySelectorAll('input')[2].value = '';
-      }
-      updateTotal();
-    }
+  // Ver detalles de evento
+  function viewEvent(id) {
+    const event = events.find(e => e.id === id);
+    if (!event) return;
+    
+    let itemsList = '';
+    event.items.forEach(item => {
+      itemsList += `<div class="event-item">
+        <span>${item.qty} x ${item.name}</span>
+        <span>Q${item.total.toFixed(2)}</span>
+      </div>`;
+    });
+    
+    const detailsContent = `
+      <div class="event-details">
+        <div class="detail-row">
+          <span class="detail-label">Cliente:</span>
+          <span class="detail-value">${event.client}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Fecha:</span>
+          <span class="detail-value">${event.date}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Personas:</span>
+          <span class="detail-value">${event.people}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Tipo:</span>
+          <span class="detail-value">${event.type}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Vajilla:</span>
+          <span class="detail-value">${event.vajilla}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Estado:</span>
+          <span class="detail-value status-badge status-${event.status.toLowerCase()}">${event.status}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Total:</span>
+          <span class="detail-value total-amount">Q${event.total.toFixed(2)}</span>
+        </div>
+        <div class="detail-section">
+          <h4>Platillos:</h4>
+          <div class="event-items">
+            ${itemsList}
+          </div>
+        </div>
+        <div class="detail-section">
+          <h4>Detalles:</h4>
+          <p>${event.details || 'Ninguno'}</p>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Registrado:</span>
+          <span class="detail-value">${event.createdAt}</span>
+        </div>
+      </div>
+    `;
+    
+    document.getElementById('eventDetailsContent').innerHTML = detailsContent;
+    document.getElementById('eventDetailsModal').classList.add('active');
+  }
 
-    // Actualizar precio cuando se selecciona un platillo
-    function updateItemPrice(select) {
-      const selectedOption = select.options[select.selectedIndex];
-      const priceInput = select.parentElement.querySelectorAll('input')[1];
-      if (selectedOption && selectedOption.dataset.price) {
-        priceInput.value = selectedOption.dataset.price;
-        calculateItemTotal(select);
-      } else {
-        priceInput.value = '';
-      }
-    }
+  // Eliminar evento
+  function deleteEvent(id) {
+    eventToDelete = id;
+    document.getElementById('deleteModal').classList.add('active');
+  }
 
-    // Calcular total por item
-    function calculateItemTotal(input) {
-      const item = input.parentElement;
-      const qty = item.querySelectorAll('input')[0].value;
-      const price = item.querySelectorAll('input')[1].value;
-      const totalInput = item.querySelectorAll('input')[2];
-      
-      if (qty && price) {
-        const total = parseFloat(qty) * parseFloat(price);
-        totalInput.value = total.toFixed(2);
-      } else {
-        totalInput.value = '';
-      }
-      updateTotal();
-    }
-
-    // Calcular cotización total
-    function updateTotal() {
-      let total = 0;
-      
-      // Sumar el costo de la vajilla
-      const vajilla = document.getElementById('evt_vajilla');
-      total += parseFloat(vajilla.options[vajilla.selectedIndex].getAttribute('data-precio'));
-      
-      // Sumar los precios de los platillos seleccionados
-      document.querySelectorAll('.menu-item-selector').forEach(item => {
-        const totalInput = item.querySelectorAll('input')[2];
-        if (totalInput.value) {
-          total += parseFloat(totalInput.value);
-        }
-      });
-      
-      // Actualizar el total mostrado
-      document.getElementById('totalAmount').textContent = total.toFixed(2);
-      currentQuote = total;
-      return total;
-    }
-
-    // Calcular cotización
-    function calculateQuote() {
-      const client = document.getElementById('evt_client').value;
-      const date = document.getElementById('evt_date').value;
-      
-      if (!client || !date) {
-        alert('Por favor complete los campos obligatorios: Cliente y Fecha');
-        return;
-      }
-      
-      const total = updateTotal();
-      document.getElementById('confirmBtn').disabled = false;
-      
-      alert(`Cotización calculada: Q${total.toFixed(2)}\n\nAhora puede confirmar el evento.`);
-    }
-
-    // Confirmar evento
-    function confirmEvent() {
-      const client = document.getElementById('evt_client').value;
-      const date = document.getElementById('evt_date').value;
-      const people = document.getElementById('evt_people').value;
-      const type = document.getElementById('evt_type').value;
-      const vajilla = document.getElementById('evt_vajilla').value;
-      const details = document.getElementById('evt_details').value;
-      
-      // Validar items
-      const items = [];
-      let isValid = true;
-      
-      document.querySelectorAll('.menu-item-selector').forEach(item => {
-        const select = item.querySelector('select');
-        const name = select.options[select.selectedIndex]?.text.split(' - ')[0] || '';
-        const qty = item.querySelectorAll('input')[0].value;
-        const price = item.querySelectorAll('input')[1].value;
-        const total = item.querySelectorAll('input')[2].value;
-        
-        if (name && qty && price && total) {
-          items.push({
-            name,
-            qty: parseFloat(qty),
-            price: parseFloat(price),
-            total: parseFloat(total)
-          });
-        } else if (select.value || qty || price) {
-          isValid = false;
-        }
-      });
-      
-      if (!isValid) {
-        alert('Por favor complete correctamente todos los items del menú');
-        return;
-      }
-      
-      if (items.length === 0) {
-        alert('Por favor agregue al menos un platillo al evento');
-        return;
-      }
-      
-      // Crear evento
-      const event = {
-        id: Date.now(),
-        client,
-        date,
-        people: parseInt(people),
-        type,
-        vajilla,
-        details,
-        items,
-        total: currentQuote,
-        status: 'Confirmado',
-        createdAt: new Date().toLocaleString()
-      };
-      
-      // Guardar evento
-      events.push(event);
+  // Confirmar eliminación
+  function confirmDelete() {
+    if (eventToDelete) {
+      events = events.filter(e => e.id !== eventToDelete);
       saveEvents();
       renderEvents();
-      
-      // Limpiar formulario
-      document.getElementById('eventForm').reset();
-      document.getElementById('menuItemsContainer').innerHTML = `
-        <div class="menu-item-selector">
-          <select class="input" onchange="updateItemPrice(this)" required>
-            <option value="">Seleccionar platillo</option>
-            ${menuItems.map(item => 
-              `<option value="${item.id}" data-price="${item.price}">${item.name} - Q${item.price.toFixed(2)}</option>`
-            ).join('')}
-          </select>
-          <input type="number" class="input" min="1" value="1" placeholder="Cantidad" onchange="calculateItemTotal(this)" required>
-          <input type="number" class="input" step="0.01" placeholder="Precio" readonly>
-          <input type="text" class="input" placeholder="Total" readonly>
-          <button class="btn ghost" onclick="removeMenuItem(this)" style="color:var(--color-error)">×</button>
-        </div>
-      `;
-      document.getElementById('totalAmount').textContent = '0.00';
-      document.getElementById('confirmBtn').disabled = true;
-      
-      alert('Evento confirmado exitosamente!');
+      closeDeleteModal();
+      showQuoteModal('Éxito', 'Evento eliminado correctamente');
     }
+  }
 
-    // Renderizar eventos en la tabla
-    function renderEvents() {
-      const tableBody = document.querySelector('#eventsTable tbody');
-      tableBody.innerHTML = '';
-      
-      if (events.length === 0) {
-        tableBody.innerHTML = `
-          <tr>
-            <td colspan="7" style="text-align: center; padding: 20px; color: var(--color-muted);">
-              <i class="fas fa-calendar-times" style="font-size: 24px; margin-bottom: 10px;"></i>
-              <p>No hay eventos registrados</p>
-            </td>
-          </tr>
-        `;
-        return;
-      }
-      
-      events.forEach(event => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td>${event.client}</td>
-          <td>${event.date}</td>
-          <td>${event.people}</td>
-          <td>${event.type}</td>
-          <td>Q${event.total.toFixed(2)}</td>
-          <td>${event.status}</td>
-          <td>
-            <button class="btn" onclick="viewEvent(${event.id})">
-              <i class="fas fa-eye"></i> Ver
-            </button>
-            <button class="btn ghost" onclick="deleteEvent(${event.id})" style="color:var(--color-error)">
-              <i class="fas fa-trash"></i> Eliminar
-            </button>
-          </td>
-        `;
-        tableBody.appendChild(row);
-      });
-    }
+  // Funciones para manejar modales
+  function showQuoteModal(title, message) {
+    document.getElementById('quoteModal').classList.add('active');
+    document.querySelector('#quoteModal h3').textContent = title;
+    document.getElementById('quoteMessage').textContent = message;
+  }
 
-    // Ver detalles de evento
-    function viewEvent(id) {
-      const event = events.find(e => e.id === id);
-      if (!event) return;
-      
-      let itemsList = '';
-      event.items.forEach(item => {
-        itemsList += `${item.qty} x ${item.name} (Q${item.price.toFixed(2)}) = Q${item.total.toFixed(2)}\n`;
-      });
-      
-      alert(`Detalles del Evento:\n
-Cliente: ${event.client}
-Fecha: ${event.date}
-Personas: ${event.people}
-Tipo: ${event.type}
-Vajilla: ${event.vajilla}
-Total: Q${event.total.toFixed(2)}
-Estado: ${event.status}
+  function closeQuoteModal() {
+    document.getElementById('quoteModal').classList.remove('active');
+  }
 
-Platillos:
-${itemsList}
-Detalles: ${event.details || 'Ninguno'}
+  function showEventConfirmModal() {
+    // Construir resumen del evento
+    let itemsSummary = '';
+    pendingEvent.items.forEach(item => {
+      itemsSummary += `<div class="summary-item">${item.qty} x ${item.name} - Q${item.total.toFixed(2)}</div>`;
+    });
+    
+    const summaryContent = `
+      <div class="summary-row">
+        <span>Cliente:</span>
+        <span>${pendingEvent.client}</span>
+      </div>
+      <div class="summary-row">
+        <span>Fecha:</span>
+        <span>${pendingEvent.date}</span>
+      </div>
+      <div class="summary-row">
+        <span>Personas:</span>
+        <span>${pendingEvent.people}</span>
+      </div>
+      <div class="summary-row">
+        <span>Tipo:</span>
+        <span>${pendingEvent.type}</span>
+      </div>
+      <div class="summary-row">
+        <span>Vajilla:</span>
+        <span>${pendingEvent.vajilla}</span>
+      </div>
+      <div class="summary-section">
+        <h4>Platillos:</h4>
+        ${itemsSummary}
+      </div>
+      <div class="summary-row total">
+        <span>Total:</span>
+        <span>Q${pendingEvent.total.toFixed(2)}</span>
+      </div>
+    `;
+    
+    document.getElementById('eventSummaryContent').innerHTML = summaryContent;
+    document.getElementById('eventConfirmModal').classList.add('active');
+  }
 
-Registrado: ${event.createdAt}`);
-    }
+  function closeEventConfirmModal() {
+    document.getElementById('eventConfirmModal').classList.remove('active');
+  }
 
-    // Eliminar evento
-    function deleteEvent(id) {
-      if (confirm('¿Está seguro de eliminar este evento?')) {
-        events = events.filter(e => e.id !== id);
-        saveEvents();
-        renderEvents();
-        alert('Evento eliminado correctamente');
-      }
-    }
-  </script>
+  function closeEventDetailsModal() {
+    document.getElementById('eventDetailsModal').classList.remove('active');
+  }
+
+  function closeDeleteModal() {
+    document.getElementById('deleteModal').classList.remove('active');
+    eventToDelete = null;
+  }
+
+  // Configurar botón de eliminación
+  document.getElementById('confirmDeleteBtn').addEventListener('click', confirmDelete);
+</script>
 </body>
 </html>

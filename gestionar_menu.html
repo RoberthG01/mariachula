@@ -7,18 +7,159 @@
   <link rel="stylesheet" href="gestionar_menu.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <link rel="icon" href="fotos/iconomch.ico" type="image/x-icon">
+  <style>
+    /* Estilos para los modales */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+    
+    .modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    .modal {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      width: 90%;
+      max-width: 450px;
+      transform: translateY(-20px);
+      transition: transform 0.3s ease;
+      overflow: hidden;
+    }
+    
+    .modal-overlay.active .modal {
+      transform: translateY(0);
+    }
+    
+    .modal-header {
+      padding: 20px 24px 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .modal-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+    
+    .modal-icon.success {
+      background-color: #e8f5e9;
+      color: #4caf50;
+    }
+    
+    .modal-icon.warning {
+      background-color: #fff8e1;
+      color: #ff9800;
+    }
+    
+    .modal-icon.error {
+      background-color: #ffebee;
+      color: #f44336;
+    }
+    
+    .modal-icon.info {
+      background-color: #e3f2fd;
+      color: #2196f3;
+    }
+    
+    .modal-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin: 0;
+      color: #333;
+    }
+    
+    .modal-body {
+      padding: 16px 24px 20px;
+      color: #555;
+      line-height: 1.5;
+    }
+    
+    .modal-footer {
+      padding: 0 24px 20px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+    }
+    
+    .modal-btn {
+      padding: 10px 20px;
+      border-radius: 6px;
+      border: none;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .modal-btn.primary {
+      background-color: var(--primary-color, #4a6cf7);
+      color: white;
+    }
+    
+    .modal-btn.primary:hover {
+      background-color: var(--primary-dark, #3a5ce5);
+    }
+    
+    .modal-btn.secondary {
+      background-color: #f5f5f5;
+      color: #333;
+    }
+    
+    .modal-btn.secondary:hover {
+      background-color: #e0e0e0;
+    }
+    
+    .modal-btn.danger {
+      background-color: #f44336;
+      color: white;
+    }
+    
+    .modal-btn.danger:hover {
+      background-color: #d32f2f;
+    }
+    
+    /* Estilo para el modal de confirmación */
+    .confirm-modal .modal-body {
+      text-align: center;
+      padding: 24px;
+    }
+    
+    .confirm-modal .modal-footer {
+      justify-content: center;
+    }
+  </style>
 </head>
 <body>
 <div class="app">
   <aside class="sidebar">
     <div class="logo">
-        <img src="fotos/logomch.png" alt="Logo María Chula">
-        <h2>María Chula</h2>
+      <img src="fotos/logomch.png" alt="Logo María Chula">
+      <h2>María Chula</h2>
     </div>
     <div class="menu-list">
       <a href="menu.html" class="menu-item"><i class="fas fa-utensils"></i> Menú</a>
       <a href="inventory.html" class="menu-item"><i class="fas fa-boxes"></i> Inventario</a>
-      <a href="index.html" class="menu-item"><i class="fas fa-home"></i> Inicio</a>
+      <a href="dashboard.html" class="menu-item"><i class="fas fa-home"></i> Dashboard</a>
       <a href="admin-menus.html" class="menu-item"><i class="fas fa-list-alt"></i> Admin Menús</a>
       <a href="admin-users.html" class="menu-item"><i class="fas fa-users"></i> Admin Usuarios</a>
       <a href="billing.html" class="menu-item"><i class="fas fa-receipt"></i> Facturación</a>
@@ -43,16 +184,10 @@
           <input class="input" id="m_name" placeholder="Nombre del platillo" required>
           <input class="input" id="m_price" placeholder="Precio" type="number" step="0.01" required>
           <select class="input" id="m_cat" required>
-            <option value="">Seleccionar categoría</option>
-            <option value="comidas">Comidas</option>
-            <option value="postres">Postres</option>
-            <option value="antojitos">Antojitos</option>
-            <option value="bebidas-frias">Bebidas Frías</option>
-            <option value="bebidas-calientes">Bebidas Calientes</option>
-            <option value="licores">Licores</option>
+            <option value="">Cargando categorías...</option>
           </select>
         </div>
-        
+
         <div class="form-row">
           <div class="file-input-container">
             <label class="file-input-label">Imagen del platillo:</label>
@@ -63,12 +198,11 @@
               </div>
             </div>
             <div id="file-name" class="file-name">No se ha seleccionado ningún archivo</div>
-            
             <small style="color:var(--muted); margin-top: 10px;">O ingresa una URL:</small>
             <input class="input" id="m_img_url" placeholder="URL imagen (opcional)" style="margin-top: 8px;">
           </div>
         </div>
-        
+
         <div style="margin-top:8px">
           <button class="btn primary" type="submit">
             <i class="fas fa-save"></i> Guardar
@@ -85,192 +219,449 @@
   </main>
 </div>
 
-<script>
-// Función auxiliar para seleccionar elementos
-function qs(selector) {
-  return document.querySelector(selector);
-}
-
-// Variables globales
-let editingId = null;
-
-// Datos de ejemplo del menú
-function getMenu() {
-  return JSON.parse(localStorage.getItem('mc_menu') || '[]');
-}
-
-function saveMenu(menu) {
-  localStorage.setItem('mc_menu', JSON.stringify(menu));
-}
-
-function addMenuItem(item) {
-  const menu = getMenu();
-  const id = Date.now();
-  menu.push({ id, ...item });
-  saveMenu(menu);
-}
-
-function updateMenuItem(updatedItem) {
-  const menu = getMenu();
-  const index = menu.findIndex(item => item.id === updatedItem.id);
-  if (index !== -1) {
-    menu[index] = { ...menu[index], ...updatedItem };
-    saveMenu(menu);
-  }
-}
-
-function deleteMenuItem(id) {
-  const menu = getMenu();
-  const updatedMenu = menu.filter(item => item.id !== id);
-  saveMenu(updatedMenu);
-}
-
-// Función para formatear dinero
-function formatMoney(amount) {
-  return `Q${amount.toFixed(2)}`;
-}
-
-// Función para obtener el nombre de la categoría
-function getCategoryName(category) {
-  const categories = {
-    'comidas': 'Comidas',
-    'postres': 'Postres',
-    'antojitos': 'Antojitos',
-    'bebidas-frias': 'Bebidas Frías',
-    'bebidas-calientes': 'Bebidas Calientes',
-    'licores': 'Licores'
-  };
-  return categories[category] || category;
-}
-
-// Función para obtener la clase CSS de la categoría
-function getCategoryClass(category) {
-  return `category-${category}`;
-}
-
-// Actualizar la lista de elementos del menú
-function refreshList(){
-  const menu = getMenu();
-  const el = document.getElementById('adminList');
-  
-  if (menu.length === 0) {
-    el.innerHTML = '<div style="text-align: center; padding: 30px; color: var(--color-muted);"><i class="fas fa-utensils" style="font-size: 48px; margin-bottom: 15px;"></i><p>No hay platillos en el menú</p></div>';
-    return;
-  }
-  
-  el.innerHTML = menu.map(item => `
-    <div class="menu-item-card">
-      <img src="${item.img || 'https://via.placeholder.com/80?text=Imagen'}" class="menu-item-image">
-      <div class="menu-item-info">
-        <strong>${item.name}</strong>
-        <div>
-          <span class="category-badge ${getCategoryClass(item.cat)}">${getCategoryName(item.cat)}</span>
-          ${formatMoney(item.price)}
-        </div>
+<!-- Modal para mensajes generales -->
+<div id="messageModal" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div id="messageModalIcon" class="modal-icon info">
+        <i class="fas fa-info-circle"></i>
       </div>
-      <div class="menu-item-actions">
-        <button class="btn" onclick='startEdit(${item.id})'>
-          <i class="fas fa-edit"></i> Editar
-        </button>
-        <button class="btn ghost" onclick='doDelete(${item.id})'>
-          <i class="fas fa-trash"></i> Eliminar
-        </button>
-      </div>
+      <h3 id="messageModalTitle" class="modal-title">Título</h3>
     </div>
-  `).join('');
+    <div class="modal-body">
+      <p id="messageModalText">Mensaje del modal</p>
+    </div>
+    <div class="modal-footer">
+      <button id="messageModalBtn" class="modal-btn primary">Aceptar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de confirmación -->
+<div id="confirmModal" class="modal-overlay">
+  <div class="modal confirm-modal">
+    <div class="modal-header">
+      <div class="modal-icon warning">
+        <i class="fas fa-exclamation-triangle"></i>
+      </div>
+      <h3 class="modal-title">Confirmar acción</h3>
+    </div>
+    <div class="modal-body">
+      <p id="confirmModalText">¿Estás seguro de que deseas realizar esta acción?</p>
+    </div>
+    <div class="modal-footer">
+      <button id="confirmModalCancel" class="modal-btn secondary">Cancelar</button>
+      <button id="confirmModalOk" class="modal-btn danger">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+    const API_URL = 'http://localhost:3000';
+    let editingId = null;
+    
+    // Helpers
+    const qs = sel => document.querySelector(sel);
+    function formatMoney(q) { return `Q${Number(q).toFixed(2)}`; }
+    
+    // ------------------------------
+    // SISTEMA DE MODALES
+    // ------------------------------
+    
+    // Mostrar modal de mensaje
+    function showMessage(title, message, type = 'info') {
+      return new Promise((resolve) => {
+        const modal = qs('#messageModal');
+        const modalTitle = qs('#messageModalTitle');
+        const modalText = qs('#messageModalText');
+        const modalIcon = qs('#messageModalIcon');
+        const modalBtn = qs('#messageModalBtn');
+        
+        // Configurar según el tipo
+        const typeConfig = {
+          success: { icon: 'fas fa-check-circle', class: 'success', btnText: 'Aceptar' },
+          error: { icon: 'fas fa-exclamation-triangle', class: 'error', btnText: 'Entendido' },
+          warning: { icon: 'fas fa-exclamation-circle', class: 'warning', btnText: 'Continuar' },
+          info: { icon: 'fas fa-info-circle', class: 'info', btnText: 'Aceptar' }
+        };
+        
+        const config = typeConfig[type] || typeConfig.info;
+        
+        // Aplicar configuración
+        modalTitle.textContent = title;
+        modalText.textContent = message;
+        modalIcon.className = `modal-icon ${config.class}`;
+        modalIcon.innerHTML = `<i class="${config.icon}"></i>`;
+        modalBtn.textContent = config.btnText;
+        
+        // Mostrar modal
+        modal.classList.add('active');
+        
+        // Configurar evento del botón
+        const handleClick = () => {
+          modal.classList.remove('active');
+          modalBtn.removeEventListener('click', handleClick);
+          resolve(true);
+        };
+        
+        modalBtn.addEventListener('click', handleClick);
+      });
+    }
+    
+    // Mostrar modal de confirmación
+    function showConfirm(message) {
+      return new Promise((resolve) => {
+        const modal = qs('#confirmModal');
+        const modalText = qs('#confirmModalText');
+        const confirmBtn = qs('#confirmModalOk');
+        const cancelBtn = qs('#confirmModalCancel');
+        
+        modalText.textContent = message;
+        modal.classList.add('active');
+        
+        const handleConfirm = () => {
+          modal.classList.remove('active');
+          confirmBtn.removeEventListener('click', handleConfirm);
+          cancelBtn.removeEventListener('click', handleCancel);
+          resolve(true);
+        };
+        
+        const handleCancel = () => {
+          modal.classList.remove('active');
+          confirmBtn.removeEventListener('click', handleConfirm);
+          cancelBtn.removeEventListener('click', handleCancel);
+          resolve(false);
+        };
+        
+        confirmBtn.addEventListener('click', handleConfirm);
+        cancelBtn.addEventListener('click', handleCancel);
+      });
+    }
+    
+    // ------------------------------
+    // MEJORAR MIDDLEWARE DE AUTORIZACIÓN
+    // ------------------------------
+    function getAuthHeaders() {
+      const token = localStorage.token;
+      // Si el token no empieza con "Bearer", agregarlo
+      if (token && !token.startsWith('Bearer ')) {
+        return { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+      }
+      return { 'Authorization': token, 'Content-Type': 'application/json' };
+    }
+    
+    // ------------------------------
+    // CARGAR CATEGORÍAS DESDE API - CORREGIDO
+    // ------------------------------
+    async function loadCategories() {
+      const select = qs('#m_cat');
+      try {
+        const res = await fetch(`${API_URL}/categorias_menu`, { 
+          headers: getAuthHeaders()
+        });
+        
+        if (!res.ok) {
+          throw new Error(`Error ${res.status}: ${res.statusText}`);
+        }
+        
+        const categorias = await res.json();
+        
+        if (categorias.error) {
+          throw new Error(categorias.error);
+        }
+        
+        select.innerHTML = '<option value="">Seleccionar categoría</option>' +
+          categorias.map(c => `<option value="${c.id_categoria}">${c.nombre_categoria}</option>`).join('');
+      } catch (err) {
+        console.error('Error al cargar categorías:', err);
+        select.innerHTML = '<option value="">Error al cargar categorías</option>';
+        // Mostrar error específico con modal
+        setTimeout(() => showMessage('Error', `Error cargando categorías: ${err.message}`, 'error'), 100);
+      }
+    }
+    
+    // ------------------------------
+    // CARGAR MENÚ DESDE API - CORREGIDO
+    // ------------------------------
+    async function refreshList() {
+      const el = document.getElementById('adminList');
+      try {
+        const res = await fetch(`${API_URL}/menu_items`, { 
+          headers: getAuthHeaders()
+        });
+        
+        if (!res.ok) {
+          throw new Error(`Error ${res.status}: ${res.statusText}`);
+        }
+        
+        const menu = await res.json();
+        
+        if (menu.error) {
+          throw new Error(menu.error);
+        }
+        
+        console.log('Menú cargado:', menu); // Para debug
+        
+        if (menu.length === 0) {
+          el.innerHTML = '<div style="text-align:center;padding:30px;color:var(--muted);"><i class="fas fa-utensils" style="font-size:48px;margin-bottom:15px;"></i><p>No hay platillos en el menú</p></div>';
+          return;
+        }
+        
+        el.innerHTML = menu.map(item => `
+          <div class="menu-item-card">
+            <img src="${item.img || 'https://via.placeholder.com/80?text=Imagen'}" 
+                 class="menu-item-image" 
+                 onerror="this.src='https://via.placeholder.com/80?text=Imagen'">
+            <div class="menu-item-info">
+              <strong>${item.nombre}</strong>
+              <div>
+                <span class="category-badge">${item.nombre_categoria || 'Sin categoría'}</span>
+                ${formatMoney(item.precio)}
+              </div>
+              ${item.descripcion ? `<small>${item.descripcion}</small>` : ''}
+            </div>
+            <div class="menu-item-actions">
+              <button class="btn" onclick='startEdit(${item.id_item})'><i class="fas fa-edit"></i> Editar</button>
+              <button class="btn ghost" onclick='doDelete(${item.id_item})'><i class="fas fa-trash"></i> Eliminar</button>
+            </div>
+          </div>
+        `).join('');
+      } catch (err) {
+        console.error('Error al cargar menú:', err);
+        el.innerHTML = `<div style="text-align:center;padding:30px;color:red;">
+          <i class="fas fa-exclamation-triangle" style="font-size:48px;margin-bottom:15px;"></i>
+          <p>Error al cargar el menú: ${err.message}</p>
+          <button class="btn" onclick="refreshList()">Reintentar</button>
+        </div>`;
+      }
+    }
+    
+    // ------------------------------
+    // ENVIAR FORMULARIO - CORREGIDO
+    // ------------------------------
+    async function handleMenuForm(e) {
+      e.preventDefault();
+      const nombre = qs('#m_name').value;
+      const precio = parseFloat(qs('#m_price').value);
+      const id_categoria = qs('#m_cat').value;
+      const imgUrl = qs('#m_img_url').value;
+      const imgFile = qs('#m_img_file').files[0];
+      let img = imgUrl || null;
+    
+      // Validaciones básicas
+      if (!nombre || !precio || !id_categoria) {
+        showMessage('Campos incompletos', 'Por favor complete todos los campos obligatorios', 'warning');
+        return;
+      }
+    
+      try {
+        // Si hay archivo, convertirlo a base64
+        if (imgFile) {
+          img = await convertToBase64(imgFile);
+        }
+    
+        const data = { 
+          id_categoria: parseInt(id_categoria), 
+          nombre, 
+          precio, 
+          img,
+          estado: 'disponible'
+        };
+    
+        console.log('Enviando datos:', data); // Para debug
+    
+        const method = editingId ? 'PUT' : 'POST';
+        const url = editingId ? `${API_URL}/menu_items/${editingId}` : `${API_URL}/menu_items`;
+    
+        const res = await fetch(url, {
+          method,
+          headers: getAuthHeaders(),
+          body: JSON.stringify(data)
+        });
+    
+        const responseData = await res.json();
+        
+        if (!res.ok) {
+          throw new Error(responseData.error || 'Error al guardar el platillo');
+        }
+    
+        await showMessage(
+          editingId ? 'Platillo actualizado' : 'Platillo agregado', 
+          editingId ? 'Platillo actualizado correctamente' : 'Platillo agregado correctamente', 
+          'success'
+        );
+        
+        resetForm();
+        refreshList();
+      } catch (err) {
+        console.error('Error:', err);
+        showMessage('Error al guardar', `Error al guardar el platillo: ${err.message}`, 'error');
+      }
+    }
+    
+    function convertToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = e => reject(e);
+      });
+    }
+    
+    // ------------------------------
+    // EDITAR Y ELIMINAR - CORREGIDO
+    // ------------------------------
+    async function startEdit(id) {
+      try {
+        const res = await fetch(`${API_URL}/menu_items`, { 
+          headers: getAuthHeaders()
+        });
+        
+        if (!res.ok) throw new Error(`Error ${res.status}`);
+        
+        const menu = await res.json();
+        const item = menu.find(m => m.id_item === id);
+        
+        if (!item) {
+          showMessage('Platillo no encontrado', 'El platillo que intentas editar no existe', 'error');
+          return;
+        }
+        
+        editingId = id;
+        qs('#m_name').value = item.nombre;
+        qs('#m_price').value = item.precio;
+        qs('#m_cat').value = item.id_categoria;
+        qs('#m_img_url').value = item.img || '';
+        document.getElementById('file-name').textContent = item.img ? 'Imagen actual (editar para cambiar)' : 'No se ha seleccionado ningún archivo';
+        
+        // Scroll al formulario
+        qs('#menuForm').scrollIntoView({ behavior: 'smooth' });
+      } catch (err) {
+        console.error('Error al cargar datos para editar:', err);
+        showMessage('Error', 'Error al cargar datos del platillo', 'error');
+      }
+    }
+    
+    async function doDelete(id) {
+      const confirmed = await showConfirm('¿Seguro que deseas eliminar este platillo?');
+      if (!confirmed) return;
+      
+      try {
+        const res = await fetch(`${API_URL}/menu_items/${id}`, { 
+          method: 'DELETE', 
+          headers: getAuthHeaders()
+        });
+        
+        if (!res.ok) {
+          const errorData = await res.json();
+          throw new Error(errorData.error || 'Error al eliminar');
+        }
+        
+        await showMessage('Eliminado', 'Platillo eliminado correctamente', 'success');
+        refreshList();
+      } catch (err) {
+        console.error('Error al eliminar:', err);
+        showMessage('Error al eliminar', `Error al eliminar el platillo: ${err.message}`, 'error');
+      }
+    }
+    
+    // ------------------------------
+    // FORM UTILITIES
+    // ------------------------------
+    function resetForm() {
+      editingId = null;
+      qs('#menuForm').reset();
+      qs('#m_img_file').value = '';
+      document.getElementById('file-name').textContent = 'No se ha seleccionado ningún archivo';
+    }
+    
+    // ------------------------------
+    // INICIALIZACIÓN
+    // ------------------------------
+    document.getElementById('m_img_file').addEventListener('change', e => {
+      const fileName = e.target.files[0] ? e.target.files[0].name : 'No se ha seleccionado ningún archivo';
+      document.getElementById('file-name').textContent = fileName;
+    });
+    
+    // Verificar autenticación antes de cargar
+    function checkAuth() {
+      if (!localStorage.token) {
+        showMessage('No autenticado', 'No estás autenticado. Redirigiendo al login...', 'warning').then(() => {
+          window.location.href = 'login.html';
+        });
+        return false;
+      }
+      return true;
+    }
+    
+// ------------------------------
+// SINCRONIZAR MENÚ CON LOCALSTORAGE
+// ------------------------------
+function updateLocalMenu(menuData) {
+  if (!Array.isArray(menuData)) return;
+  const localMenu = menuData.map(item => ({
+    id: item.id_item,
+    name: item.nombre,
+    price: parseFloat(item.precio),
+    category: item.nombre_categoria || '',
+    description: item.descripcion || '',
+    img: item.img || ''
+  }));
+  localStorage.setItem('mc_menu', JSON.stringify(localMenu));
+  console.log('Menú sincronizado con localStorage:', localMenu);
 }
 
-// Manejar envío del formulario
-async function handleMenuForm(e){
-  e.preventDefault();
-  const name = qs('#m_name').value;
-  const price = parseFloat(qs('#m_price').value);
-  const cat = qs('#m_cat').value;
-  const imgUrl = qs('#m_img_url').value;
-  const imgFile = qs('#m_img_file').files[0];
-  
-  let img = imgUrl;
-  
-  // Si hay un archivo seleccionado, procesarlo
-  if(imgFile) {
-    try {
-      const base64Image = await convertToBase64(imgFile);
-      img = base64Image;
-    } catch(error) {
-      console.error("Error al procesar la imagen:", error);
-      alert("Error al procesar la imagen. Intente nuevamente.");
+// Modificamos refreshList() para que también actualice localStorage
+const originalRefreshList = refreshList;
+refreshList = async function() {
+  const el = document.getElementById('adminList');
+  try {
+    const res = await fetch(`${API_URL}/menu_items`, { headers: getAuthHeaders() });
+    if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
+    const menu = await res.json();
+    if (menu.error) throw new Error(menu.error);
+
+    // 👇 sincroniza localStorage
+    updateLocalMenu(menu);
+
+    if (menu.length === 0) {
+      el.innerHTML = '<div style="text-align:center;padding:30px;color:var(--muted);"><i class="fas fa-utensils" style="font-size:48px;margin-bottom:15px;"></i><p>No hay platillos en el menú</p></div>';
       return;
     }
+
+    el.innerHTML = menu.map(item => `
+      <div class="menu-item-card">
+        <img src="${item.img || 'https://via.placeholder.com/80?text=Imagen'}" class="menu-item-image" onerror="this.src='https://via.placeholder.com/80?text=Imagen'">
+        <div class="menu-item-info">
+          <strong>${item.nombre}</strong>
+          <div>
+            <span class="category-badge">${item.nombre_categoria || 'Sin categoría'}</span>
+            ${formatMoney(item.precio)}
+          </div>
+          ${item.descripcion ? `<small>${item.descripcion}</small>` : ''}
+        </div>
+        <div class="menu-item-actions">
+          <button class="btn" onclick='startEdit(${item.id_item})'><i class="fas fa-edit"></i> Editar</button>
+          <button class="btn ghost" onclick='doDelete(${item.id_item})'><i class="fas fa-trash"></i> Eliminar</button>
+        </div>
+      </div>
+    `).join('');
+  } catch (err) {
+    console.error('Error al cargar menú:', err);
+    el.innerHTML = `<div style="text-align:center;padding:30px;color:red;">
+      <i class="fas fa-exclamation-triangle" style="font-size:48px;margin-bottom:15px;"></i>
+      <p>Error al cargar el menú: ${err.message}</p>
+      <button class="btn" onclick="refreshList()">Reintentar</button>
+    </div>`;
   }
-  
-  if(editingId){
-    updateMenuItem({id:editingId, name, price, cat, img});
-    editingId = null;
-  } else {
-    addMenuItem({name, price, cat, img});
-  }
-  
-  resetForm(); 
-  refreshList();
-  alert(editingId ? 'Platillo actualizado correctamente' : 'Platillo agregado correctamente');
-}
+};
 
-// Función para convertir imagen a Base64
-function convertToBase64(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = error => reject(error);
-  });
-}
-
-// Iniciar edición de un elemento
-function startEdit(id){
-  const item = getMenu().find(m => m.id === id);
-  if(!item) return;
-  
-  editingId = id;
-  qs('#m_name').value = item.name; 
-  qs('#m_price').value = item.price;
-  qs('#m_cat').value = item.cat; 
-  qs('#m_img_url').value = item.img || '';
-  
-  // Mostrar nombre de archivo si es una imagen base64
-  if (item.img && item.img.startsWith('data:image')) {
-    document.getElementById('file-name').textContent = 'Imagen actual (editar para cambiar)';
-  } else {
-    document.getElementById('file-name').textContent = 'No se ha seleccionado ningún archivo';
-  }
-}
-
-// Resetear formulario
-function resetForm(){
-  editingId = null; 
-  qs('#menuForm').reset();
-  qs('#m_img_file').value = '';
-  document.getElementById('file-name').textContent = 'No se ha seleccionado ningún archivo';
-}
-
-// Eliminar elemento
-function doDelete(id){
-  if(confirm('¿Estás seguro de que deseas eliminar este platillo?')){ 
-    deleteMenuItem(id); 
-    refreshList(); 
-    alert('Platillo eliminado correctamente');
-  }
-}
-
-// Mostrar nombre del archivo seleccionado
-document.getElementById('m_img_file').addEventListener('change', function(e) {
-  const fileName = e.target.files[0] ? e.target.files[0].name : 'No se ha seleccionado ningún archivo';
-  document.getElementById('file-name').textContent = fileName;
-});
-
-// Inicializar
-document.addEventListener('DOMContentLoaded', () => { 
-  refreshList(); 
-});
+    document.addEventListener('DOMContentLoaded', () => {
+      if (checkAuth()) {
+        loadCategories();
+        refreshList();
+      }
+    });
 </script>
 </body>
 </html>

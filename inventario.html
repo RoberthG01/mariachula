@@ -9,16 +9,15 @@
     <link rel="icon" href="fotos/iconomch.ico" type="image/x-icon">
 </head>
 <body>
-<div class="overlay" id="overlay"></div>
 <div class="app">
-    <aside class="sidebar" id="sidebar">
+    <aside class="sidebar">
         <div class="logo">
             <img src="fotos/logomch.png" alt="Logo María Chula">
             <h2>María Chula</h2>
         </div>
         <div class="menu-list">
             <a href="menu.html" class="menu-item"><i class="fas fa-utensils"></i> Menú</a>
-            <a href="inventory.html" class="menu-item"><i class="fas fa-boxes"></i> Inventario</a>
+            <a href="inventory.html" class="menu-item active"><i class="fas fa-boxes"></i> Inventario</a>
             <a href="dashboard.html" class="menu-item"><i class="fas fa-home"></i> Dashboard</a>
             <a href="admin-menus.html" class="menu-item"><i class="fas fa-list-alt"></i> Admin Menús</a>
             <a href="admin-users.html" class="menu-item"><i class="fas fa-users"></i> Admin Usuarios</a>
@@ -32,20 +31,28 @@
 
     <main class="main">
         <div class="header">
-            <h1>Inventario</h1>
-            <button class="btn ghost" onclick="window.history.back()" style="margin-left: auto;">
-                <i class="fas fa-arrow-left"></i> Regresar
-            </button>
+            <div class="title">Inventario</div>
+            <div class="actions">
+                <a href="panel.html" class="back-button">
+                    <i class="fas fa-arrow-left"></i> Regresar
+                </a>
+            </div>
         </div>
         
         <div class="card">
             <form id="invForm">
                 <div class="form-row">
-                    <input class="input" id="inv_name" placeholder="Ingrediente" required>
-                    <input class="input" id="inv_qty" placeholder="Cantidad (stock inicial)" type="number" step="0.01" required>
-                    <input class="input" id="inv_unit" placeholder="Unidad (kg, l, etc.)" required>
+                    <div class="input-group">
+                        <input class="input" id="inv_name" placeholder="Ingrediente" required>
+                    </div>
+                    <div class="input-group">
+                        <input class="input" id="inv_qty" placeholder="Cantidad (stock inicial)" type="number" step="0.01" required>
+                    </div>
+                    <div class="input-group">
+                        <input class="input" id="inv_unit" placeholder="Unidad (kg, lt y lb.)" required>
+                    </div>
                 </div>
-                <div style="margin-top:8px">
+                <div style="margin-top:16px">
                     <button class="btn primary" type="submit"><i class="fas fa-save"></i> Guardar</button>
                     <button class="btn ghost" type="button" id="invCancelEdit" style="display:none;">Cancelar</button>
                 </div>
@@ -54,52 +61,98 @@
             <hr>
 
             <div class="filters">
-                <input id="searchName" class="input" placeholder="Buscar por nombre">
-                <select id="filterUnit" class="input">
-                    <option value="">Todas las unidades</option>
-                </select>
-                <select id="filterStock" class="input">
-                    <option value="">Todo stock</option>
-                    <option value="low">Stock bajo (&lt; 10)</option>
-                </select>
+                <div class="input-group">
+                    <input id="searchName" class="input" placeholder="Buscar por nombre">
+                </div>
+                <div class="input-group">
+                    <select id="filterUnit" class="input">
+                        <option value="">Todas las unidades</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <select id="filterStock" class="input">
+                        <option value="">Todo stock</option>
+                        <option value="low">Stock bajo (&lt; 10)</option>
+                    </select>
+                </div>
             </div>
 
-            <table class="table" id="invTable">
-                <thead>
-                    <tr>
-                        <th data-column="nombre">Ingrediente</th>
-                        <th data-column="stock_actual">Cantidad</th>
-                        <th data-column="unidad_medida">Unidad</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
+            <div class="table-container">
+                <table class="table" id="invTable">
+                    <thead>
+                        <tr>
+                            <th data-column="nombre">Ingrediente</th>
+                            <th data-column="stock_actual">Cantidad</th>
+                            <th data-column="unidad_medida">Unidad</th>
+                            <th data-column="last_movement">Último movimiento</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
         </div>
     </main>
 </div>
 
 <!-- MODAL DE MENSAJE -->
-<div id="modalMsg" class="modal hidden">
-    <div class="modal-content" id="modalMsgContent">
-        <h3 id="modalMsgTitle">Mensaje</h3>
-        <p id="modalMsgText"></p>
-        <div class="modal-buttons">
-            <button id="modalMsgOk" class="btn-modal btn-primary">Aceptar</button>
+<div id="modalMsg" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modalMsgTitle">Mensaje</h3>
+            <button class="close-modal" onclick="closeMsgModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <p id="modalMsgText"></p>
+            <div class="modal-actions">
+                <button id="modalMsgOk" class="btn primary">Aceptar</button>
+            </div>
         </div>
     </div>
 </div>
 
-<!-- MODAL DE MOVIMIENTO (MEJORADO) -->
-<div id="modalMove" class="modal hidden">
-    <div class="modal-content" id="modalMoveContent">
-        <h3 id="modalMoveTitle">Movimiento de Inventario</h3>
-        <p id="modalMoveText"></p>
-        <input id="moveCantidad" class="input" type="number" step="0.01" placeholder="Cantidad" required>
-        <input id="moveObs" class="input" type="text" placeholder="Observación (opcional)">
-        <div class="modal-buttons">
-            <button id="btnEntrada" class="btn-modal btn-primary">Entrada</button>
-            <button id="btnSalida" class="btn-modal btn-ghost">Salida</button>
+<!-- MODAL DE MOVIMIENTO -->
+<div id="modalMove" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modalMoveTitle">Movimiento de Inventario</h3>
+            <button class="close-modal" onclick="closeMoveModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <p id="modalMoveText"></p>
+            <div class="input-group">
+                <input id="moveCantidad" class="input" type="number" step="0.01" placeholder="Cantidad" required>
+            </div>
+            <div class="input-group">
+                <input id="moveObs" class="input" type="text" placeholder="Observación (opcional)">
+            </div>
+            <div class="modal-actions">
+                <button id="btnEntrada" class="btn success">Entrada</button>
+                <button id="btnSalida" class="btn error">Salida</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL DE ELIMINACIÓN -->
+<div id="modalDelete" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Eliminar Insumo</h3>
+            <button class="close-modal" onclick="closeDeleteModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <p>¿Estás seguro de que deseas eliminar este insumo?</p>
+            <div class="modal-actions">
+                <button id="btnDeleteConfirm" class="btn error">Sí, eliminar</button>
+                <button id="btnDeleteCancel" class="btn ghost">Cancelar</button>
+            </div>
         </div>
     </div>
 </div>
@@ -108,6 +161,7 @@
 const API = 'http://localhost:3000';
 let inventoryData = [];
 let currentSort = {column:null, asc:true};
+let deleteId = null;
 
 // Helpers
 function qs(sel){ return document.querySelector(sel); }
@@ -125,16 +179,20 @@ function showMsg({title='Mensaje', text='', type='info'}) {
 
         titleEl.textContent = title;
         textEl.textContent = text;
-        modal.classList.remove('hidden');
+        modal.classList.add('active');
 
-        okBtn.onclick = ()=>{ modal.classList.add('hidden'); resolve(true); };
+        okBtn.onclick = ()=>{ modal.classList.remove('active'); resolve(true); };
     });
 }
 
-function showSuccess(text){ return showMsg({title:'Éxito',text,type:'success'}); }
-function showError(text){ return showMsg({title:'Error',text,type:'error'}); }
+function showSuccess(text){ return showMsg({title:'Éxito',text}); }
+function showError(text){ return showMsg({title:'Error',text}); }
 
-// Modal de movimiento mejorado (de la versión resumida)
+function closeMsgModal() {
+    qs('#modalMsg').classList.remove('active');
+}
+
+// Modal de movimiento mejorado
 function showMoveModal(nombre){
     return new Promise(resolve=>{
         const modal = qs('#modalMove');
@@ -143,9 +201,13 @@ function showMoveModal(nombre){
         const inputObs = qs('#moveObs');
         inputCantidad.value = '';
         inputObs.value = '';
-        modal.classList.remove('hidden');
+        modal.classList.add('active');
 
-        const clean = ()=>{ modal.classList.add('hidden'); btnEntrada.onclick=null; btnSalida.onclick=null; };
+        const clean = ()=>{ 
+            modal.classList.remove('active'); 
+            btnEntrada.onclick=null; 
+            btnSalida.onclick=null; 
+        };
 
         const btnEntrada = qs('#btnEntrada');
         const btnSalida = qs('#btnSalida');
@@ -165,11 +227,59 @@ function showMoveModal(nombre){
     });
 }
 
+function closeMoveModal() {
+    qs('#modalMove').classList.remove('active');
+}
+
+// Modal de eliminación
+function showDeleteModal(id){
+    return new Promise(resolve=>{
+        deleteId = id;
+        const modal = qs('#modalDelete');
+        modal.classList.add('active');
+
+        const clean = ()=>{
+            modal.classList.remove('active');
+            qs('#btnDeleteConfirm').onclick = null;
+            qs('#btnDeleteCancel').onclick = null;
+            deleteId = null;
+        };
+
+        qs('#btnDeleteConfirm').onclick = ()=>{
+            clean();
+            resolve(true);
+        };
+        qs('#btnDeleteCancel').onclick = ()=>{
+            clean();
+            resolve(false);
+        };
+    });
+}
+
+function closeDeleteModal() {
+    qs('#modalDelete').classList.remove('active');
+}
+
+// Formatea la fecha ISO a local string (o retorna '-')
+function formatDateTime(iso){
+    if(!iso) return '-';
+    try {
+        const d = new Date(iso);
+        if (isNaN(d)) return '-';
+        return d.toLocaleString();
+    } catch (e) {
+        return '-';
+    }
+}
+
 // ==== RENDER TABLA ====
 async function renderInv(){
     requireAuth();
     const res = await fetch(API+'/inventario',{headers:{'Authorization':'Bearer '+getToken()}});
-    if(!res.ok) return showError('Error al obtener inventario');
+    if(!res.ok){
+        showError('Error al obtener inventario');
+        return;
+    }
     const data = await res.json();
     inventoryData = data;
     populateUnitFilter();
@@ -208,7 +318,7 @@ function filterAndRenderTable(){
 
     const tb = qs('#invTable tbody');
     if(!filtered.length){
-        tb.innerHTML='<tr><td colspan="4" style="text-align:center;">No hay ingredientes</td></tr>';
+        tb.innerHTML='<tr><td colspan="5" style="text-align:center; padding: 40px; color: var(--color-muted);"><i class="fas fa-box-open" style="font-size: 48px; margin-bottom: 15px;"></i><p>No hay ingredientes en el inventario</p></td></tr>';
         return;
     }
 
@@ -217,10 +327,19 @@ function filterAndRenderTable(){
             <td>${item.nombre}</td>
             <td>${Number(item.stock_actual).toFixed(2)}</td>
             <td>${item.unidad_medida}</td>
+            <td>${formatDateTime(item.last_movement)}</td>
             <td>
-                <button class="btn" onclick="editInsumo(${item.id_insumo})"><i class="fas fa-edit"></i></button>
-                <button class="btn ghost" onclick="delInsumo(${item.id_insumo})"><i class="fas fa-trash"></i></button>
-                <button class="btn" onclick="movimientoPrompt(${item.id_insumo},'${item.nombre}')"><i class="fas fa-exchange-alt"></i></button>
+                <div class="action-buttons">
+                    <button class="btn" onclick="editInsumo(${item.id_insumo})" title="Editar">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn ghost" onclick="delInsumo(${item.id_insumo})" title="Eliminar">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                    <button class="btn" onclick="movimientoPrompt(${item.id_insumo},'${item.nombre}')" title="Movimiento">
+                        <i class="fas fa-exchange-alt"></i>
+                    </button>
+                </div>
             </td>
         </tr>
     `).join('');
@@ -235,30 +354,32 @@ async function createInsumo({nombre,cantidad,unidad}){
         body: JSON.stringify({nombre,descripcion:null,stock:Number(cantidad)||0,unidad_medida:unidad,estado:"activo"})
     });
     if(!res.ok) return showError('Error al crear insumo');
-    await showSuccess('Insumo creado');
+    await showSuccess('Insumo creado exitosamente');
     renderInv();
 }
 
 async function delInsumo(id){
     requireAuth();
-    if(!confirm('¿Deseas eliminar este insumo?')) return;
+    const ok = await showDeleteModal(id);
+    if(!ok) return;
     const res = await fetch(API+`/insumos/${id}`,{method:'DELETE',headers:{'Authorization':'Bearer '+getToken()}});
     if(!res.ok) return showError('Error al eliminar insumo');
-    await showSuccess('Insumo eliminado');
+    await showSuccess('Insumo eliminado correctamente');
     renderInv();
 }
 
 async function editInsumo(id){
     requireAuth();
     const res = await fetch(API+'/insumos',{headers:{'Authorization':'Bearer '+getToken()}});
+    if(!res.ok) return showError('Error al obtener insumos');
     const list = await res.json();
     const ins = list.find(x=>x.id_insumo===id);
     if(!ins) return showError('Insumo no encontrado');
     qs('#inv_name').value = ins.nombre;
-    qs('#inv_qty').value = Number(ins.stock_actual)||0;
+    qs('#inv_qty').value = Number(ins.stock)||0;
     qs('#inv_unit').value = ins.unidad_medida||'';
     qs('#invForm').dataset.editing = id;
-    qs('#invForm button[type="submit"]').innerHTML='Guardar (actualizar)';
+    qs('#invForm button[type="submit"]').innerHTML='<i class="fas fa-save"></i> Actualizar';
     qs('#invCancelEdit').style.display='inline-block';
 }
 
@@ -288,7 +409,7 @@ async function handleInvForm(e){
             body: JSON.stringify({nombre,descripcion:null,stock:cantidad,unidad_medida:unidad,estado:'activo'})
         });
         if(!res.ok) return showError('Error al actualizar insumo');
-        await showSuccess('Insumo actualizado');
+        await showSuccess('Insumo actualizado correctamente');
         delete qs('#invForm').dataset.editing;
         qs('#invForm button[type="submit"]').innerHTML='<i class="fas fa-save"></i> Guardar';
         qs('#invCancelEdit').style.display='none';
@@ -302,22 +423,22 @@ async function handleInvForm(e){
 async function movimientoPrompt(id_insumo,nombre){
     requireAuth();
     const data = await showMoveModal(nombre);
+    if(!data || !data.tipo) return;
     const res = await fetch(API+'/inventario/movimiento',{
         method:'POST',
         headers:{'Content-Type':'application/json','Authorization':'Bearer '+getToken()},
         body: JSON.stringify({id_insumo,tipo_movimiento:data.tipo,cantidad:data.cantidad,observacion:data.obs})
     });
     if(!res.ok) return showError('Error al registrar movimiento');
-    await showSuccess('Movimiento registrado');
+    await showSuccess('Movimiento registrado exitosamente');
     renderInv();
 }
 
-// FILTROS
+// FILTROS y ORDEN
 qs('#searchName').addEventListener('input',filterAndRenderTable);
 qs('#filterUnit').addEventListener('change',filterAndRenderTable);
 qs('#filterStock').addEventListener('change',filterAndRenderTable);
 
-// ORDEN
 document.querySelectorAll('#invTable th[data-column]').forEach(th=>{
     th.addEventListener('click',()=>{
         const col = th.getAttribute('data-column');
