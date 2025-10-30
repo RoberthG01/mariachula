@@ -7,6 +7,40 @@
     <link rel="stylesheet" href="login.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="icon" href="fotos/iconomch.ico" type="image/x-icon">
+    <style>
+        .server-status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .server-online {
+            background: #e8f5e8;
+            color: #2e7d32;
+            border: 1px solid #4caf50;
+        }
+        .server-offline {
+            background: #ffebee;
+            color: #c62828;
+            border: 1px solid #f44336;
+        }
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #e74c3c;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
 </head>
 <body>
     <div class="login-container">
@@ -20,13 +54,19 @@
             <h2>Iniciar Sesión</h2>
         </header>
         
-        <!-- Mensajes de alerta -->
-        <div class="alert alert-error" id="errorAlert">
-            <i class="fas fa-exclamation-circle"></i>
-            <span id="errorMessage">Correo o contraseña incorrectos</span>
+        <!-- Estado del servidor -->
+        <div id="serverStatus" class="server-status" style="display: none;">
+            <i class="fas fa-server"></i>
+            <span id="statusText"></span>
         </div>
         
-        <div class="alert alert-success" id="successAlert">
+        <!-- Mensajes de alerta -->
+        <div class="alert alert-error" id="errorAlert" style="display: none;">
+            <i class="fas fa-exclamation-circle"></i>
+            <span id="errorMessage">Error al conectar con el servidor</span>
+        </div>
+        
+        <div class="alert alert-success" id="successAlert" style="display: none;">
             <i class="fas fa-check-circle"></i>
             <span>Inicio de sesión exitoso. Redirigiendo...</span>
         </div>
@@ -36,7 +76,7 @@
                 <label for="email">Correo electrónico:</label>
                 <div class="input-with-icon">
                     <i class="fas fa-envelope"></i>
-                    <input type="email" id="email" placeholder="usuario@ejemplo.com" required>
+                    <input type="email" id="email" placeholder="usuario@ejemplo.com" required value="juana@mariachula.com">
                 </div>
             </div>
             
@@ -48,17 +88,19 @@
                 </div>
             </div>
             
-            <button type="submit" class="login-button" id="loginBtn">Iniciar sesión</button>
-            
-            <!-- Spinner de carga -->
-            <div class="spinner" id="spinner"></div>
+            <button type="submit" class="login-button" id="loginBtn">
+                <span id="btnText">Iniciar sesión</span>
+                <div class="loading-spinner" id="btnSpinner" style="display: none;"></div>
+            </button>
         </form>
 
         <div class="links">
             <a href="olvidacontraseña.html"><i class="fas fa-key"></i> ¿Olvidaste tu contraseña?</a>
         </div>
 
-        <button class="back-button" onclick="window.location.href='inicio.html'"><i class="fas fa-arrow-left"></i> Volver al Inicio</button>
+        <button class="back-button" onclick="window.location.href='inicio.html'">
+            <i class="fas fa-arrow-left"></i> Volver al Inicio
+        </button>
     </div>
 
     <footer>
@@ -66,86 +108,170 @@
     </footer>
 
     <script>
+        // Configuración - PUERTO ACTUALIZADO A 5000
+        const API_BASE_URL = 'http://localhost:5000';
+        
         document.addEventListener('DOMContentLoaded', function() {
-          const loginForm = document.getElementById('loginForm');
-          const errorAlert = document.getElementById('errorAlert');
-          const successAlert = document.getElementById('successAlert');
-          const errorMessage = document.getElementById('errorMessage');
-          const spinner = document.getElementById('spinner');
-          const loginBtn = document.getElementById('loginBtn');
-        
-          loginForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
-        
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-        
-            if (!email || !password) {
-              showError('Por favor, complete todos los campos');
-              return;
+            const loginForm = document.getElementById('loginForm');
+            const errorAlert = document.getElementById('errorAlert');
+            const successAlert = document.getElementById('successAlert');
+            const errorMessage = document.getElementById('errorMessage');
+            const loginBtn = document.getElementById('loginBtn');
+            const btnText = document.getElementById('btnText');
+            const btnSpinner = document.getElementById('btnSpinner');
+            const serverStatus = document.getElementById('serverStatus');
+            const statusText = document.getElementById('statusText');
+
+            // Verificar estado del servidor al cargar
+            checkServerStatus();
+
+            // Verificar si ya hay sesión activa
+            if (localStorage.getItem('token') && localStorage.getItem('currentUser')) {
+                console.log('Sesión activa detectada, redirigiendo...');
+                window.location.href = 'panel.html';
             }
-            if (!isValidEmail(email)) {
-              showError('Por favor, ingrese un correo electrónico válido');
-              return;
+
+            loginForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                await handleLogin();
+            });
+
+            async function checkServerStatus() {
+                try {
+                    console.log('🔍 Verificando servidor en:', API_BASE_URL);
+                    
+                    const response = await fetch(`${API_BASE_URL}/health`, {
+                        method: 'GET',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        showServerStatus('Servidor conectado ✅ - ' + data.message, 'online');
+                    } else {
+                        showServerStatus('Servidor con problemas ⚠️', 'offline');
+                    }
+                } catch (error) {
+                    console.log('❌ Error verificando servidor:', error.name, error.message);
+                    
+                    if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+                        showServerStatus('Servidor no encontrado ❌ - Verifica que esté en puerto 5000', 'offline');
+                    } else {
+                        showServerStatus('Error de conexión ❌', 'offline');
+                    }
+                }
             }
-        
-            spinner.style.display = 'block';
-            loginBtn.disabled = true;
-        
-            try {
-              const response = await fetch('http://localhost:3000/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ correo: email, password })
-              });
-        
-              const data = await response.json();
-              spinner.style.display = 'none';
-              loginBtn.disabled = false;
-        
-              if (response.ok) {
-                showSuccess();
-        
-                // Guardar token y usuario
-                localStorage.setItem('token', data.token);
-                localStorage.setItem('currentUser', JSON.stringify(data.usuario));
-        
+
+            function showServerStatus(message, status) {
+                serverStatus.style.display = 'block';
+                statusText.textContent = message;
+                serverStatus.className = `server-status server-${status}`;
+            }
+
+            async function handleLogin() {
+                const email = document.getElementById('email').value.trim();
+                const password = document.getElementById('password').value;
+
+                // Validaciones
+                if (!email || !password) {
+                    showError('Por favor, complete todos los campos');
+                    return;
+                }
+                
+                if (!isValidEmail(email)) {
+                    showError('Por favor, ingrese un correo electrónico válido');
+                    return;
+                }
+
+                // Mostrar estado de carga
+                setLoadingState(true);
+
+                try {
+                    console.log('📧 Enviando solicitud de login...');
+                    
+                    const response = await fetch(`${API_BASE_URL}/login`, {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({ 
+                            correo: email, 
+                            password: password 
+                        })
+                    });
+
+                    console.log('📨 Respuesta recibida, status:', response.status);
+
+                    const data = await response.json();
+                    
+                    if (response.ok) {
+                        console.log('✅ Login exitoso:', data.usuario.nombre);
+                        showSuccess();
+                        
+                        // Guardar datos de sesión
+                        localStorage.setItem('token', data.token);
+                        localStorage.setItem('currentUser', JSON.stringify(data.usuario));
+                        
+                        // Redirigir después de 1.5 segundos
+                        setTimeout(() => {
+                            window.location.href = 'panel.html';
+                        }, 1500);
+                        
+                    } else {
+                        console.log('❌ Error en login:', data.error);
+                        showError(data.error || 'Error en el inicio de sesión');
+                    }
+
+                } catch (error) {
+                    console.error('💥 Error de conexión:', error);
+                    
+                    if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+                        showError('No se puede conectar al servidor. Verifique que esté ejecutándose en http://localhost:5000');
+                    } else {
+                        showError('Error de conexión con el servidor');
+                    }
+                } finally {
+                    setLoadingState(false);
+                }
+            }
+
+            function setLoadingState(loading) {
+                if (loading) {
+                    btnText.textContent = 'Conectando...';
+                    btnSpinner.style.display = 'inline-block';
+                    loginBtn.disabled = true;
+                } else {
+                    btnText.textContent = 'Iniciar sesión';
+                    btnSpinner.style.display = 'none';
+                    loginBtn.disabled = false;
+                }
+            }
+
+            function showError(message) {
+                errorMessage.textContent = message;
+                errorAlert.style.display = 'block';
+                successAlert.style.display = 'none';
+                
+                // Ocultar después de 5 segundos
                 setTimeout(() => {
-                  window.location.href = 'panel.html';
-                }, 2000);
-              } else {
-                showError(data.error || 'Correo electrónico o contraseña incorrectos');
-              }
-        
-            } catch (err) {
-              spinner.style.display = 'none';
-              loginBtn.disabled = false;
-              showError('Error al conectarse al servidor');
-              console.error(err);
+                    errorAlert.style.display = 'none';
+                }, 5000);
             }
-          });
-        
-          function showError(message) {
-            errorMessage.textContent = message;
-            errorAlert.style.display = 'block';
-            successAlert.style.display = 'none';
-          }
-        
-          function showSuccess() {
-            errorAlert.style.display = 'none';
-            successAlert.style.display = 'block';
-          }
-        
-          function isValidEmail(email) {
-            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return re.test(email);
-          }
-        
-          // 🔑 Verificar si ya hay sesión activa
-          if (localStorage.getItem('token') && localStorage.getItem('currentUser')) {
-            window.location.href = 'panel.html';
-          }
+
+            function showSuccess() {
+                errorAlert.style.display = 'none';
+                successAlert.style.display = 'block';
+            }
+
+            function isValidEmail(email) {
+                const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return re.test(email);
+            }
+
+            // Auto-revisar estado del servidor cada 30 segundos
+            setInterval(checkServerStatus, 30000);
         });
-        </script>
+    </script>
 </body>
 </html>

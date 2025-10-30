@@ -7,147 +7,6 @@
   <link rel="stylesheet" href="gestionar_menu.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <link rel="icon" href="fotos/iconomch.ico" type="image/x-icon">
-  <style>
-    /* Estilos para los modales */
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: rgba(0, 0, 0, 0.5);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      opacity: 0;
-      visibility: hidden;
-      transition: all 0.3s ease;
-    }
-    
-    .modal-overlay.active {
-      opacity: 1;
-      visibility: visible;
-    }
-    
-    .modal {
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-      width: 90%;
-      max-width: 450px;
-      transform: translateY(-20px);
-      transition: transform 0.3s ease;
-      overflow: hidden;
-    }
-    
-    .modal-overlay.active .modal {
-      transform: translateY(0);
-    }
-    
-    .modal-header {
-      padding: 20px 24px 0;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    
-    .modal-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-    }
-    
-    .modal-icon.success {
-      background-color: #e8f5e9;
-      color: #4caf50;
-    }
-    
-    .modal-icon.warning {
-      background-color: #fff8e1;
-      color: #ff9800;
-    }
-    
-    .modal-icon.error {
-      background-color: #ffebee;
-      color: #f44336;
-    }
-    
-    .modal-icon.info {
-      background-color: #e3f2fd;
-      color: #2196f3;
-    }
-    
-    .modal-title {
-      font-size: 18px;
-      font-weight: 600;
-      margin: 0;
-      color: #333;
-    }
-    
-    .modal-body {
-      padding: 16px 24px 20px;
-      color: #555;
-      line-height: 1.5;
-    }
-    
-    .modal-footer {
-      padding: 0 24px 20px;
-      display: flex;
-      justify-content: flex-end;
-      gap: 12px;
-    }
-    
-    .modal-btn {
-      padding: 10px 20px;
-      border-radius: 6px;
-      border: none;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    
-    .modal-btn.primary {
-      background-color: var(--primary-color, #4a6cf7);
-      color: white;
-    }
-    
-    .modal-btn.primary:hover {
-      background-color: var(--primary-dark, #3a5ce5);
-    }
-    
-    .modal-btn.secondary {
-      background-color: #f5f5f5;
-      color: #333;
-    }
-    
-    .modal-btn.secondary:hover {
-      background-color: #e0e0e0;
-    }
-    
-    .modal-btn.danger {
-      background-color: #f44336;
-      color: white;
-    }
-    
-    .modal-btn.danger:hover {
-      background-color: #d32f2f;
-    }
-    
-    /* Estilo para el modal de confirmación */
-    .confirm-modal .modal-body {
-      text-align: center;
-      padding: 24px;
-    }
-    
-    .confirm-modal .modal-footer {
-      justify-content: center;
-    }
-  </style>
 </head>
 <body>
 <div class="app">
@@ -159,17 +18,17 @@
     <div class="menu-list">
       <a href="menu.html" class="menu-item"><i class="fas fa-utensils"></i> Menú</a>
       <a href="inventory.html" class="menu-item"><i class="fas fa-boxes"></i> Inventario</a>
-      <a href="dashboard.html" class="menu-item"><i class="fas fa-home"></i> Dashboard</a>
-      <a href="admin-menus.html" class="menu-item"><i class="fas fa-list-alt"></i> Admin Menús</a>
+      <a href="dashboard.html" class="menu-item"><i class="fas fa-chart-bar"></i> Dashboard</a>
+      <a href="admin-menus.html" class="menu-item active"><i class="fas fa-list-alt"></i> Admin Menús</a>
       <a href="admin-users.html" class="menu-item"><i class="fas fa-users"></i> Admin Usuarios</a>
       <a href="billing.html" class="menu-item"><i class="fas fa-receipt"></i> Facturación</a>
       <a href="events.html" class="menu-item"><i class="fas fa-calendar-alt"></i> Eventos</a>
       <a href="history-events.html" class="menu-item"><i class="fas fa-history"></i> Historial Eventos</a>
       <a href="history-orders.html" class="menu-item"><i class="fas fa-clipboard-list"></i> Historial Pedidos</a>
       <a href="queue.html" class="menu-item"><i class="fas fa-tasks"></i> Cola de pedidos</a>
+      <a href="cash-register.html" class="menu-item"><i class="fas fa-cash-register"></i> Caja Registradora</a>
     </div>
   </aside>
-
   <main class="main">
     <div class="header">
       <div class="title">Administración de Menús</div>
@@ -177,17 +36,15 @@
         <i class="fas fa-arrow-left"></i> Regresar
       </a>
     </div>
-
     <div class="card">
-      <form id="menuForm" onsubmit="handleMenuForm(event)" enctype="multipart/form-data">
+      <form id="menuForm" enctype="multipart/form-data">
         <div class="form-row">
           <input class="input" id="m_name" placeholder="Nombre del platillo" required>
-          <input class="input" id="m_price" placeholder="Precio" type="number" step="0.01" required>
+          <input class="input" id="m_price" placeholder="Precio" type="number" step="0.01" min="0" required>
           <select class="input" id="m_cat" required>
             <option value="">Cargando categorías...</option>
           </select>
         </div>
-
         <div class="form-row">
           <div class="file-input-container">
             <label class="file-input-label">Imagen del platillo:</label>
@@ -202,7 +59,6 @@
             <input class="input" id="m_img_url" placeholder="URL imagen (opcional)" style="margin-top: 8px;">
           </div>
         </div>
-
         <div style="margin-top:8px">
           <button class="btn primary" type="submit">
             <i class="fas fa-save"></i> Guardar
@@ -212,13 +68,11 @@
           </button>
         </div>
       </form>
-
       <hr>
       <div id="adminList"></div>
     </div>
   </main>
 </div>
-
 <!-- Modal para mensajes generales -->
 <div id="messageModal" class="modal-overlay">
   <div class="modal">
@@ -236,7 +90,6 @@
     </div>
   </div>
 </div>
-
 <!-- Modal de confirmación -->
 <div id="confirmModal" class="modal-overlay">
   <div class="modal confirm-modal">
@@ -255,14 +108,47 @@
     </div>
   </div>
 </div>
-
 <script>
-    const API_URL = 'http://localhost:3000';
+    // ✅ PUERTO CORREGIDO
+    const API_URL = 'http://localhost:5000';
     let editingId = null;
+    
+    // ✅ VERIFICACIÓN INICIAL
+    const token = localStorage.getItem('token');
+    const currentUser = localStorage.getItem('currentUser');
+    
+    if (!token || !currentUser) {
+        window.location.href = 'login.html';
+    }
     
     // Helpers
     const qs = sel => document.querySelector(sel);
     function formatMoney(q) { return `Q${Number(q).toFixed(2)}`; }
+    
+    // ✅ FUNCIÓN PARA HEADERS DE AUTORIZACIÓN
+    function getAuthHeaders() {
+        return {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        };
+    }
+
+    // ✅ FUNCIÓN PARA MANEJAR RESPUESTAS DE API
+    async function handleApiResponse(response) {
+        if (response.status === 401) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('currentUser');
+            window.location.href = 'login.html';
+            throw new Error('Sesión expirada');
+        }
+        
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({ error: 'Error desconocido' }));
+            throw new Error(errorData.error || `Error ${response.status}`);
+        }
+        
+        return await response.json();
+    }
     
     // ------------------------------
     // SISTEMA DE MODALES
@@ -270,397 +156,316 @@
     
     // Mostrar modal de mensaje
     function showMessage(title, message, type = 'info') {
-      return new Promise((resolve) => {
-        const modal = qs('#messageModal');
-        const modalTitle = qs('#messageModalTitle');
-        const modalText = qs('#messageModalText');
-        const modalIcon = qs('#messageModalIcon');
-        const modalBtn = qs('#messageModalBtn');
-        
-        // Configurar según el tipo
-        const typeConfig = {
-          success: { icon: 'fas fa-check-circle', class: 'success', btnText: 'Aceptar' },
-          error: { icon: 'fas fa-exclamation-triangle', class: 'error', btnText: 'Entendido' },
-          warning: { icon: 'fas fa-exclamation-circle', class: 'warning', btnText: 'Continuar' },
-          info: { icon: 'fas fa-info-circle', class: 'info', btnText: 'Aceptar' }
-        };
-        
-        const config = typeConfig[type] || typeConfig.info;
-        
-        // Aplicar configuración
-        modalTitle.textContent = title;
-        modalText.textContent = message;
-        modalIcon.className = `modal-icon ${config.class}`;
-        modalIcon.innerHTML = `<i class="${config.icon}"></i>`;
-        modalBtn.textContent = config.btnText;
-        
-        // Mostrar modal
-        modal.classList.add('active');
-        
-        // Configurar evento del botón
-        const handleClick = () => {
-          modal.classList.remove('active');
-          modalBtn.removeEventListener('click', handleClick);
-          resolve(true);
-        };
-        
-        modalBtn.addEventListener('click', handleClick);
-      });
+        return new Promise((resolve) => {
+            const modal = qs('#messageModal');
+            const modalTitle = qs('#messageModalTitle');
+            const modalText = qs('#messageModalText');
+            const modalIcon = qs('#messageModalIcon');
+            const modalBtn = qs('#messageModalBtn');
+            
+            // Configurar según el tipo
+            const typeConfig = {
+                success: { icon: 'fas fa-check-circle', class: 'success', btnText: 'Aceptar' },
+                error: { icon: 'fas fa-exclamation-triangle', class: 'error', btnText: 'Entendido' },
+                warning: { icon: 'fas fa-exclamation-circle', class: 'warning', btnText: 'Continuar' },
+                info: { icon: 'fas fa-info-circle', class: 'info', btnText: 'Aceptar' }
+            };
+            
+            const config = typeConfig[type] || typeConfig.info;
+            
+            // Aplicar configuración
+            modalTitle.textContent = title;
+            modalText.textContent = message;
+            modalIcon.className = `modal-icon ${config.class}`;
+            modalIcon.innerHTML = `<i class="${config.icon}"></i>`;
+            modalBtn.textContent = config.btnText;
+            
+            // Mostrar modal
+            modal.classList.add('active');
+            
+            // Configurar evento del botón
+            const handleClick = () => {
+                modal.classList.remove('active');
+                modalBtn.removeEventListener('click', handleClick);
+                resolve(true);
+            };
+            
+            modalBtn.addEventListener('click', handleClick);
+        });
     }
     
     // Mostrar modal de confirmación
     function showConfirm(message) {
-      return new Promise((resolve) => {
-        const modal = qs('#confirmModal');
-        const modalText = qs('#confirmModalText');
-        const confirmBtn = qs('#confirmModalOk');
-        const cancelBtn = qs('#confirmModalCancel');
-        
-        modalText.textContent = message;
-        modal.classList.add('active');
-        
-        const handleConfirm = () => {
-          modal.classList.remove('active');
-          confirmBtn.removeEventListener('click', handleConfirm);
-          cancelBtn.removeEventListener('click', handleCancel);
-          resolve(true);
-        };
-        
-        const handleCancel = () => {
-          modal.classList.remove('active');
-          confirmBtn.removeEventListener('click', handleConfirm);
-          cancelBtn.removeEventListener('click', handleCancel);
-          resolve(false);
-        };
-        
-        confirmBtn.addEventListener('click', handleConfirm);
-        cancelBtn.addEventListener('click', handleCancel);
-      });
+        return new Promise((resolve) => {
+            const modal = qs('#confirmModal');
+            const modalText = qs('#confirmModalText');
+            const confirmBtn = qs('#confirmModalOk');
+            const cancelBtn = qs('#confirmModalCancel');
+            
+            modalText.textContent = message;
+            modal.classList.add('active');
+            
+            const handleConfirm = () => {
+                modal.classList.remove('active');
+                confirmBtn.removeEventListener('click', handleConfirm);
+                cancelBtn.removeEventListener('click', handleCancel);
+                resolve(true);
+            };
+            
+            const handleCancel = () => {
+                modal.classList.remove('active');
+                confirmBtn.removeEventListener('click', handleConfirm);
+                cancelBtn.removeEventListener('click', handleCancel);
+                resolve(false);
+            };
+            
+            confirmBtn.addEventListener('click', handleConfirm);
+            cancelBtn.addEventListener('click', handleCancel);
+        });
     }
     
     // ------------------------------
-    // MEJORAR MIDDLEWARE DE AUTORIZACIÓN
-    // ------------------------------
-    function getAuthHeaders() {
-      const token = localStorage.token;
-      // Si el token no empieza con "Bearer", agregarlo
-      if (token && !token.startsWith('Bearer ')) {
-        return { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
-      }
-      return { 'Authorization': token, 'Content-Type': 'application/json' };
-    }
-    
-    // ------------------------------
-    // CARGAR CATEGORÍAS DESDE API - CORREGIDO
+    // CARGAR CATEGORÍAS
     // ------------------------------
     async function loadCategories() {
-      const select = qs('#m_cat');
-      try {
-        const res = await fetch(`${API_URL}/categorias_menu`, { 
-          headers: getAuthHeaders()
-        });
-        
-        if (!res.ok) {
-          throw new Error(`Error ${res.status}: ${res.statusText}`);
+        const select = qs('#m_cat');
+        try {
+            const response = await fetch(`${API_URL}/categorias_menu`, { 
+                headers: getAuthHeaders()
+            });
+            
+            const categorias = await handleApiResponse(response);
+            
+            select.innerHTML = '<option value="">Seleccionar categoría</option>' +
+                categorias.map(c => `<option value="${c.id_categoria}">${c.nombre_categoria}</option>`).join('');
+        } catch (err) {
+            console.error('Error al cargar categorías:', err);
+            select.innerHTML = '<option value="">Error al cargar categorías</option>';
+            showMessage('Error', `Error cargando categorías: ${err.message}`, 'error');
         }
-        
-        const categorias = await res.json();
-        
-        if (categorias.error) {
-          throw new Error(categorias.error);
-        }
-        
-        select.innerHTML = '<option value="">Seleccionar categoría</option>' +
-          categorias.map(c => `<option value="${c.id_categoria}">${c.nombre_categoria}</option>`).join('');
-      } catch (err) {
-        console.error('Error al cargar categorías:', err);
-        select.innerHTML = '<option value="">Error al cargar categorías</option>';
-        // Mostrar error específico con modal
-        setTimeout(() => showMessage('Error', `Error cargando categorías: ${err.message}`, 'error'), 100);
-      }
     }
     
     // ------------------------------
-    // CARGAR MENÚ DESDE API - CORREGIDO
+    // CARGAR MENÚ
     // ------------------------------
     async function refreshList() {
-      const el = document.getElementById('adminList');
-      try {
-        const res = await fetch(`${API_URL}/menu_items`, { 
-          headers: getAuthHeaders()
-        });
-        
-        if (!res.ok) {
-          throw new Error(`Error ${res.status}: ${res.statusText}`);
+        const el = document.getElementById('adminList');
+        try {
+            const response = await fetch(`${API_URL}/menu_items`, { 
+                headers: getAuthHeaders()
+            });
+            
+            const menu = await handleApiResponse(response);
+            
+            console.log('Menú cargado:', menu);
+            
+            if (menu.length === 0) {
+                el.innerHTML = '<div style="text-align:center;padding:30px;color:var(--muted);"><i class="fas fa-utensils" style="font-size:48px;margin-bottom:15px;"></i><p>No hay platillos en el menú</p></div>';
+                return;
+            }
+            
+            el.innerHTML = menu.map(item => `
+                <div class="menu-item-card">
+                    <img src="${item.img || 'https://via.placeholder.com/80?text=Imagen'}" 
+                         class="menu-item-image" 
+                         onerror="this.src='https://via.placeholder.com/80?text=Imagen'">
+                    <div class="menu-item-info">
+                        <strong>${item.nombre}</strong>
+                        <div>
+                            <span class="category-badge">${item.nombre_categoria || 'Sin categoría'}</span>
+                            ${formatMoney(item.precio)}
+                        </div>
+                        ${item.descripcion ? `<small>${item.descripcion}</small>` : ''}
+                    </div>
+                    <div class="menu-item-actions">
+                        <button class="btn" onclick='startEdit(${item.id_item})'><i class="fas fa-edit"></i> Editar</button>
+                        <button class="btn ghost" onclick='doDelete(${item.id_item})'><i class="fas fa-trash"></i> Eliminar</button>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Sincronizar con localStorage
+            updateLocalMenu(menu);
+            
+        } catch (err) {
+            console.error('Error al cargar menú:', err);
+            el.innerHTML = `<div style="text-align:center;padding:30px;color:red;">
+                <i class="fas fa-exclamation-triangle" style="font-size:48px;margin-bottom:15px;"></i>
+                <p>Error al cargar el menú: ${err.message}</p>
+                <button class="btn" onclick="refreshList()">Reintentar</button>
+            </div>`;
         }
-        
-        const menu = await res.json();
-        
-        if (menu.error) {
-          throw new Error(menu.error);
-        }
-        
-        console.log('Menú cargado:', menu); // Para debug
-        
-        if (menu.length === 0) {
-          el.innerHTML = '<div style="text-align:center;padding:30px;color:var(--muted);"><i class="fas fa-utensils" style="font-size:48px;margin-bottom:15px;"></i><p>No hay platillos en el menú</p></div>';
-          return;
-        }
-        
-        el.innerHTML = menu.map(item => `
-          <div class="menu-item-card">
-            <img src="${item.img || 'https://via.placeholder.com/80?text=Imagen'}" 
-                 class="menu-item-image" 
-                 onerror="this.src='https://via.placeholder.com/80?text=Imagen'">
-            <div class="menu-item-info">
-              <strong>${item.nombre}</strong>
-              <div>
-                <span class="category-badge">${item.nombre_categoria || 'Sin categoría'}</span>
-                ${formatMoney(item.precio)}
-              </div>
-              ${item.descripcion ? `<small>${item.descripcion}</small>` : ''}
-            </div>
-            <div class="menu-item-actions">
-              <button class="btn" onclick='startEdit(${item.id_item})'><i class="fas fa-edit"></i> Editar</button>
-              <button class="btn ghost" onclick='doDelete(${item.id_item})'><i class="fas fa-trash"></i> Eliminar</button>
-            </div>
-          </div>
-        `).join('');
-      } catch (err) {
-        console.error('Error al cargar menú:', err);
-        el.innerHTML = `<div style="text-align:center;padding:30px;color:red;">
-          <i class="fas fa-exclamation-triangle" style="font-size:48px;margin-bottom:15px;"></i>
-          <p>Error al cargar el menú: ${err.message}</p>
-          <button class="btn" onclick="refreshList()">Reintentar</button>
-        </div>`;
-      }
     }
     
     // ------------------------------
-    // ENVIAR FORMULARIO - CORREGIDO
+    // ENVIAR FORMULARIO
     // ------------------------------
     async function handleMenuForm(e) {
-      e.preventDefault();
-      const nombre = qs('#m_name').value;
-      const precio = parseFloat(qs('#m_price').value);
-      const id_categoria = qs('#m_cat').value;
-      const imgUrl = qs('#m_img_url').value;
-      const imgFile = qs('#m_img_file').files[0];
-      let img = imgUrl || null;
+        e.preventDefault();
+        const nombre = qs('#m_name').value;
+        const precio = parseFloat(qs('#m_price').value);
+        const id_categoria = qs('#m_cat').value;
+        const imgUrl = qs('#m_img_url').value;
+        const imgFile = qs('#m_img_file').files[0];
+        let img = imgUrl || null;
     
-      // Validaciones básicas
-      if (!nombre || !precio || !id_categoria) {
-        showMessage('Campos incompletos', 'Por favor complete todos los campos obligatorios', 'warning');
-        return;
-      }
-    
-      try {
-        // Si hay archivo, convertirlo a base64
-        if (imgFile) {
-          img = await convertToBase64(imgFile);
+        // Validaciones básicas
+        if (!nombre || !precio || !id_categoria) {
+            showMessage('Campos incompletos', 'Por favor complete todos los campos obligatorios', 'warning');
+            return;
         }
     
-        const data = { 
-          id_categoria: parseInt(id_categoria), 
-          nombre, 
-          precio, 
-          img,
-          estado: 'disponible'
-        };
-    
-        console.log('Enviando datos:', data); // Para debug
-    
-        const method = editingId ? 'PUT' : 'POST';
-        const url = editingId ? `${API_URL}/menu_items/${editingId}` : `${API_URL}/menu_items`;
-    
-        const res = await fetch(url, {
-          method,
-          headers: getAuthHeaders(),
-          body: JSON.stringify(data)
-        });
-    
-        const responseData = await res.json();
-        
-        if (!res.ok) {
-          throw new Error(responseData.error || 'Error al guardar el platillo');
+        if (precio < 0) {
+            showMessage('Precio inválido', 'El precio no puede ser negativo', 'warning');
+            return;
         }
     
-        await showMessage(
-          editingId ? 'Platillo actualizado' : 'Platillo agregado', 
-          editingId ? 'Platillo actualizado correctamente' : 'Platillo agregado correctamente', 
-          'success'
-        );
-        
-        resetForm();
-        refreshList();
-      } catch (err) {
-        console.error('Error:', err);
-        showMessage('Error al guardar', `Error al guardar el platillo: ${err.message}`, 'error');
-      }
+        try {
+            // Si hay archivo, convertirlo a base64
+            if (imgFile) {
+                img = await convertToBase64(imgFile);
+            }
+    
+            const data = { 
+                id_categoria: parseInt(id_categoria), 
+                nombre, 
+                precio, 
+                img,
+                estado: 'disponible'
+            };
+    
+            console.log('Enviando datos:', data);
+    
+            const method = editingId ? 'PUT' : 'POST';
+            const url = editingId ? `${API_URL}/menu_items/${editingId}` : `${API_URL}/menu_items`;
+    
+            const response = await fetch(url, {
+                method,
+                headers: getAuthHeaders(),
+                body: JSON.stringify(data)
+            });
+    
+            const result = await handleApiResponse(response);
+    
+            await showMessage(
+                editingId ? 'Platillo actualizado' : 'Platillo agregado', 
+                editingId ? 'Platillo actualizado correctamente' : 'Platillo agregado correctamente', 
+                'success'
+            );
+            
+            resetForm();
+            refreshList();
+        } catch (err) {
+            console.error('Error:', err);
+            showMessage('Error al guardar', `Error al guardar el platillo: ${err.message}`, 'error');
+        }
     }
     
     function convertToBase64(file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = e => reject(e);
-      });
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = e => reject(e);
+        });
     }
     
     // ------------------------------
-    // EDITAR Y ELIMINAR - CORREGIDO
+    // EDITAR Y ELIMINAR
     // ------------------------------
     async function startEdit(id) {
-      try {
-        const res = await fetch(`${API_URL}/menu_items`, { 
-          headers: getAuthHeaders()
-        });
-        
-        if (!res.ok) throw new Error(`Error ${res.status}`);
-        
-        const menu = await res.json();
-        const item = menu.find(m => m.id_item === id);
-        
-        if (!item) {
-          showMessage('Platillo no encontrado', 'El platillo que intentas editar no existe', 'error');
-          return;
+        try {
+            const response = await fetch(`${API_URL}/menu_items`, { 
+                headers: getAuthHeaders()
+            });
+            
+            const menu = await handleApiResponse(response);
+            const item = menu.find(m => m.id_item === id);
+            
+            if (!item) {
+                showMessage('Platillo no encontrado', 'El platillo que intentas editar no existe', 'error');
+                return;
+            }
+            
+            editingId = id;
+            qs('#m_name').value = item.nombre;
+            qs('#m_price').value = item.precio;
+            qs('#m_cat').value = item.id_categoria;
+            qs('#m_img_url').value = item.img || '';
+            document.getElementById('file-name').textContent = item.img ? 'Imagen actual (editar para cambiar)' : 'No se ha seleccionado ningún archivo';
+            
+            // Scroll al formulario
+            qs('#menuForm').scrollIntoView({ behavior: 'smooth' });
+        } catch (err) {
+            console.error('Error al cargar datos para editar:', err);
+            showMessage('Error', 'Error al cargar datos del platillo', 'error');
         }
-        
-        editingId = id;
-        qs('#m_name').value = item.nombre;
-        qs('#m_price').value = item.precio;
-        qs('#m_cat').value = item.id_categoria;
-        qs('#m_img_url').value = item.img || '';
-        document.getElementById('file-name').textContent = item.img ? 'Imagen actual (editar para cambiar)' : 'No se ha seleccionado ningún archivo';
-        
-        // Scroll al formulario
-        qs('#menuForm').scrollIntoView({ behavior: 'smooth' });
-      } catch (err) {
-        console.error('Error al cargar datos para editar:', err);
-        showMessage('Error', 'Error al cargar datos del platillo', 'error');
-      }
     }
     
     async function doDelete(id) {
-      const confirmed = await showConfirm('¿Seguro que deseas eliminar este platillo?');
-      if (!confirmed) return;
-      
-      try {
-        const res = await fetch(`${API_URL}/menu_items/${id}`, { 
-          method: 'DELETE', 
-          headers: getAuthHeaders()
-        });
+        const confirmed = await showConfirm('¿Seguro que deseas eliminar este platillo?');
+        if (!confirmed) return;
         
-        if (!res.ok) {
-          const errorData = await res.json();
-          throw new Error(errorData.error || 'Error al eliminar');
+        try {
+            const response = await fetch(`${API_URL}/menu_items/${id}`, { 
+                method: 'DELETE', 
+                headers: getAuthHeaders()
+            });
+            
+            await handleApiResponse(response);
+            await showMessage('Eliminado', 'Platillo eliminado correctamente', 'success');
+            refreshList();
+        } catch (err) {
+            console.error('Error al eliminar:', err);
+            showMessage('Error al eliminar', `Error al eliminar el platillo: ${err.message}`, 'error');
         }
-        
-        await showMessage('Eliminado', 'Platillo eliminado correctamente', 'success');
-        refreshList();
-      } catch (err) {
-        console.error('Error al eliminar:', err);
-        showMessage('Error al eliminar', `Error al eliminar el platillo: ${err.message}`, 'error');
-      }
     }
     
     // ------------------------------
     // FORM UTILITIES
     // ------------------------------
     function resetForm() {
-      editingId = null;
-      qs('#menuForm').reset();
-      qs('#m_img_file').value = '';
-      document.getElementById('file-name').textContent = 'No se ha seleccionado ningún archivo';
+        editingId = null;
+        qs('#menuForm').reset();
+        qs('#m_img_file').value = '';
+        document.getElementById('file-name').textContent = 'No se ha seleccionado ningún archivo';
+    }
+    
+    // ------------------------------
+    // SINCRONIZAR MENÚ CON LOCALSTORAGE
+    // ------------------------------
+    function updateLocalMenu(menuData) {
+        if (!Array.isArray(menuData)) return;
+        const localMenu = menuData.map(item => ({
+            id: item.id_item,
+            name: item.nombre,
+            price: parseFloat(item.precio),
+            category: item.nombre_categoria || '',
+            description: item.descripcion || '',
+            img: item.img || ''
+        }));
+        localStorage.setItem('mc_menu', JSON.stringify(localMenu));
+        console.log('Menú sincronizado con localStorage:', localMenu);
     }
     
     // ------------------------------
     // INICIALIZACIÓN
     // ------------------------------
-    document.getElementById('m_img_file').addEventListener('change', e => {
-      const fileName = e.target.files[0] ? e.target.files[0].name : 'No se ha seleccionado ningún archivo';
-      document.getElementById('file-name').textContent = fileName;
-    });
-    
-    // Verificar autenticación antes de cargar
-    function checkAuth() {
-      if (!localStorage.token) {
-        showMessage('No autenticado', 'No estás autenticado. Redirigiendo al login...', 'warning').then(() => {
-          window.location.href = 'login.html';
-        });
-        return false;
-      }
-      return true;
-    }
-    
-// ------------------------------
-// SINCRONIZAR MENÚ CON LOCALSTORAGE
-// ------------------------------
-function updateLocalMenu(menuData) {
-  if (!Array.isArray(menuData)) return;
-  const localMenu = menuData.map(item => ({
-    id: item.id_item,
-    name: item.nombre,
-    price: parseFloat(item.precio),
-    category: item.nombre_categoria || '',
-    description: item.descripcion || '',
-    img: item.img || ''
-  }));
-  localStorage.setItem('mc_menu', JSON.stringify(localMenu));
-  console.log('Menú sincronizado con localStorage:', localMenu);
-}
-
-// Modificamos refreshList() para que también actualice localStorage
-const originalRefreshList = refreshList;
-refreshList = async function() {
-  const el = document.getElementById('adminList');
-  try {
-    const res = await fetch(`${API_URL}/menu_items`, { headers: getAuthHeaders() });
-    if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
-    const menu = await res.json();
-    if (menu.error) throw new Error(menu.error);
-
-    // 👇 sincroniza localStorage
-    updateLocalMenu(menu);
-
-    if (menu.length === 0) {
-      el.innerHTML = '<div style="text-align:center;padding:30px;color:var(--muted);"><i class="fas fa-utensils" style="font-size:48px;margin-bottom:15px;"></i><p>No hay platillos en el menú</p></div>';
-      return;
-    }
-
-    el.innerHTML = menu.map(item => `
-      <div class="menu-item-card">
-        <img src="${item.img || 'https://via.placeholder.com/80?text=Imagen'}" class="menu-item-image" onerror="this.src='https://via.placeholder.com/80?text=Imagen'">
-        <div class="menu-item-info">
-          <strong>${item.nombre}</strong>
-          <div>
-            <span class="category-badge">${item.nombre_categoria || 'Sin categoría'}</span>
-            ${formatMoney(item.precio)}
-          </div>
-          ${item.descripcion ? `<small>${item.descripcion}</small>` : ''}
-        </div>
-        <div class="menu-item-actions">
-          <button class="btn" onclick='startEdit(${item.id_item})'><i class="fas fa-edit"></i> Editar</button>
-          <button class="btn ghost" onclick='doDelete(${item.id_item})'><i class="fas fa-trash"></i> Eliminar</button>
-        </div>
-      </div>
-    `).join('');
-  } catch (err) {
-    console.error('Error al cargar menú:', err);
-    el.innerHTML = `<div style="text-align:center;padding:30px;color:red;">
-      <i class="fas fa-exclamation-triangle" style="font-size:48px;margin-bottom:15px;"></i>
-      <p>Error al cargar el menú: ${err.message}</p>
-      <button class="btn" onclick="refreshList()">Reintentar</button>
-    </div>`;
-  }
-};
-
     document.addEventListener('DOMContentLoaded', () => {
-      if (checkAuth()) {
-        loadCategories();
-        refreshList();
-      }
+        if (token && currentUser) {
+            // Configurar el formulario
+            document.getElementById('menuForm').addEventListener('submit', handleMenuForm);
+            
+            // Configurar el input de archivo
+            document.getElementById('m_img_file').addEventListener('change', e => {
+                const fileName = e.target.files[0] ? e.target.files[0].name : 'No se ha seleccionado ningún archivo';
+                document.getElementById('file-name').textContent = fileName;
+            });
+            
+            // Cargar datos
+            loadCategories();
+            refreshList();
+        }
     });
 </script>
 </body>

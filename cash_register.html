@@ -6,24 +6,91 @@
     <title>Caja Registradora - María Chula</title>
     <link rel="stylesheet" href="cash_register.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <style>
-
-    </style>
+    <link rel="icon" href="fotos/iconomch.ico" type="image/x-icon">
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <div class="logo-container">
-                <img src="fotos/logomch.png" alt="Logo María Chula" class="logo">
-                <h1 class="title">Caja Registradora</h1>
-            </div>
-            <a href="panel.html" class="back-button">
-                <i class="fas fa-arrow-left"></i> Regresar
-            </a>
+<div class="app">
+    <aside class="sidebar">
+        <div class="logo">
+            <img src="fotos/logomch.png" alt="Logo María Chula">
+            <h2>María Chula</h2>
         </div>
-
+        <div class="menu-list">
+            <a href="menu.html" class="menu-item"><i class="fas fa-utensils"></i> Menú</a>
+            <a href="inventory.html" class="menu-item"><i class="fas fa-boxes"></i> Inventario</a>
+            <a href="dashboard.html" class="menu-item"><i class="fas fa-chart-bar"></i> Dashboard</a>
+            <a href="admin-menus.html" class="menu-item"><i class="fas fa-list-alt"></i> Admin Menús</a>
+            <a href="admin-users.html" class="menu-item"><i class="fas fa-users"></i> Admin Usuarios</a>
+            <a href="billing.html" class="menu-item"><i class="fas fa-receipt"></i> Facturación</a>
+            <a href="events.html" class="menu-item"><i class="fas fa-calendar-alt"></i> Eventos</a>
+            <a href="history-events.html" class="menu-item"><i class="fas fa-history"></i> Historial Eventos</a>
+            <a href="history-orders.html" class="menu-item"><i class="fas fa-clipboard-list"></i> Historial Pedidos</a>
+            <a href="queue.html" class="menu-item"><i class="fas fa-tasks"></i> Cola de pedidos</a>
+            <a href="cash-register.html" class="menu-item active"><i class="fas fa-cash-register"></i> Caja Registradora</a>
+        </div>
+    </aside>
+    <main class="main">
+        <div class="header">
+            <div class="title">Caja Registradora</div>
+            <div class="actions">
+                <a href="panel.html" class="back-button">
+                    <i class="fas fa-arrow-left"></i> Regresar
+                </a>
+            </div>
+        </div>
+        <!-- Registro de venta -->
+        <div class="card">
+            <h2>Registrar Venta</h2>
+            <form id="cashForm">
+                <div class="form-row">
+                    <div class="input-group">
+                        <label for="total">Total de la compra (Q):</label>
+                        <input type="number" id="total" class="input" required step="0.01" min="0">
+                    </div>
+                    <div class="input-group">
+                        <label for="recibido">Monto recibido (Q):</label>
+                        <input type="number" id="recibido" class="input" required step="0.01" min="0">
+                    </div>
+                </div>              
+                <div class="form-row">
+                    <button type="submit" class="btn primary" id="calculateBtn">
+                        <i class="fas fa-calculator"></i> Calcular y Registrar
+                    </button>
+                    <button type="button" class="btn ghost" onclick="limpiarFormulario()">
+                        <i class="fas fa-broom"></i> Limpiar formulario
+                    </button>
+                </div>
+            </form>
+            <div id="resultado" class="result"></div>
+        </div>
+        <!-- Movimientos de caja -->
+        <div class="card">
+            <h2>Movimientos de Caja</h2>
+            <div class="table-container">
+                <table class="table" id="movimientos">
+                    <thead>
+                        <tr>
+                            <th>Fecha y Hora</th>
+                            <th>Total (Q)</th>
+                            <th>Recibido (Q)</th>
+                            <th>Cambio (Q)</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Los movimientos se insertarán aquí -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="form-row" style="margin-top: 20px;">
+                <button class="btn error" onclick="resetearCaja()">
+                    <i class="fas fa-trash"></i> Resetear caja
+                </button>
+            </div>
+        </div>
         <!-- Estado de caja -->
-        <div class="section">
+        <div class="card">
             <h2>Estado de Caja</h2>
             <div class="cash-status">
                 <div class="status-card">
@@ -44,7 +111,6 @@
                     <div class="amount" id="totalAmount">Q0.00</div>
                 </div>
             </div>
-            
             <div class="form-row">
                 <button class="btn success" id="openCashBtn" onclick="openCash()">
                     <i class="fas fa-lock-open"></i> Apertura de Caja
@@ -54,299 +120,573 @@
                 </button>
             </div>
         </div>
-
-        <!-- Registrar venta -->
-        <div class="section">
-            <h2>Registrar Venta</h2>
-            <form id="cashForm">
-                <div class="form-row">
-                    <div class="input-group">
-                        <label for="total">Total de la compra (Q):</label>
-                        <input type="number" id="total" class="input" required step="0.01" min="0">
-                    </div>
-                    <div class="input-group">
-                        <label for="recibido">Monto recibido (Q):</label>
-                        <input type="number" id="recibido" class="input" required step="0.01" min="0">
-                    </div>
-                </div>
-                
-                <div class="form-row">
-                    <button type="submit" class="btn primary" id="calculateBtn">
-                        <i class="fas fa-calculator"></i> Calcular y Registrar
-                    </button>
-                    <button type="button" class="btn ghost" onclick="limpiarFormulario()">
-                        <i class="fas fa-broom"></i> Limpiar formulario
-                    </button>
-                </div>
-            </form>
-            
-            <div id="resultado" class="result"></div>
+    </main>
+</div>
+<!-- Modal de Apertura de Caja -->
+<div id="openCashModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Apertura de Caja</h3>
+            <button class="close-modal" onclick="closeOpenCashModal()">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
-
-        <!-- Movimientos de caja -->
-        <div class="section">
-            <h2>Movimientos de Caja</h2>
-            <table id="movimientos">
-                <thead>
-                    <tr>
-                        <th>Fecha y Hora</th>
-                        <th>Total (Q)</th>
-                        <th>Recibido (Q)</th>
-                        <th>Cambio (Q)</th>
-                        <th>Estado</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Los movimientos se insertarán aquí -->
-                </tbody>
-            </table>
-            
-            <div class="form-row" style="margin-top: 20px;">
-                <button class="btn error" onclick="resetearCaja()">
-                    <i class="fas fa-trash"></i> Resetear caja
-                </button>
+        <div class="modal-body">
+            <div class="input-group">
+                <label for="initialCash">Monto inicial (Q):</label>
+                <input type="number" id="initialCash" class="input" step="0.01" min="0" required>
+            </div>
+            <div class="modal-actions">
+                <button class="btn" onclick="closeOpenCashModal()">Cancelar</button>
+                <button class="btn success" onclick="confirmOpenCash()">Abrir Caja</button>
             </div>
         </div>
     </div>
+</div>
+<!-- Modal de Cierre de Caja -->
+<div id="closeCashModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Cierre de Caja</h3>
+            <button class="close-modal" onclick="closeCloseCashModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="close-summary">
+                <div class="summary-row">
+                    <span>Fondo inicial:</span>
+                    <span id="summaryInitial">Q0.00</span>
+                </div>
+                <div class="summary-row">
+                    <span>Ventas del día:</span>
+                    <span id="summarySales">Q0.00</span>
+                </div>
+                <div class="summary-row total">
+                    <span>Total en caja:</span>
+                    <span id="summaryTotal">Q0.00</span>
+                </div>
+                <div class="summary-row">
+                    <span>Movimientos:</span>
+                    <span id="summaryMovements">0</span>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn" onclick="closeCloseCashModal()">Cancelar</button>
+                <button class="btn error" onclick="confirmCloseCash()">Cerrar Caja</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    // Configuración de la API - VERIFICA ESTA URL
+    const API_BASE = 'http://localhost:5000';
 
-    <script>
-        // Variables globales
-        let cashRegister = {
-            isOpen: false,
-            initialAmount: 0,
-            sales: 0,
-            movements: []
+    // Variables globales
+    let currentCashRegister = null;
+
+    // Elementos del DOM
+    const cashForm = document.getElementById("cashForm");
+    const resultado = document.getElementById("resultado");
+    const tabla = document.getElementById("movimientos").getElementsByTagName("tbody")[0];
+    const statusText = document.getElementById("statusText");
+    const statusBadge = document.getElementById("statusBadge");
+    const initialAmount = document.getElementById("initialAmount");
+    const salesAmount = document.getElementById("salesAmount");
+    const totalAmount = document.getElementById("totalAmount");
+    const openCashBtn = document.getElementById("openCashBtn");
+    const closeCashBtn = document.getElementById("closeCashBtn");
+    const calculateBtn = document.getElementById("calculateBtn");
+
+    // Funciones de utilidad
+    function getToken() {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            console.error('No se encontró token en localStorage');
+            window.location.href = 'login.html';
+            return null;
+        }
+        return token;
+    }
+
+    function getUserId() {
+        return localStorage.getItem('user_id');
+    }
+
+    function showResult(message, type = 'success') {
+        resultado.innerHTML = `<div class="result ${type}">${message}</div>`;
+        setTimeout(() => {
+            resultado.innerHTML = '';
+        }, 5000);
+    }
+
+    function formatCurrency(amount) {
+        return `Q${parseFloat(amount).toFixed(2)}`;
+    }
+
+    // Función mejorada para hacer fetch con mejor manejo de errores
+    async function fetchWithAuth(url, options = {}) {
+        const token = getToken();
+        if (!token) return null;
+
+        const defaultOptions = {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
         };
 
-        // Elementos del DOM
-        const cashForm = document.getElementById("cashForm");
-        const resultado = document.getElementById("resultado");
-        const tabla = document.getElementById("movimientos").getElementsByTagName("tbody")[0];
-        const statusText = document.getElementById("statusText");
-        const statusBadge = document.getElementById("statusBadge");
-        const initialAmount = document.getElementById("initialAmount");
-        const salesAmount = document.getElementById("salesAmount");
-        const totalAmount = document.getElementById("totalAmount");
-        const openCashBtn = document.getElementById("openCashBtn");
-        const closeCashBtn = document.getElementById("closeCashBtn");
-        const calculateBtn = document.getElementById("calculateBtn");
+        const finalOptions = { ...defaultOptions, ...options };
 
-        // Cargar datos desde localStorage al iniciar
-        document.addEventListener('DOMContentLoaded', function() {
-            loadCashRegister();
-            updateCashStatus();
-            renderMovements();
-        });
-
-        // Cargar estado de caja desde localStorage
-        function loadCashRegister() {
-            const savedData = localStorage.getItem('mariaChulaCashRegister');
-            if (savedData) {
-                cashRegister = JSON.parse(savedData);
-            }
-        }
-
-        // Guardar estado de caja en localStorage
-        function saveCashRegister() {
-            localStorage.setItem('mariaChulaCashRegister', JSON.stringify(cashRegister));
-        }
-
-        // Actualizar interfaz con el estado de caja
-        function updateCashStatus() {
-            if (cashRegister.isOpen) {
-                statusText.textContent = "Abierta";
-                statusBadge.textContent = "ABIERTA";
-                statusBadge.className = "status status-open";
-                initialAmount.textContent = `Q${cashRegister.initialAmount.toFixed(2)}`;
-                salesAmount.textContent = `Q${cashRegister.sales.toFixed(2)}`;
-                totalAmount.textContent = `Q${(cashRegister.initialAmount + cashRegister.sales).toFixed(2)}`;
-                
-                openCashBtn.disabled = true;
-                closeCashBtn.disabled = false;
-                calculateBtn.disabled = false;
-            } else {
-                statusText.textContent = "Cerrada";
-                statusBadge.textContent = "CERRADA";
-                statusBadge.className = "status status-closed";
-                initialAmount.textContent = "Q0.00";
-                salesAmount.textContent = "Q0.00";
-                totalAmount.textContent = "Q0.00";
-                
-                openCashBtn.disabled = false;
-                closeCashBtn.disabled = true;
-                calculateBtn.disabled = true;
-            }
-        }
-
-        // Apertura de caja
-        function openCash() {
-            const amount = parseFloat(prompt("Ingrese el monto inicial para abrir caja:"));
+        try {
+            console.log(`🔗 Haciendo request a: ${url}`);
+            const response = await fetch(url, finalOptions);
             
-            if (isNaN(amount) || amount <= 0) {
-                alert("Por favor ingrese un monto válido.");
-                return;
-            }
-            
-            cashRegister.isOpen = true;
-            cashRegister.initialAmount = amount;
-            cashRegister.sales = 0;
-            cashRegister.movements = [];
-            
-            saveCashRegister();
-            updateCashStatus();
-            renderMovements();
-            
-            resultado.innerHTML = `<div class="result success">Caja abierta con Q${amount.toFixed(2)}</div>`;
-        }
-
-        // Cierre de caja
-        function closeCash() {
-            if (!cashRegister.isOpen) return;
-            
-            const total = cashRegister.initialAmount + cashRegister.sales;
-            const report = `
-                REPORTE DE CIERRE DE CAJA:
-                - Fondo inicial: Q${cashRegister.initialAmount.toFixed(2)}
-                - Ventas del día: Q${cashRegister.sales.toFixed(2)}
-                - Total en caja: Q${total.toFixed(2)}
-                - Movimientos registrados: ${cashRegister.movements.length}
-            `;
-            
-            if (confirm(`¿Está seguro de cerrar la caja?\n\n${report}`)) {
-                // Guardar reporte de cierre
-                const closeReport = {
-                    date: new Date().toLocaleString(),
-                    initial: cashRegister.initialAmount,
-                    sales: cashRegister.sales,
-                    total: total,
-                    movements: cashRegister.movements.length
-                };
-                
-                // Guardar en historial de cierres
-                let closeHistory = JSON.parse(localStorage.getItem('mariaChulaCloseHistory') || '[]');
-                closeHistory.push(closeReport);
-                localStorage.setItem('mariaChulaCloseHistory', JSON.stringify(closeHistory));
-                
-                // Reiniciar caja
-                cashRegister.isOpen = false;
-                cashRegister.initialAmount = 0;
-                cashRegister.sales = 0;
-                cashRegister.movements = [];
-                
-                saveCashRegister();
-                updateCashStatus();
-                renderMovements();
-                
-                resultado.innerHTML = `<div class="result success">Caja cerrada correctamente. Total: Q${total.toFixed(2)}</div>`;
-            }
-        }
-
-        // Procesar formulario de venta
-        cashForm.addEventListener("submit", function(e) {
-            e.preventDefault();
-            
-            if (!cashRegister.isOpen) {
-                resultado.innerHTML = `<div class="result error">La caja está cerrada. Debe abrirla primero.</div>`;
-                return;
-            }
-            
-            const total = parseFloat(document.getElementById("total").value);
-            const recibido = parseFloat(document.getElementById("recibido").value);
-            
-            if (isNaN(total) || isNaN(recibido) || total <= 0 || recibido <= 0) {
-                resultado.innerHTML = `<div class="result error">Por favor ingrese valores válidos.</div>`;
-                return;
-            }
-            
-            let cambio = recibido - total;
-            let estado = "";
-            
-            if (recibido >= total) {
-                resultado.innerHTML = `<div class="result success">Pago aceptado. Cambio: Q${cambio.toFixed(2)}</div>`;
-                estado = "Pagado";
-                
-                // Registrar venta
-                cashRegister.sales += total;
-            } else {
-                resultado.innerHTML = `<div class="result error">Monto insuficiente. Faltan Q${(total - recibido).toFixed(2)}</div>`;
-                cambio = 0;
-                estado = "Insuficiente";
-            }
-            
-            // Registrar movimiento
-            const movement = {
-                date: new Date().toLocaleString(),
-                total: total,
-                received: recibido,
-                change: cambio,
-                status: estado
-            };
-            
-            cashRegister.movements.push(movement);
-            saveCashRegister();
-            updateCashStatus();
-            renderMovements();
-            
-            limpiarFormulario();
-        });
-
-        // Renderizar movimientos en tabla
-        function renderMovements() {
-            tabla.innerHTML = '';
-            
-            if (cashRegister.movements.length === 0) {
-                const row = tabla.insertRow();
-                const cell = row.insertCell(0);
-                cell.colSpan = 5;
-                cell.textContent = "No hay movimientos registrados";
-                cell.style.textAlign = "center";
-                cell.style.padding = "20px";
-                cell.style.color = "#999";
-                return;
-            }
-            
-            cashRegister.movements.forEach(movement => {
-                const row = tabla.insertRow();
-                row.insertCell(0).textContent = movement.date;
-                row.insertCell(1).textContent = movement.total.toFixed(2);
-                row.insertCell(2).textContent = movement.received.toFixed(2);
-                row.insertCell(3).textContent = movement.change.toFixed(2);
-                
-                const statusCell = row.insertCell(4);
-                statusCell.textContent = movement.status;
-                
-                if (movement.status === "Pagado") {
-                    statusCell.style.color = "var(--color-success)";
-                    statusCell.style.fontWeight = "600";
-                } else {
-                    statusCell.style.color = "var(--color-error)";
-                    statusCell.style.fontWeight = "600";
+            if (!response.ok) {
+                if (response.status === 401) {
+                    console.error('Token inválido o expirado');
+                    window.location.href = 'login.html';
+                    return null;
                 }
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            return await response.json();
+        } catch (error) {
+            console.error('❌ Error en fetch:', error);
+            throw error;
+        }
+    }
+
+    // API Functions - VERSIÓN MEJORADA
+    async function fetchCashRegisterStatus() {
+        try {
+            const data = await fetchWithAuth(`${API_BASE}/cash-register/status`);
+            
+            if (data && data.error) {
+                if (data.error === 'No hay caja abierta') {
+                    return null; // Esto es normal, no hay caja abierta
+                }
+                throw new Error(data.error);
+            }
+            
+            return data;
+        } catch (error) {
+            console.error('Error al obtener estado de caja:', error);
+            
+            // Si es error de conexión, mostrar mensaje específico
+            if (error.message.includes('Failed to fetch')) {
+                showResult('Error: No se puede conectar con el servidor. Verifica que el backend esté corriendo.', 'error');
+            } else {
+                showResult('Error al obtener estado de caja: ' + error.message, 'error');
+            }
+            
+            return null;
+        }
+    }
+
+    async function openCashRegister(initialAmount) {
+        try {
+            const data = await fetchWithAuth(`${API_BASE}/cash-register/open`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    monto_inicial: initialAmount,
+                    id_usuario: getUserId()
+                })
             });
-        }
 
-        // Limpiar formulario
-        function limpiarFormulario() {
-            document.getElementById("total").value = "";
-            document.getElementById("recibido").value = "";
-        }
+            if (data && data.error) {
+                throw new Error(data.error);
+            }
 
-        // Resetear caja
-        function resetearCaja() {
-            if (confirm("¿Está seguro de resetear toda la caja? Se perderán todos los datos.")) {
-                cashRegister.isOpen = false;
-                cashRegister.initialAmount = 0;
-                cashRegister.sales = 0;
-                cashRegister.movements = [];
+            return data;
+        } catch (error) {
+            console.error('Error al abrir caja:', error);
+            throw error;
+        }
+    }
+
+    async function closeCashRegister() {
+        try {
+            const data = await fetchWithAuth(`${API_BASE}/cash-register/close`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    id_usuario: getUserId()
+                })
+            });
+
+            if (data && data.error) {
+                throw new Error(data.error);
+            }
+
+            return data;
+        } catch (error) {
+            console.error('Error al cerrar caja:', error);
+            throw error;
+        }
+    }
+
+    async function registerSale(saleData) {
+        try {
+            const data = await fetchWithAuth(`${API_BASE}/cash-register/sales`, {
+                method: 'POST',
+                body: JSON.stringify(saleData)
+            });
+
+            if (data && data.error) {
+                throw new Error(data.error);
+            }
+
+            return data;
+        } catch (error) {
+            console.error('Error al registrar venta:', error);
+            throw error;
+        }
+    }
+
+    async function getCashMovements() {
+        try {
+            const data = await fetchWithAuth(`${API_BASE}/cash-register/movements`);
+            return data || [];
+        } catch (error) {
+            console.error('Error al obtener movimientos:', error);
+            return [];
+        }
+    }
+
+    async function getTodaySales() {
+        try {
+            const data = await fetchWithAuth(`${API_BASE}/cash-register/today-sales`);
+            return data || { total: 0 };
+        } catch (error) {
+            console.error('Error al obtener ventas del día:', error);
+            return { total: 0 };
+        }
+    }
+
+    // Funciones principales
+    async function loadCashRegister() {
+        try {
+            console.log('🔄 Cargando estado de caja...');
+            
+            // Obtener estado de caja
+            const cashStatus = await fetchCashRegisterStatus();
+            
+            if (cashStatus) {
+                currentCashRegister = cashStatus;
                 
-                saveCashRegister();
-                updateCashStatus();
-                renderMovements();
-                limpiarFormulario();
+                // Obtener ventas del día
+                const todaySales = await getTodaySales();
                 
-                resultado.innerHTML = `<div class="result success">Caja reseteada correctamente.</div>`;
+                // Obtener movimientos
+                const movements = await getCashMovements();
+                
+                updateCashStatus(cashStatus, todaySales.total);
+                renderMovements(movements);
+                console.log('✅ Caja cargada correctamente');
+            } else {
+                currentCashRegister = null;
+                updateCashStatus(null, 0);
+                renderMovements([]);
+                console.log('ℹ️ No hay caja abierta');
+            }
+        } catch (error) {
+            console.error('Error loading cash register:', error);
+            showResult('Error al cargar datos de caja', 'error');
+        }
+    }
+
+    function updateCashStatus(cashStatus, todaySales) {
+        if (cashStatus && cashStatus.estado === 'abierta') {
+            statusText.textContent = "Abierta";
+            statusBadge.textContent = "ABIERTA";
+            statusBadge.className = "status status-open";
+            initialAmount.textContent = formatCurrency(cashStatus.monto_inicial);
+            salesAmount.textContent = formatCurrency(todaySales);
+            totalAmount.textContent = formatCurrency(parseFloat(cashStatus.monto_inicial) + parseFloat(todaySales));
+            
+            openCashBtn.disabled = true;
+            closeCashBtn.disabled = false;
+            calculateBtn.disabled = false;
+        } else {
+            statusText.textContent = "Cerrada";
+            statusBadge.textContent = "CERRADA";
+            statusBadge.className = "status status-closed";
+            initialAmount.textContent = "Q0.00";
+            salesAmount.textContent = "Q0.00";
+            totalAmount.textContent = "Q0.00";
+            
+            openCashBtn.disabled = false;
+            closeCashBtn.disabled = true;
+            calculateBtn.disabled = true;
+        }
+    }
+
+    // Modal de apertura de caja
+    function openCash() {
+        document.getElementById('openCashModal').classList.add('active');
+        document.getElementById('initialCash').focus();
+    }
+
+    function closeOpenCashModal() {
+        document.getElementById('openCashModal').classList.remove('active');
+        document.getElementById('initialCash').value = '';
+    }
+
+    async function confirmOpenCash() {
+        const amountInput = document.getElementById('initialCash');
+        const amount = parseFloat(amountInput.value);
+        
+        if (isNaN(amount) || amount <= 0) {
+            showResult("Por favor ingrese un monto válido mayor a 0.", "error");
+            amountInput.focus();
+            return;
+        }
+        
+        // Mostrar loading
+        const originalText = openCashBtn.innerHTML;
+        openCashBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Abriendo caja...';
+        openCashBtn.disabled = true;
+
+        try {
+            await openCashRegister(amount);
+            showResult(`✅ Caja abierta con ${formatCurrency(amount)}`, "success");
+            closeOpenCashModal();
+            await loadCashRegister();
+        } catch (error) {
+            console.error('Error en confirmOpenCash:', error);
+            
+            if (error.message.includes('Failed to fetch')) {
+                showResult('❌ Error de conexión. Verifica que el servidor esté corriendo.', 'error');
+            } else if (error.message.includes('Ya existe una caja abierta')) {
+                showResult('❌ Ya existe una caja abierta', 'error');
+            } else {
+                showResult('❌ Error al abrir la caja: ' + error.message, 'error');
+            }
+        } finally {
+            // Restaurar botón
+            openCashBtn.innerHTML = originalText;
+            openCashBtn.disabled = false;
+        }
+    }
+
+    // Modal de cierre de caja
+    function closeCash() {
+        if (!currentCashRegister) {
+            showResult("No hay caja abierta para cerrar", "error");
+            return;
+        }
+        
+        // Actualizar resumen
+        const initial = parseFloat(currentCashRegister.monto_inicial);
+        const sales = parseFloat(salesAmount.textContent.replace('Q', ''));
+        const total = initial + sales;
+        const movementsCount = tabla.rows.length;
+        
+        document.getElementById('summaryInitial').textContent = formatCurrency(initial);
+        document.getElementById('summarySales').textContent = formatCurrency(sales);
+        document.getElementById('summaryTotal').textContent = formatCurrency(total);
+        document.getElementById('summaryMovements').textContent = movementsCount;
+        
+        document.getElementById('closeCashModal').classList.add('active');
+    }
+
+    function closeCloseCashModal() {
+        document.getElementById('closeCashModal').classList.remove('active');
+    }
+
+    async function confirmCloseCash() {
+        // Mostrar loading
+        const originalText = closeCashBtn.innerHTML;
+        closeCashBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cerrando caja...';
+        closeCashBtn.disabled = true;
+
+        try {
+            await closeCashRegister();
+            showResult("✅ Caja cerrada correctamente", "success");
+            closeCloseCashModal();
+            await loadCashRegister();
+        } catch (error) {
+            console.error('Error en confirmCloseCash:', error);
+            
+            if (error.message.includes('Failed to fetch')) {
+                showResult('❌ Error de conexión. Verifica que el servidor esté corriendo.', 'error');
+            } else {
+                showResult('❌ Error al cerrar la caja: ' + error.message, 'error');
+            }
+        } finally {
+            // Restaurar botón
+            closeCashBtn.innerHTML = originalText;
+            closeCashBtn.disabled = false;
+        }
+    }
+
+    // Procesar venta
+    cashForm.addEventListener("submit", async function(e) {
+        e.preventDefault();
+        
+        if (!currentCashRegister) {
+            showResult("❌ La caja está cerrada. Debe abrirla primero.", "error");
+            return;
+        }
+        
+        const total = parseFloat(document.getElementById("total").value);
+        const recibido = parseFloat(document.getElementById("recibido").value);
+        
+        if (isNaN(total) || isNaN(recibido) || total <= 0 || recibido <= 0) {
+            showResult("❌ Por favor ingrese valores válidos mayores a 0.", "error");
+            return;
+        }
+        
+        const cambio = recibido - total;
+        
+        if (recibido < total) {
+            showResult(`❌ Monto insuficiente. Faltan ${formatCurrency(total - recibido)}`, "error");
+            return;
+        }
+        
+        // Mostrar loading
+        const originalText = calculateBtn.innerHTML;
+        calculateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Registrando...';
+        calculateBtn.disabled = true;
+
+        try {
+            await registerSale({
+                id_caja: currentCashRegister.id_caja,
+                total: total,
+                recibido: recibido,
+                cambio: cambio
+            });
+            
+            showResult(`✅ Venta registrada. Cambio: ${formatCurrency(cambio)}`, "success");
+            await loadCashRegister();
+            limpiarFormulario();
+        } catch (error) {
+            console.error('Error al registrar venta:', error);
+            
+            if (error.message.includes('Failed to fetch')) {
+                showResult('❌ Error de conexión. Verifica que el servidor esté corriendo.', 'error');
+            } else {
+                showResult('❌ Error al registrar la venta: ' + error.message, 'error');
+            }
+        } finally {
+            // Restaurar botón
+            calculateBtn.innerHTML = originalText;
+            calculateBtn.disabled = false;
+        }
+    });
+
+    // Renderizar movimientos
+    function renderMovements(movements) {
+        tabla.innerHTML = '';
+        
+        if (!movements || movements.length === 0) {
+            const row = tabla.insertRow();
+            const cell = row.insertCell(0);
+            cell.colSpan = 5;
+            cell.textContent = "No hay movimientos registrados";
+            cell.style.textAlign = "center";
+            cell.style.padding = "20px";
+            cell.style.color = "var(--color-muted)";
+            return;
+        }
+        
+        movements.forEach(movement => {
+            const row = tabla.insertRow();
+            row.insertCell(0).textContent = new Date(movement.fecha).toLocaleString();
+            row.insertCell(1).textContent = formatCurrency(movement.monto);
+            
+            // Para ventas, mostrar recibido y cambio
+            if (movement.tipo_movimiento === 'venta') {
+                // Extraer recibido y cambio de la descripción
+                const descMatch = movement.descripcion.match(/Recibido: Q([\d.]+), Cambio: Q([\d.]+)/);
+                if (descMatch) {
+                    row.insertCell(2).textContent = formatCurrency(descMatch[1]);
+                    row.insertCell(3).textContent = formatCurrency(descMatch[2]);
+                } else {
+                    row.insertCell(2).textContent = formatCurrency(movement.monto);
+                    row.insertCell(3).textContent = "Q0.00";
+                }
+            } else {
+                row.insertCell(2).textContent = formatCurrency(movement.monto);
+                row.insertCell(3).textContent = "Q0.00";
+            }
+            
+            const statusCell = row.insertCell(4);
+            statusCell.textContent = movement.tipo_movimiento === 'venta' ? 'Pagado' : movement.descripcion;
+            
+            if (movement.tipo_movimiento === 'venta') {
+                statusCell.style.color = "var(--color-success)";
+                statusCell.style.fontWeight = "600";
+            } else {
+                statusCell.style.color = "var(--color-muted)";
+            }
+        });
+    }
+
+    // Limpiar formulario
+    function limpiarFormulario() {
+        document.getElementById("total").value = "";
+        document.getElementById("recibido").value = "";
+    }
+
+    // Resetear caja (solo para desarrollo)
+    async function resetearCaja() {
+        if (confirm("¿Está seguro de resetear toda la caja? Esta acción es solo para desarrollo.")) {
+            try {
+                await loadCashRegister();
+                showResult("✅ Datos de caja recargados", "success");
+            } catch (error) {
+                showResult("❌ Error al resetear la caja", "error");
             }
         }
-    </script>
+    }
+
+    // Función para probar la conexión
+    async function testConnection() {
+        try {
+            console.log('🔍 Probando conexión con el servidor...');
+            const response = await fetch('http://localhost:5000/health');
+            if (response.ok) {
+                const data = await response.json();
+                console.log('✅ Servidor conectado:', data);
+                return true;
+            } else {
+                console.error('❌ Servidor respondió con error:', response.status);
+                return false;
+            }
+        } catch (error) {
+            console.error('❌ No se pudo conectar con el servidor:', error);
+            showResult('❌ No se puede conectar con el servidor. Verifica que esté corriendo en http://localhost:5000', 'error');
+            return false;
+        }
+    }
+
+    // Inicialización mejorada
+    document.addEventListener('DOMContentLoaded', async function() {
+        console.log('🚀 Inicializando caja registradora...');
+        
+        // Primero probar conexión
+        const isConnected = await testConnection();
+        
+        if (isConnected) {
+            // Si hay conexión, cargar datos
+            await loadCashRegister();
+        } else {
+            showResult('❌ No se puede conectar con el servidor. Verifica que el backend esté corriendo en el puerto 5000.', 'error');
+        }
+    });
+
+    // Agregar esto para debugging en la consola
+    window.debugCashRegister = {
+        reload: loadCashRegister,
+        test: testConnection,
+        getStatus: () => currentCashRegister,
+        API_BASE: API_BASE
+    };
+
+    console.log('🔧 Debug functions available: window.debugCashRegister');
+</script>
 </body>
 </html>

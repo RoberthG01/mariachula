@@ -19,17 +19,17 @@
       <div class="menu-list">
         <a href="menu.html" class="menu-item"><i class="fas fa-utensils"></i> Menú</a>
         <a href="inventory.html" class="menu-item"><i class="fas fa-boxes"></i> Inventario</a>
-        <a href="index.html" class="menu-item"><i class="fas fa-home"></i> Inicio</a>
+        <a href="dashboard.html" class="menu-item"><i class="fas fa-chart-bar"></i> Dashboard</a>
         <a href="admin-menus.html" class="menu-item"><i class="fas fa-list-alt"></i> Admin Menús</a>
         <a href="admin-users.html" class="menu-item"><i class="fas fa-users"></i> Admin Usuarios</a>
         <a href="billing.html" class="menu-item"><i class="fas fa-receipt"></i> Facturación</a>
         <a href="events.html" class="menu-item"><i class="fas fa-calendar-alt"></i> Eventos</a>
         <a href="history-events.html" class="menu-item"><i class="fas fa-history"></i> Historial Eventos</a>
-        <a href="history-orders.html" class="menu-item active"><i class="fas fa-clipboard-list"></i> Historial Pedidos</a>
+        <a href="history-orders.html" class="menu-item"><i class="fas fa-clipboard-list"></i> Historial Pedidos</a>
         <a href="queue.html" class="menu-item"><i class="fas fa-tasks"></i> Cola de pedidos</a>
+        <a href="cash-register.html" class="menu-item active"><i class="fas fa-cash-register"></i> Caja Registradora</a>
       </div>
     </aside>
-
     <main class="main">
       <div class="header">
         <div class="title">Historial de Pedidos</div>
@@ -42,7 +42,6 @@
           </button>
         </div>
       </div>
-
       <div class="card">
         <div class="filters">
           <div class="filter-group">
@@ -63,7 +62,6 @@
             <input type="text" id="searchFilter" class="filter-input" placeholder="Buscar pedidos..." oninput="filterOrders()">
           </div>
         </div>
-
         <table class="table" id="histOrders">
           <thead>
             <tr>
@@ -76,7 +74,6 @@
           </thead>
           <tbody></tbody>
         </table>
-
         <div id="noOrders" class="no-orders" style="display: none;">
           <i class="fas fa-clipboard-list"></i>
           <h3>No hay pedidos registrados</h3>
@@ -85,7 +82,6 @@
       </div>
     </main>
   </div>
-
   <script>
     // Función para formatear dinero
     function formatMoney(amount) {

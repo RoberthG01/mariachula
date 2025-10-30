@@ -10,15 +10,16 @@
 </head>
 <body>
 <div class="app">
+  <!-- Sidebar -->
   <aside class="sidebar">
     <div class="logo">
         <img src="fotos/logomch.png" alt="Logo María Chula">
         <h2>María Chula</h2>
     </div>
     <div class="menu-list">
-      <a href="menu.html" class="menu-item"><i class="fas fa-utensils"></i> Menú</a>
+      <a href="menu.html" class="menu-item active"><i class="fas fa-utensils"></i> Menú</a>
       <a href="inventory.html" class="menu-item"><i class="fas fa-boxes"></i> Inventario</a>
-      <a href="dashboard.html" class="menu-item"><i class="fas fa-home"></i> Dashboard</a>
+      <a href="dashboard.html" class="menu-item"><i class="fas fa-chart-bar"></i> Dashboard</a>
       <a href="admin-menus.html" class="menu-item"><i class="fas fa-list-alt"></i> Admin Menús</a>
       <a href="admin-users.html" class="menu-item"><i class="fas fa-users"></i> Admin Usuarios</a>
       <a href="billing.html" class="menu-item"><i class="fas fa-receipt"></i> Facturación</a>
@@ -26,9 +27,10 @@
       <a href="history-events.html" class="menu-item"><i class="fas fa-history"></i> Historial Eventos</a>
       <a href="history-orders.html" class="menu-item"><i class="fas fa-clipboard-list"></i> Historial Pedidos</a>
       <a href="queue.html" class="menu-item"><i class="fas fa-tasks"></i> Cola de pedidos</a>
+      <a href="cash-register.html" class="menu-item"><i class="fas fa-cash-register"></i> Caja Registradora</a>
     </div>
   </aside>
-
+  <!-- Contenido principal -->
   <main class="main">
     <div class="header">
       <div class="title">Menú de Pedidos</div>
@@ -36,390 +38,364 @@
         <a href="panel.html" class="back-button">
           <i class="fas fa-arrow-left"></i> Regresar
         </a>
+        <button id="cartButton" class="btn primary">
+          <i class="fas fa-shopping-cart"></i> Ver Carrito (<span id="cartCount">0</span>)
+        </button>
       </div>
     </div>
-
     <div class="card">
-      <div class="order-header">
-        <h3>Platos disponibles</h3>
-        <div class="order-actions">
-          <button class="btn" onclick="openOrderTypeModal()">
-            <i class="fas fa-truck"></i> Enviar pedido
-          </button>
-          <button id="cartToggle" class="btn primary">
-            <i class="fas fa-shopping-cart"></i> Ver Carrito (<span id="cartCount">0</span>)
-          </button>
-        </div>
-      </div>
-
-      <div class="order-container">
-        <div id="menuGrid" class="menu-grid"></div>
-        
-        <!-- Carrito flotante -->
-        <div id="floatingCart" class="cart-container floating-cart">
-          <div class="cart-header">
-            <h3>Tu Pedido</h3>
-            <button class="btn ghost close-cart" onclick="toggleCart()">
-              <i class="fas fa-times"></i>
-            </button>
-          </div>
-          <div class="cart-content">
-            <div id="cartItems"></div>
-            <div id="emptyCart" class="empty-cart">No hay items en el carrito</div>
-            <div class="cart-total">Total: <span id="cartTotal">$0.00</span></div>
-          </div>
-          
-          <div class="notes-box">
-            <h3>Detalles del Pedido</h3>
-            <textarea id="orderNotes" placeholder="Indica aquí cualquier detalle especial para tu pedido (alergias, modificaciones, etc.)"></textarea>
-          </div>
-        </div>
-      </div>
+      <h3>Platos disponibles</h3>
+      <div id="menuGrid" class="menu-grid"></div>
     </div>
   </main>
 </div>
-
-<!-- Modal para seleccionar tipo de pedido -->
+<!-- Modal del Carrito -->
+<div id="cartModal" class="modal">
+  <div class="modal-content" style="max-width:500px;">
+    <div class="modal-header">
+      <h3>Tu Pedido</h3>
+      <button class="close-modal" onclick="closeCartModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div id="cartItems"></div>
+      <div id="emptyCart" class="empty-cart">No hay productos en el carrito</div>
+      <div class="cart-total">Total: <span id="cartTotal">Q0.00</span></div>
+      <h4 style="margin-top:15px;">Datos del Cliente</h4>
+      <div id="clientForm"></div>
+      <h4>Notas del pedido</h4>
+      <textarea id="orderNotes" placeholder="Ejemplo: sin cebolla, con extra queso..."></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeCartModal()">Cancelar</button>
+      <button class="btn primary" onclick="openOrderTypeModal()">Enviar pedido</button>
+    </div>
+  </div>
+</div>
+<!--  Modal para tipo de pedido -->
 <div id="orderTypeModal" class="modal">
-  <div class="modal-content">
+  <div class="modal-content" style="max-width:400px;">
     <div class="modal-header">
-      <h3>Seleccionar tipo de pedido</h3>
-      <button class="close-modal" onclick="closeOrderTypeModal()">
-        <i class="fas fa-times"></i>
-      </button>
+      <h3>Selecciona el tipo de pedido</h3>
+      <button class="close-modal" onclick="closeOrderTypeModal()">&times;</button>
     </div>
     <div class="modal-body">
-      <p>¿Cómo será el pedido?</p>
-      <div class="modal-actions">
-        <button class="btn" onclick="submitOrder({type:'domicilio',address:'Dirección demo'})">
-          <i class="fas fa-truck"></i> Domicilio
-        </button>
-        <button class="btn primary" onclick="submitOrder({type:'mesa',table:5})">
-          <i class="fas fa-utensils"></i> Mesa
-        </button>
-      </div>
+      <button class="btn" onclick="selectOrderType('mesa')">
+        <i class="fas fa-utensils"></i> En mesa
+      </button>
+      <button class="btn primary" onclick="selectOrderType('domicilio')">
+        <i class="fas fa-truck"></i> A domicilio
+      </button>
     </div>
   </div>
 </div>
-
-<!-- Modal de confirmación -->
-<div id="confirmationModal" class="modal">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h3 id="confirmationTitle">Confirmación</h3>
-      <button class="close-modal" onclick="closeConfirmationModal()">
-        <i class="fas fa-times"></i>
-      </button>
-    </div>
-    <div class="modal-body">
-      <p id="confirmationMessage"></p>
-      <div class="modal-actions">
-        <button class="btn" onclick="closeConfirmationModal()">Cancelar</button>
-        <button id="confirmAction" class="btn primary">Confirmar</button>
-      </div>
+<!-- Modal de mensajes -->
+<div id="messageModal" class="modal">
+  <div class="modal-content message-modal">
+    <div class="modal-body" id="messageBody">
+      <div id="messageIcon" class="message-icon"></div>
+      <h3 id="messageTitle">Mensaje</h3>
+      <p id="messageText"></p>
+      <button class="btn primary" onclick="closeMessageModal()">Aceptar</button>
     </div>
   </div>
 </div>
-
+<!-- 🔔 Contenedor de notificaciones -->
+<div id="toastContainer"></div>
 <script>
-// Variables globales
 let cart = [];
-let orderNotes = '';
-let cartVisible = false;
+let orderNotes = "";
+let orderType = null;
 
-// Obtener menú desde localStorage (desde admin-menus.html)
+// ==============================
+// TOAST
+// ==============================
+function showToast(mensaje, tipo = "info") {
+  const container = document.getElementById("toastContainer");
+  const toast = document.createElement("div");
+  toast.className = `toast toast-${tipo}`;
+  toast.innerHTML = `
+    ${tipo === "success" ? "✅" : tipo === "warning" ? "⚠️" : tipo === "error" ? "❌" : "ℹ️"} 
+    ${mensaje}
+  `;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.style.opacity = "0";
+    setTimeout(() => toast.remove(), 300);
+  }, 2500);
+}
+
+// ==============================
+// MODAL DE MENSAJES
+// ==============================
+function showMessage(titulo, texto, tipo = "info") {
+  const modal = document.getElementById("messageModal");
+  const title = document.getElementById("messageTitle");
+  const text = document.getElementById("messageText");
+  const icon = document.getElementById("messageIcon");
+
+  title.textContent = titulo;
+  text.textContent = texto;
+
+  const icons = { success: "✅", error: "❌", warning: "⚠️", info: "ℹ️" };
+  icon.textContent = icons[tipo] || "ℹ️";
+
+  modal.classList.add("active");
+}
+
+function closeMessageModal() {
+  document.getElementById("messageModal").classList.remove("active");
+}
+
+// ==============================
+// OBTENER MENÚ
+// ==============================
 function getMenu() {
-  // Intentar obtener desde localStorage primero
-  const savedMenu = localStorage.getItem('mc_menu');
-  
-  if (savedMenu) {
-    return JSON.parse(savedMenu);
-  }
-  
-  // Si no hay menú guardado, usar datos de ejemplo
+  const saved = localStorage.getItem("mc_menu");
+  if (saved) return JSON.parse(saved);
   return [
-    { id: 1, name: "Tacos al Pastor", description: "Deliciosos tacos con carne adobada, piña y cilantro", price: 45, category: "comidas" },
-    { id: 2, name: "Enchiladas Verdes", description: "Tortillas rellenas de pollo bañadas en salsa verde", price: 55, category: "comidas" },
-    { id: 3, name: "Flan Napolitano", description: "Postre de flan con caramelo y queso crema", price: 35, category: "postres" },
-    { id: 4, name: "Chilaquiles", description: "Tortillas fritas con salsa, crema y queso", price: 40, category: "antojitos" },
-    { id: 5, name: "Limonada Fresca", description: "Refrescante limonada natural con hierbabuena", price: 20, category: "bebidas-frias" },
-    { id: 6, name: "Café de Olla", description: "Café tradicional mexicano con piloncillo y canela", price: 18, category: "bebidas-calientes" },
-    { id: 7, name: "Margarita Clásica", description: "Coctel de tequila con limón y triple sec", price: 55, category: "licores" }
+    { id: 1, name: "Tacos al Pastor", description: "Carne adobada con piña", price: 45, img: "fotos/no-image.png" },
+    { id: 2, name: "Enchiladas Verdes", description: "Pollo con salsa verde", price: 55, img: "fotos/no-image.png" }
   ];
 }
 
-// Función para formatear dinero
-function formatMoney(amount) {
-  return `Q${amount.toFixed(2)}`;
-}
-
-// Función para obtener el nombre de la categoría
-function getCategoryName(category) {
-  const categories = {
-    'comidas': 'Comidas',
-    'postres': 'Postres',
-    'antojitos': 'Antojitos',
-    'bebidas-frias': 'Bebidas Frías',
-    'bebidas-calientes': 'Bebidas Calientes',
-    'licores': 'Licores'
-  };
-  return categories[category] || category;
-}
-
-// Función para obtener la clase CSS de la categoría
-function getCategoryClass(category) {
-  return `category-${category}`;
-}
-
-// Renderizar la cuadrícula del menú
-function renderMenuGrid(selector) {
-  const container = document.querySelector(selector);
+// ==============================
+// RENDERIZAR MENÚ
+// ==============================
+function renderMenuGrid() {
   const menu = getMenu();
-  
-  if (menu.length === 0) {
-    container.innerHTML = `
-      <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--color-muted);">
-        <i class="fas fa-utensils" style="font-size: 48px; margin-bottom: 15px;"></i>
-        <h3>No hay platillos en el menú</h3>
-        <p>Agrega platillos desde la sección de Administración de Menús</p>
-        <a href="admin-menus.html" class="btn primary" style="margin-top: 15px;">
-          <i class="fas fa-plus"></i> Agregar Platillos
-        </a>
-      </div>
-    `;
+  const grid = document.getElementById("menuGrid");
+
+  if (!menu.length) {
+    grid.innerHTML = `
+      <div style="text-align:center; padding:40px; color:#888;">
+        <i class="fas fa-utensils" style="font-size:48px;"></i>
+        <p>No hay platillos en el menú</p>
+        <a href="admin-menus.html" class="btn primary"><i class="fas fa-plus"></i> Agregar Platillos</a>
+      </div>`;
     return;
   }
-  
-  container.innerHTML = menu.map(item => `
-    <div class="menu-item-card" onclick="addToCart(${item.id})">
-      ${item.img ? `<img src="${item.img}" alt="${item.name}" style="width: 100%; height: 150px; object-fit: cover; border-radius: 8px; margin-bottom: 10px;">` : ''}
-      <span class="category ${getCategoryClass(item.category)}">${getCategoryName(item.category)}</span>
+
+  grid.innerHTML = menu.map(item => `
+    <div class="menu-item-card">
+      <img src="${item.img || 'fotos/no-image.png'}" alt="${item.name}" class="menu-img">
       <h4>${item.name}</h4>
-      <div class="price">${formatMoney(item.price)}</div>
-      <div class="description">${item.description}</div>
-      <button class="btn primary">
+      <p>${item.description || ''}</p>
+      <div class="price">Q${item.price.toFixed(2)}</div>
+      <button class="btn primary" onclick="addToCart(${item.id})">
         <i class="fas fa-plus"></i> Agregar
       </button>
     </div>
-  `).join('');
+  `).join("");
 }
 
-// Toggle del carrito flotante
-function toggleCart() {
-  const cart = document.getElementById('floatingCart');
-  cartVisible = !cartVisible;
-  
-  if (cartVisible) {
-    cart.classList.add('active');
-  } else {
-    cart.classList.remove('active');
-  }
-}
-
-// Actualizar contador del carrito
-function updateCartCount() {
-  const count = cart.reduce((total, item) => total + item.quantity, 0);
-  document.getElementById('cartCount').textContent = count;
-}
-
-// Modales
-function openOrderTypeModal() {
-  if (cart.length === 0) {
-    showConfirmation('Carrito vacío', 'No hay items en el carrito. Agrega productos antes de enviar un pedido.', false);
-    return;
-  }
-  document.getElementById('orderTypeModal').classList.add('active');
-}
-
-function closeOrderTypeModal() {
-  document.getElementById('orderTypeModal').classList.remove('active');
-}
-
-function showConfirmation(title, message, hasConfirm = true) {
-  document.getElementById('confirmationTitle').textContent = title;
-  document.getElementById('confirmationMessage').textContent = message;
-  
-  const confirmBtn = document.getElementById('confirmAction');
-  if (hasConfirm) {
-    confirmBtn.style.display = 'inline-flex';
-  } else {
-    confirmBtn.style.display = 'none';
-  }
-  
-  document.getElementById('confirmationModal').classList.add('active');
-}
-
-function closeConfirmationModal() {
-  document.getElementById('confirmationModal').classList.remove('active');
-}
-
-// Inicialización
-document.addEventListener('DOMContentLoaded', () => {
-  renderMenuGrid('#menuGrid');
-  updateCartUI();
-  
-  // Cargar carrito desde localStorage si existe
-  const savedCart = localStorage.getItem('mariaChulaCart');
-  if(savedCart) {
-    cart = JSON.parse(savedCart);
-    updateCartUI();
-  }
-  
-  // Cargar notas desde localStorage
-  const savedNotes = localStorage.getItem('mariaChulaOrderNotes');
-  if(savedNotes) {
-    orderNotes = savedNotes;
-    document.getElementById('orderNotes').value = orderNotes;
-  }
-  
-  // Escuchar cambios en las notas
-  document.getElementById('orderNotes').addEventListener('input', (e) => {
-    orderNotes = e.target.value;
-    localStorage.setItem('mariaChulaOrderNotes', orderNotes);
-  });
-  
-  // Botón para toggle del carrito
-  document.getElementById('cartToggle').addEventListener('click', toggleCart);
-  
-  // Escuchar cambios en el menú (por si se agregan platillos desde otra pestaña)
-  window.addEventListener('storage', function(e) {
-    if (e.key === 'mc_menu') {
-      renderMenuGrid('#menuGrid');
-    }
-  });
-});
-
-function addToCart(itemId) {
+// ==============================
+// CARRITO
+// ==============================
+function addToCart(id) {
   const menu = getMenu();
-  const item = menu.find(m => m.id === itemId);
-  
-  if(!item) return;
-  
-  const existingItem = cart.find(i => i.id === itemId);
-  
-  if(existingItem) {
-    existingItem.quantity += 1;
-  } else {
-    cart.push({
-      id: item.id,
-      name: item.name,
-      price: item.price,
-      quantity: 1,
-      notes: ''
-    });
-  }
-  
+  const item = menu.find(p => p.id === id);
+  if (!item) return;
+  const existing = cart.find(i => i.id === id);
+  if (existing) existing.quantity++;
+  else cart.push({ id: item.id, name: item.name, price: item.price, quantity: 1 });
+  updateCartCount();
   saveCart();
-  updateCartUI();
-  
-  // Mostrar el carrito automáticamente al agregar un producto
-  if (!cartVisible) {
-    toggleCart();
-  }
+  showToast(`${item.name} agregado al carrito`, "success");
 }
 
-function updateCartItem(itemId, newQty) {
-  const item = cart.find(i => i.id === itemId);
-  
-  if(!item) return;
-  
-  if(newQty <= 0) {
-    removeFromCart(itemId);
-    return;
-  }
-  
-  item.quantity = newQty;
+function changeQty(id, delta) {
+  const item = cart.find(i => i.id === id);
+  if (!item) return;
+  item.quantity += delta;
+  if (item.quantity <= 0) cart = cart.filter(i => i.id !== id);
+  renderCart();
+  updateCartCount();
   saveCart();
-  updateCartUI();
 }
 
-function removeFromCart(itemId) {
-  cart = cart.filter(i => i.id !== itemId);
+function removeFromCart(id) {
+  const item = cart.find(i => i.id === id);
+  cart = cart.filter(i => i.id !== id);
+  renderCart();
+  updateCartCount();
   saveCart();
-  updateCartUI();
+  showToast(`${item?.name || "Producto"} eliminado del carrito`, "warning");
+}
+
+function updateCartCount() {
+  const count = cart.reduce((sum, i) => sum + i.quantity, 0);
+  document.getElementById("cartCount").textContent = count;
 }
 
 function saveCart() {
-  localStorage.setItem('mariaChulaCart', JSON.stringify(cart));
+  localStorage.setItem("mariaChulaCart", JSON.stringify(cart));
 }
 
-function updateCartUI() {
-  const cartItemsEl = document.getElementById('cartItems');
-  const emptyCartEl = document.getElementById('emptyCart');
-  const cartTotalEl = document.getElementById('cartTotal');
-  
-  if(cart.length === 0) {
-    cartItemsEl.innerHTML = '';
-    emptyCartEl.style.display = 'block';
-    cartTotalEl.textContent = formatMoney(0);
-    updateCartCount();
+function renderCart() {
+  const cartItems = document.getElementById("cartItems");
+  const empty = document.getElementById("emptyCart");
+  const totalEl = document.getElementById("cartTotal");
+
+  if (!cart.length) {
+    cartItems.innerHTML = "";
+    empty.style.display = "block";
+    totalEl.textContent = "Q0.00";
     return;
   }
-  
-  emptyCartEl.style.display = 'none';
-  
+
+  empty.style.display = "none";
   let total = 0;
-  
-  cartItemsEl.innerHTML = cart.map(item => `
+  cartItems.innerHTML = cart.map(i => `
     <div class="cart-item">
-      <div>
-        <strong>${item.name}</strong>
-        <div>${formatMoney(item.price)} x ${item.quantity}</div>
-      </div>
+      <div><strong>${i.name}</strong><div>Q${i.price.toFixed(2)} x ${i.quantity}</div></div>
       <div class="cart-item-actions">
-        <button class="btn ghost" onclick="updateCartItem(${item.id}, ${item.quantity - 1})">-</button>
-        <span class="cart-item-qty">${item.quantity}</span>
-        <button class="btn ghost" onclick="updateCartItem(${item.id}, ${item.quantity + 1})">+</button>
-        <button class="btn ghost" onclick="removeFromCart(${item.id})" style="color:var(--color-secondary)">×</button>
+        <button class="btn ghost" onclick="changeQty(${i.id}, -1)">-</button>
+        <span>${i.quantity}</span>
+        <button class="btn ghost" onclick="changeQty(${i.id}, 1)">+</button>
+        <button class="btn danger" onclick="removeFromCart(${i.id})"><i class="fas fa-trash"></i></button>
       </div>
     </div>
-  `).join('');
-  
-  total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  cartTotalEl.textContent = formatMoney(total);
-  updateCartCount();
+  `).join("");
+
+  total = cart.reduce((s, i) => s + i.price * i.quantity, 0);
+  totalEl.textContent = `Q${total.toFixed(2)}`;
 }
 
-function submitOrder(orderDetails) {
-  if(cart.length === 0) {
-    showConfirmation('Error', 'No hay items en el carrito', false);
-    return;
+function openCartModal() {
+  renderCart();
+  document.getElementById("cartModal").classList.add("active");
+}
+
+function closeCartModal() {
+  document.getElementById("cartModal").classList.remove("active");
+}
+
+// ==============================
+// PEDIDOS
+// ==============================
+function openOrderTypeModal() {
+  if (!cart.length) return showMessage("Carrito vacío", "Agrega productos antes de enviar un pedido.", "warning");
+  closeCartModal();
+  document.getElementById("orderTypeModal").classList.add("active");
+}
+
+function closeOrderTypeModal() {
+  document.getElementById("orderTypeModal").classList.remove("active");
+}
+
+function selectOrderType(type) {
+  orderType = type;
+  const form = document.getElementById("clientForm");
+  if (type === "mesa") {
+    form.innerHTML = `
+      <input id="clienteNombre" placeholder="Nombre del cliente" required>
+      <input id="clienteApellido" placeholder="Apellido del cliente" required>
+    `;
+  } else {
+    form.innerHTML = `
+      <input id="clienteNombre" placeholder="Nombre" required>
+      <input id="clienteApellido" placeholder="Apellido" required>
+      <input id="clienteCorreo" type="email" placeholder="Correo" required>
+      <input id="clienteTelefono" placeholder="Teléfono" required>
+      <input id="clienteDireccion" placeholder="Dirección" required>
+    `;
   }
-  
-  const order = {
-    ...orderDetails,
-    items: [...cart],
-    notes: orderNotes,
-    date: new Date().toISOString(),
-    status: 'pending'
-  };
-  
-  console.log('Pedido enviado:', order);
-  
-  // Guardar en historial de pedidos
-  saveOrderToHistory(order);
-  
-  cart = [];
-  orderNotes = '';
-  saveCart();
-  localStorage.removeItem('mariaChulaOrderNotes');
-  document.getElementById('orderNotes').value = '';
-  updateCartUI();
   closeOrderTypeModal();
-  
-  showConfirmation('Éxito', 'Pedido enviado con éxito!', false);
+  openCartModal();
+  document.querySelector('.modal-footer .primary').setAttribute('onclick', 'submitOrder()');
 }
 
-function saveOrderToHistory(order) {
-  // Obtener pedidos existentes o inicializar array vacío
-  const orders = JSON.parse(localStorage.getItem('mariaChulaOrders') || '[]');
-  
-  // Agregar nuevo pedido
-  orders.push(order);
-  
-  // Guardar de vuelta en localStorage
-  localStorage.setItem('mariaChulaOrders', JSON.stringify(orders));
+// ==============================
+// ENVIAR PEDIDO (con registro de cliente)
+// ==============================
+async function submitOrder() {
+  if (!cart.length) return showMessage("Error", "El carrito está vacío.", "error");
+
+  const nombre = document.getElementById("clienteNombre")?.value?.trim();
+  const apellido = document.getElementById("clienteApellido")?.value?.trim();
+  const correo = document.getElementById("clienteCorreo")?.value?.trim();
+  const telefono = document.getElementById("clienteTelefono")?.value?.trim();
+  const direccion = document.getElementById("clienteDireccion")?.value?.trim();
+  const notas = document.getElementById("orderNotes").value.trim();
+
+  if (!nombre || !apellido)
+    return showMessage("Faltan datos", "Debe ingresar nombre y apellido del cliente.", "warning");
+  if (orderType === "domicilio" && (!correo || !telefono || !direccion))
+    return showMessage("Datos incompletos", "Complete todos los datos para pedidos a domicilio.", "warning");
+
+  const token = localStorage.getItem("token");
+  const total = cart.reduce((s, i) => s + i.price * i.quantity, 0);
+
+  // 1️⃣ Registrar cliente antes del pedido
+  const clienteData = { nombre, apellido, correo, telefono, direccion };
+
+  let clienteId = null;
+  try {
+    const resCliente = await fetch("http://localhost:5000/clientes", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify(clienteData)
+    });
+
+    const clienteResp = await resCliente.json();
+    if (!resCliente.ok) throw new Error(clienteResp.error || "Error al registrar cliente");
+    clienteId = clienteResp.id_cliente;
+  } catch (err) {
+    console.error("Error al registrar cliente:", err);
+    return showMessage("Error", "No se pudo registrar el cliente: " + err.message, "error");
+  }
+
+  // 2️⃣ Registrar pedido
+  const pedidoData = {
+    tipo_pedido: orderType,
+    total,
+    id_cliente: clienteId,
+    detalles: cart.map(i => ({
+      id_producto: i.id,
+      cantidad: i.quantity,
+      precio_unitario: i.price,
+      subtotal: i.price * i.quantity
+    })),
+    notas
+  };
+
+  try {
+    const res = await fetch("http://localhost:5000/pedidos", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify(pedidoData)
+    });
+    const data = await res.json();
+
+    if (!res.ok) throw new Error(data.error || "Error al registrar pedido");
+
+    showMessage("Éxito", `✅ Pedido enviado con éxito (ID: ${data.id_pedido})`, "success");
+    cart = [];
+    saveCart();
+    updateCartCount();
+    closeCartModal();
+  } catch (err) {
+    console.error(err);
+    showMessage("Error", "Error al enviar el pedido: " + err.message, "error");
+  }
 }
+
+// ==============================
+// INICIO
+// ==============================
+document.addEventListener("DOMContentLoaded", () => {
+  const saved = localStorage.getItem("mariaChulaCart");
+  if (saved) cart = JSON.parse(saved);
+  renderMenuGrid();
+  updateCartCount();
+  document.getElementById("cartButton").addEventListener("click", openCartModal);
+});
 </script>
 </body>
 </html>

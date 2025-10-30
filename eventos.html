@@ -18,17 +18,17 @@
     <div class="menu-list">
       <a href="menu.html" class="menu-item"><i class="fas fa-utensils"></i> Menú</a>
       <a href="inventory.html" class="menu-item"><i class="fas fa-boxes"></i> Inventario</a>
-      <a href="dashboard.html" class="menu-item"><i class="fas fa-home"></i> Dashboard</a>
+      <a href="dashboard.html" class="menu-item"><i class="fas fa-chart-bar"></i> Dashboard</a>
       <a href="admin-menus.html" class="menu-item"><i class="fas fa-list-alt"></i> Admin Menús</a>
       <a href="admin-users.html" class="menu-item"><i class="fas fa-users"></i> Admin Usuarios</a>
       <a href="billing.html" class="menu-item"><i class="fas fa-receipt"></i> Facturación</a>
-      <a href="events.html" class="menu-item active"><i class="fas fa-calendar-alt"></i> Eventos</a>
+      <a href="events.html" class="menu-item"><i class="fas fa-calendar-alt"></i> Eventos</a>
       <a href="history-events.html" class="menu-item"><i class="fas fa-history"></i> Historial Eventos</a>
       <a href="history-orders.html" class="menu-item"><i class="fas fa-clipboard-list"></i> Historial Pedidos</a>
       <a href="queue.html" class="menu-item"><i class="fas fa-tasks"></i> Cola de pedidos</a>
+      <a href="cash-register.html" class="menu-item active"><i class="fas fa-cash-register"></i> Caja Registradora</a>
     </div>
   </aside>
-
   <main class="main">
     <div class="header">
       <div class="title">Eventos</div>
@@ -38,10 +38,8 @@
         </a>
       </div>
     </div>
-
     <div class="card">
       <h2>Registro de Eventos</h2>
-      
       <form id="eventForm">
         <div class="form-row">
           <div class="input-group">
@@ -53,7 +51,6 @@
             <input class="input" id="evt_date" type="date" required>
           </div>
         </div>
-        
         <div class="form-row">
           <div class="input-group">
             <label for="evt_people">Número de Personas</label>
@@ -71,7 +68,6 @@
             </select>
           </div>
         </div>
-        
         <div class="form-row">
           <div class="input-group">
             <label for="evt_vajilla">Tipo de Vajilla</label>
@@ -85,7 +81,6 @@
             <textarea class="input" id="evt_details" rows="3" placeholder="Detalles adicionales sobre el evento..."></textarea>
           </div>
         </div>
-
         <h3 style="margin-top:16px">Selección de Menú</h3>
         <div id="menuItemsContainer">
           <div class="menu-item-selector">
@@ -99,13 +94,10 @@
             <button class="btn ghost" onclick="removeMenuItem(this)" style="color:var(--color-error)">×</button>
           </div>
         </div>
-
         <button class="btn ghost" type="button" onclick="addMenuItem()" style="margin-top:8px">
           <i class="fas fa-plus"></i> Añadir otro platillo
         </button>
-
         <h2 style="margin-top: 20px;">Total: Q<span id="totalAmount">0.00</span></h2>
-
         <div style="margin-top:16px">
           <button type="button" class="btn primary" onclick="calculateQuote()">
             <i class="fas fa-calculator"></i> Cotizar
@@ -119,7 +111,6 @@
         </div>
       </form>
     </div>
-
     <div class="card">
       <h2>Eventos Registrados</h2>
       <div class="table-container">
@@ -143,7 +134,6 @@
     </div>
   </main>
 </div>
-
 <!-- Modal de confirmación de cotización -->
 <div id="quoteModal" class="modal">
   <div class="modal-content">
@@ -161,7 +151,6 @@
     </div>
   </div>
 </div>
-
 <!-- Modal de confirmación de evento -->
 <div id="eventConfirmModal" class="modal">
   <div class="modal-content">
@@ -184,7 +173,6 @@
     </div>
   </div>
 </div>
-
 <!-- Modal de detalles del evento -->
 <div id="eventDetailsModal" class="modal">
   <div class="modal-content">
@@ -202,7 +190,6 @@
     </div>
   </div>
 </div>
-
 <!-- Modal de eliminación -->
 <div id="deleteModal" class="modal">
   <div class="modal-content">
@@ -221,7 +208,6 @@
     </div>
   </div>
 </div>
-
 <script>
   // Variables globales
   let menuItems = [];

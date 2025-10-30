@@ -19,19 +19,19 @@
                 <h2>María Chula</h2>
             </div>
             <div class="menu-list">
-                <a href="menu.html" class="menu-item">Menú</a>
-                <a href="inventory.html" class="menu-item">Inventario</a>
-                <a href="index.html" class="menu-item">Inicio</a>
-                <a href="admin-menus.html" class="menu-item">Administración de Menús</a>
-                <a href="admin-users.html" class="menu-item">Administración de usuarios</a>
-                <a href="billing.html" class="menu-item">Facturación</a>
-                <a href="events.html" class="menu-item">Eventos</a>
-                <a href="history-events.html" class="menu-item active">Historial de Eventos</a>
-                <a href="history-orders.html" class="menu-item">Historial de Pedidos</a>
-                <a href="queue.html" class="menu-item">Cola de pedidos</a>
+                <a href="menu.html" class="menu-item"><i class="fas fa-utensils"></i> Menú</a>
+                <a href="inventory.html" class="menu-item"><i class="fas fa-boxes"></i> Inventario</a>
+                <a href="dashboard.html" class="menu-item"><i class="fas fa-chart-bar"></i> Dashboard</a>
+                <a href="admin-menus.html" class="menu-item"><i class="fas fa-list-alt"></i> Admin Menús</a>
+                <a href="admin-users.html" class="menu-item"><i class="fas fa-users"></i> Admin Usuarios</a>
+                <a href="billing.html" class="menu-item"><i class="fas fa-receipt"></i> Facturación</a>
+                <a href="events.html" class="menu-item"><i class="fas fa-calendar-alt"></i> Eventos</a>
+                <a href="history-events.html" class="menu-item"><i class="fas fa-history"></i> Historial Eventos</a>
+                <a href="history-orders.html" class="menu-item"><i class="fas fa-clipboard-list"></i> Historial Pedidos</a>
+                <a href="queue.html" class="menu-item"><i class="fas fa-tasks"></i> Cola de pedidos</a>
+                <a href="cash-register.html" class="menu-item active"><i class="fas fa-cash-register"></i> Caja Registradora</a>
             </div>
         </aside>
-
         <main class="main">
             <div class="header">
                 <div class="title">Historial de Eventos</div>
@@ -44,7 +44,6 @@
                     </button>
                 </div>
             </div>
-
             <div class="card">
                 <h2>Filtros de Búsqueda</h2>
                 <div class="filters">
@@ -68,218 +67,227 @@
                     </div>
                 </div>
             </div>
-
             <div class="card">
                 <h2>Eventos Pasados</h2>
                 
                 <div id="eventsContainer">
-                    <!-- Evento 1 -->
-                    <div class="evento">
-                        <h3>1. Evento: Celebración de Aniversario</h3>
-                        <div class="evento-info">
-                            <p><strong>Cliente:</strong> Juan Pérez</p>
-                            <p><strong>Teléfono:</strong> +502 1234-5678</p>
-                            <p><strong>Email:</strong> juan.perez@example.com</p>
-                            <p><strong>Fecha:</strong> 10 de octubre, 2023</p>
-                            <p><strong>Ubicación:</strong> Salón Principal</p>
-                            <p><strong>Tipo de Evento:</strong> Aniversario</p>
-                        </div>
-                        <p><strong>Descripción:</strong> Evento formal para 50 personas con música en vivo y un menú personalizado.</p>
-                        
-                        <div class="detalles-evento">
-                            <h4>Detalles del Pedido</h4>
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>Concepto</th>
-                                        <th>Detalles</th>
-                                        <th>Precio Unitario</th>
-                                        <th>Cantidad</th>
-                                        <th>Subtotal</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <!-- Ejemplo de platillos -->
-                                    <tr>
-                                        <td>Platillo</td>
-                                        <td>Mar y Tierra</td>
-                                        <td>Q70.00</td>
-                                        <td>25</td>
-                                        <td>Q1,750.00</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Platillo</td>
-                                        <td>Pasta Boloñesa</td>
-                                        <td>Q55.00</td>
-                                        <td>25</td>
-                                        <td>Q1,375.00</td>
-                                    </tr>
-                                    <!-- Ejemplo de bebidas -->
-                                    <tr>
-                                        <td>Bebida</td>
-                                        <td>Limonada</td>
-                                        <td>Q18.00</td>
-                                        <td>50</td>
-                                        <td>Q900.00</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Bebida</td>
-                                        <td>Vino de la Casa</td>
-                                        <td>Q25.00</td>
-                                        <td>20</td>
-                                        <td>Q500.00</td>
-                                    </tr>
-                                    <!-- Vajilla -->
-                                    <tr>
-                                        <td>Vajilla</td>
-                                        <td>Losa</td>
-                                        <td>Q50.00</td>
-                                        <td>50</td>
-                                        <td>Q2,500.00</td>
-                                    </tr>
-                                    <!-- Indumentaria -->
-                                    <tr>
-                                        <td>Indumentaria</td>
-                                        <td>Sillas y Mesas</td>
-                                        <td>Q100.00</td>
-                                        <td>10</td>
-                                        <td>Q1,000.00</td>
-                                    </tr>
-                                    <tr class="total-row">
-                                        <td colspan="4" style="text-align: right;"><strong>Total del Evento:</strong></td>
-                                        <td><strong>Q8,025.00</strong></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
+                    <!-- Los eventos se cargarán dinámicamente desde la base de datos -->
+                    <div id="loadingMessage" class="loading-message">
+                        <i class="fas fa-spinner fa-spin"></i> Cargando eventos...
                     </div>
-
-                    <!-- Evento 2 -->
-                    <div class="evento">
-                        <h3>2. Evento: Fiesta de Cumpleaños</h3>
-                        <div class="evento-info">
-                            <p><strong>Cliente:</strong> Ana García</p>
-                            <p><strong>Teléfono:</strong> +502 8765-4321</p>
-                            <p><strong>Email:</strong> ana.garcia@example.com</p>
-                            <p><strong>Fecha:</strong> 15 de noviembre, 2023</p>
-                            <p><strong>Ubicación:</strong> Terraza</p>
-                            <p><strong>Tipo de Evento:</strong> Cumpleaños</p>
-                        </div>
-                        <p><strong>Descripción:</strong> Celebración de cumpleaños con temática tropical para 30 personas.</p>
-                        
-                        <div class="detalles-evento">
-                            <h4>Detalles del Pedido</h4>
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>Concepto</th>
-                                        <th>Detalles</th>
-                                        <th>Precio Unitario</th>
-                                        <th>Cantidad</th>
-                                        <th>Subtotal</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>Platillo</td>
-                                        <td>Enchiladas</td>
-                                        <td>Q40.00</td>
-                                        <td>30</td>
-                                        <td>Q1,200.00</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Bebida</td>
-                                        <td>Ponche de Frutas</td>
-                                        <td>Q15.00</td>
-                                        <td>30</td>
-                                        <td>Q450.00</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Vajilla</td>
-                                        <td>Desechables</td>
-                                        <td>Q20.00</td>
-                                        <td>30</td>
-                                        <td>Q600.00</td>
-                                    </tr>
-                                    <tr class="total-row">
-                                        <td colspan="4" style="text-align: right;"><strong>Total del Evento:</strong></td>
-                                        <td><strong>Q2,250.00</strong></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
+                    <div id="noEventsMessage" class="no-events-message" style="display: none;">
+                        <i class="fas fa-calendar-times"></i> No hay eventos registrados en el historial.
                     </div>
-
-                    <!-- Evento 3 -->
-                    <div class="evento">
-                        <h3>3. Evento: Boda</h3>
-                        <div class="evento-info">
-                            <p><strong>Cliente:</strong> Carlos Rodríguez</p>
-                            <p><strong>Teléfono:</strong> +502 5555-1234</p>
-                            <p><strong>Email:</strong> carlos.rodriguez@example.com</p>
-                            <p><strong>Fecha:</strong> 5 de diciembre, 2023</p>
-                            <p><strong>Ubicación:</strong> Jardín</p>
-                            <p><strong>Tipo de Evento:</strong> Boda</p>
-                        </div>
-                        <p><strong>Descripción:</strong> Ceremonia y recepción de boda para 80 invitados.</p>
-                        
-                        <div class="detalles-evento">
-                            <h4>Detalles del Pedido</h4>
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>Concepto</th>
-                                        <th>Detalles</th>
-                                        <th>Precio Unitario</th>
-                                        <th>Cantidad</th>
-                                        <th>Subtotal</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>Platillo</td>
-                                        <td>Menú Especial de Boda</td>
-                                        <td>Q120.00</td>
-                                        <td>80</td>
-                                        <td>Q9,600.00</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Bebida</td>
-                                        <td>Champán</td>
-                                        <td>Q80.00</td>
-                                        <td>80</td>
-                                        <td>Q6,400.00</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Postre</td>
-                                        <td>Pastel de Bodas</td>
-                                        <td>Q500.00</td>
-                                        <td>1</td>
-                                        <td>Q500.00</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Vajilla</td>
-                                        <td>Losa Premium</td>
-                                        <td>Q80.00</td>
-                                        <td>80</td>
-                                        <td>Q6,400.00</td>
-                                    </tr>
-                                    <tr class="total-row">
-                                        <td colspan="4" style="text-align: right;"><strong>Total del Evento:</strong></td>
-                                        <td><strong>Q22,900.00</strong></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+                    <!-- Los eventos se insertarán aquí dinámicamente -->
                 </div>
             </div>
         </main>
     </div>
-
     <script>
         // Inicializar jsPDF
         const { jsPDF } = window.jspdf;
+
+        // Configuración de la API
+        const API_BASE = 'http://localhost:5000';
+
+        // Función para obtener el token
+        function getToken() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                console.error('No se encontró token en localStorage');
+                window.location.href = 'login.html';
+                return null;
+            }
+            return token;
+        }
+
+        // Función para cargar eventos desde la base de datos
+        async function loadEvents() {
+            try {
+                const token = getToken();
+                if (!token) return;
+
+                const response = await fetch(`${API_BASE}/events/history`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Error al cargar eventos');
+                }
+
+                const events = await response.json();
+                displayEvents(events);
+                
+            } catch (error) {
+                console.error('Error al cargar eventos:', error);
+                document.getElementById('loadingMessage').style.display = 'none';
+                document.getElementById('noEventsMessage').style.display = 'block';
+                document.getElementById('noEventsMessage').innerHTML = 
+                    '<i class="fas fa-exclamation-triangle"></i> Error al cargar eventos.';
+            }
+        }
+
+        // Función para mostrar eventos en el HTML
+        function displayEvents(events) {
+            const eventsContainer = document.getElementById('eventsContainer');
+            const loadingMessage = document.getElementById('loadingMessage');
+            const noEventsMessage = document.getElementById('noEventsMessage');
+
+            // Ocultar mensaje de carga
+            loadingMessage.style.display = 'none';
+
+            if (!events || events.length === 0) {
+                noEventsMessage.style.display = 'block';
+                return;
+            }
+
+            // Limpiar contenedor
+            eventsContainer.innerHTML = '';
+
+            events.forEach((event, index) => {
+                const eventElement = createEventElement(event, index + 1);
+                eventsContainer.appendChild(eventElement);
+            });
+        }
+
+        // Función para crear el HTML de un evento
+        function createEventElement(event, number) {
+            const eventDiv = document.createElement('div');
+            eventDiv.className = 'evento';
+            eventDiv.innerHTML = `
+                <h3>${number}. Evento: ${event.nombre_evento || 'Evento sin nombre'}</h3>
+                <div class="evento-info">
+                    <p><strong>Cliente:</strong> ${event.cliente_nombre || 'Cliente no especificado'}</p>
+                    <p><strong>Teléfono:</strong> ${event.cliente_telefono || 'No disponible'}</p>
+                    <p><strong>Email:</strong> ${event.cliente_correo || 'No disponible'}</p>
+                    <p><strong>Fecha:</strong> ${formatDate(event.fecha_evento)}</p>
+                    <p><strong>Cantidad de Personas:</strong> ${event.cantidad_personas || 'No especificado'}</p>
+                    <p><strong>Tipo de Evento:</strong> ${event.tipo_evento || 'No especificado'}</p>
+                    <p><strong>Estado:</strong> ${event.estado || 'Completado'}</p>
+                </div>
+                ${event.observacion ? `<p><strong>Descripción:</strong> ${event.observacion}</p>` : ''}
+                
+                <div class="detalles-evento">
+                    <h4>Detalles del Evento</h4>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Concepto</th>
+                                <th>Detalles</th>
+                                <th>Precio Unitario</th>
+                                <th>Cantidad</th>
+                                <th>Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody id="eventDetails-${event.id_evento}">
+                            <!-- Los detalles se cargarán dinámicamente -->
+                            <tr>
+                                <td colspan="5" style="text-align: center;">
+                                    <i class="fas fa-spinner fa-spin"></i> Cargando detalles...
+                                </td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr class="total-row">
+                                <td colspan="4" style="text-align: right;"><strong>Total del Evento:</strong></td>
+                                <td><strong id="eventTotal-${event.id_evento}">Cargando...</strong></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            `;
+
+            // Cargar detalles del evento
+            loadEventDetails(event.id_evento);
+
+            return eventDiv;
+        }
+
+        // Función para cargar detalles específicos de un evento
+        async function loadEventDetails(eventId) {
+            try {
+                const token = getToken();
+                if (!token) return;
+
+                const response = await fetch(`${API_BASE}/events/${eventId}/details`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Error al cargar detalles del evento');
+                }
+
+                const details = await response.json();
+                displayEventDetails(eventId, details);
+                
+            } catch (error) {
+                console.error('Error al cargar detalles del evento:', error);
+                const detailsBody = document.getElementById(`eventDetails-${eventId}`);
+                detailsBody.innerHTML = `
+                    <tr>
+                        <td colspan="5" style="text-align: center; color: #dc3545;">
+                            <i class="fas fa-exclamation-triangle"></i> Error al cargar detalles
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        // Función para mostrar los detalles de un evento
+        function displayEventDetails(eventId, details) {
+            const detailsBody = document.getElementById(`eventDetails-${eventId}`);
+            const totalElement = document.getElementById(`eventTotal-${eventId}`);
+
+            if (!details || details.length === 0) {
+                detailsBody.innerHTML = `
+                    <tr>
+                        <td colspan="5" style="text-align: center; color: #6c757d;">
+                            <i class="fas fa-info-circle"></i> No hay detalles registrados para este evento
+                        </td>
+                    </tr>
+                `;
+                totalElement.textContent = 'Q0.00';
+                return;
+            }
+
+            let total = 0;
+            let detailsHTML = '';
+
+            details.forEach(detail => {
+                const subtotal = detail.precio_unitario * detail.cantidad;
+                total += subtotal;
+
+                detailsHTML += `
+                    <tr>
+                        <td>${detail.tipo_producto || 'Producto'}</td>
+                        <td>${detail.nombre_producto || 'Sin nombre'}</td>
+                        <td>Q${detail.precio_unitario?.toFixed(2) || '0.00'}</td>
+                        <td>${detail.cantidad || 0}</td>
+                        <td>Q${subtotal.toFixed(2)}</td>
+                    </tr>
+                `;
+            });
+
+            detailsBody.innerHTML = detailsHTML;
+            totalElement.textContent = `Q${total.toFixed(2)}`;
+        }
+
+        // Función para formatear fecha
+        function formatDate(dateString) {
+            if (!dateString) return 'Fecha no disponible';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('es-GT', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
 
         // Filtrar eventos
         function filterEvents() {
@@ -288,6 +296,7 @@
             const typeFilter = document.getElementById('searchType').value;
             
             const eventos = document.querySelectorAll('.evento');
+            let visibleCount = 0;
             
             eventos.forEach(evento => {
                 const client = evento.querySelector('p:first-child').textContent.toLowerCase();
@@ -300,10 +309,20 @@
                 
                 if (clientMatch && dateMatch && typeMatch) {
                     evento.style.display = 'block';
+                    visibleCount++;
                 } else {
                     evento.style.display = 'none';
                 }
             });
+
+            // Mostrar mensaje si no hay eventos visibles
+            const noEventsMessage = document.getElementById('noEventsMessage');
+            if (visibleCount === 0 && eventos.length > 0) {
+                noEventsMessage.style.display = 'block';
+                noEventsMessage.innerHTML = '<i class="fas fa-search"></i> No se encontraron eventos con los filtros aplicados.';
+            } else {
+                noEventsMessage.style.display = 'none';
+            }
         }
 
         // Generar PDF
@@ -324,9 +343,12 @@
             
             // Obtener eventos visibles
             const eventos = document.querySelectorAll('.evento');
+            let hasVisibleEvents = false;
             
             eventos.forEach((evento, index) => {
                 if (evento.style.display !== 'none') {
+                    hasVisibleEvents = true;
+                    
                     // Salto de página si es necesario (excepto para el primer evento)
                     if (yPosition > 250 && index > 0) {
                         doc.addPage();
@@ -350,62 +372,127 @@
                     });
                     
                     // Descripción
-                    const descripcion = evento.querySelector('p:last-child').textContent;
-                    const splitDesc = doc.splitTextToSize(descripcion, 180);
-                    doc.text(splitDesc, 14, yPosition);
-                    yPosition += (splitDesc.length * 7) + 5;
+                    const descripcion = evento.querySelector('p:last-of-type')?.textContent;
+                    if (descripcion && !descripcion.includes('Detalles del Evento')) {
+                        const splitDesc = doc.splitTextToSize(descripcion, 180);
+                        doc.text(splitDesc, 14, yPosition);
+                        yPosition += (splitDesc.length * 7) + 5;
+                    }
                     
                     // Tabla de detalles
                     const table = evento.querySelector('.table');
-                    const rows = [];
-                    
-                    // Encabezados de la tabla
-                    const headers = [];
-                    table.querySelectorAll('thead th').forEach(th => {
-                        headers.push(th.textContent);
-                    });
-                    
-                    // Datos de la tabla
-                    table.querySelectorAll('tbody tr').forEach(tr => {
-                        const row = [];
-                        tr.querySelectorAll('td').forEach(td => {
-                            row.push(td.textContent);
+                    if (table) {
+                        const rows = [];
+                        
+                        // Encabezados de la tabla
+                        const headers = [];
+                        table.querySelectorAll('thead th').forEach(th => {
+                            headers.push(th.textContent);
                         });
-                        rows.push(row);
-                    });
-                    
-                    // Generar tabla
-                    doc.autoTable({
-                        head: [headers],
-                        body: rows,
-                        startY: yPosition,
-                        theme: 'grid',
-                        headStyles: {
-                            fillColor: [211, 84, 0],
-                            textColor: [255, 255, 255]
-                        },
-                        alternateRowStyles: {
-                            fillColor: [253, 235, 208]
+                        
+                        // Datos de la tabla (excluir filas de carga)
+                        table.querySelectorAll('tbody tr').forEach(tr => {
+                            const row = [];
+                            const firstCell = tr.querySelector('td:first-child');
+                            if (firstCell && !firstCell.innerHTML.includes('fa-spinner') && 
+                                !firstCell.innerHTML.includes('fa-info-circle') && 
+                                !firstCell.innerHTML.includes('fa-exclamation-triangle')) {
+                                tr.querySelectorAll('td').forEach(td => {
+                                    row.push(td.textContent);
+                                });
+                                rows.push(row);
+                            }
+                        });
+                        
+                        // Generar tabla solo si hay datos
+                        if (rows.length > 0) {
+                            doc.autoTable({
+                                head: [headers],
+                                body: rows,
+                                startY: yPosition,
+                                theme: 'grid',
+                                headStyles: {
+                                    fillColor: [211, 84, 0],
+                                    textColor: [255, 255, 255]
+                                },
+                                alternateRowStyles: {
+                                    fillColor: [253, 235, 208]
+                                }
+                            });
+                            
+                            // Actualizar posición Y después de la tabla
+                            yPosition = doc.lastAutoTable.finalY + 15;
                         }
-                    });
-                    
-                    // Actualizar posición Y después de la tabla
-                    yPosition = doc.lastAutoTable.finalY + 15;
+                    }
                 }
             });
+
+            if (!hasVisibleEvents) {
+                doc.setFontSize(14);
+                doc.setTextColor(100, 100, 100);
+                doc.text('No hay eventos para mostrar', 105, 50, { align: 'center' });
+            }
             
             // Guardar PDF
             doc.save('historial-eventos-maria-chula.pdf');
         }
 
-        // Cargar eventos desde localStorage si existen
+        // Cargar eventos cuando la página esté lista
         document.addEventListener('DOMContentLoaded', () => {
-            const savedEvents = localStorage.getItem('mc_events');
-            if (savedEvents) {
-                // En una implementación real, aquí se cargarían los eventos guardados
-                console.log('Eventos cargados desde localStorage');
-            }
+            loadEvents();
         });
+
+        // Agregar estilos para los mensajes
+        const style = document.createElement('style');
+        style.textContent = `
+            .loading-message, .no-events-message {
+                text-align: center;
+                padding: 40px;
+                color: #6c757d;
+                font-size: 16px;
+            }
+            
+            .loading-message i, .no-events-message i {
+                margin-right: 10px;
+                font-size: 20px;
+            }
+            
+            .evento {
+                margin-bottom: 30px;
+                padding: 20px;
+                border: 1px solid #e0e0e0;
+                border-radius: 8px;
+                background: #f9f9f9;
+            }
+            
+            .evento h3 {
+                color: #d35400;
+                margin-bottom: 15px;
+            }
+            
+            .evento-info {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+                margin-bottom: 15px;
+            }
+            
+            @media (max-width: 768px) {
+                .evento-info {
+                    grid-template-columns: 1fr;
+                }
+            }
+            
+            .detalles-evento {
+                margin-top: 20px;
+            }
+            
+            .total-row {
+                background-color: #fff3cd;
+                font-weight: bold;
+            }
+        `;
+        document.head.appendChild(style);
     </script>
 </body>
 </html>

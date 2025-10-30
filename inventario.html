@@ -18,14 +18,15 @@
         <div class="menu-list">
             <a href="menu.html" class="menu-item"><i class="fas fa-utensils"></i> Menú</a>
             <a href="inventory.html" class="menu-item active"><i class="fas fa-boxes"></i> Inventario</a>
-            <a href="dashboard.html" class="menu-item"><i class="fas fa-home"></i> Dashboard</a>
+            <a href="dashboard.html" class="menu-item"><i class="fas fa-chart-bar"></i> Dashboard</a>
             <a href="admin-menus.html" class="menu-item"><i class="fas fa-list-alt"></i> Admin Menús</a>
             <a href="admin-users.html" class="menu-item"><i class="fas fa-users"></i> Admin Usuarios</a>
             <a href="billing.html" class="menu-item"><i class="fas fa-receipt"></i> Facturación</a>
             <a href="events.html" class="menu-item"><i class="fas fa-calendar-alt"></i> Eventos</a>
             <a href="history-events.html" class="menu-item"><i class="fas fa-history"></i> Historial Eventos</a>
             <a href="history-orders.html" class="menu-item"><i class="fas fa-clipboard-list"></i> Historial Pedidos</a>
-            <a href="cola_pedidos_chef.html" class="menu-item"><i class="fas fa-tasks"></i> Cola de pedidos</a>
+            <a href="queue.html" class="menu-item"><i class="fas fa-tasks"></i> Cola de pedidos</a>
+            <a href="cash-register.html" class="menu-item"><i class="fas fa-cash-register"></i> Caja Registradora</a>
         </div>
     </aside>
 
@@ -46,10 +47,10 @@
                         <input class="input" id="inv_name" placeholder="Ingrediente" required>
                     </div>
                     <div class="input-group">
-                        <input class="input" id="inv_qty" placeholder="Cantidad (stock inicial)" type="number" step="0.01" required>
+                        <input class="input" id="inv_qty" placeholder="Cantidad (stock inicial)" type="number" step="0.01" min="0" required>
                     </div>
                     <div class="input-group">
-                        <input class="input" id="inv_unit" placeholder="Unidad (kg, lt y lb.)" required>
+                        <input class="input" id="inv_unit" placeholder="Unidad (kg, lt, lb)" required>
                     </div>
                 </div>
                 <div style="margin-top:16px">
@@ -94,7 +95,6 @@
         </div>
     </main>
 </div>
-
 <!-- MODAL DE MENSAJE -->
 <div id="modalMsg" class="modal">
     <div class="modal-content">
@@ -112,7 +112,6 @@
         </div>
     </div>
 </div>
-
 <!-- MODAL DE MOVIMIENTO -->
 <div id="modalMove" class="modal">
     <div class="modal-content">
@@ -125,7 +124,7 @@
         <div class="modal-body">
             <p id="modalMoveText"></p>
             <div class="input-group">
-                <input id="moveCantidad" class="input" type="number" step="0.01" placeholder="Cantidad" required>
+                <input id="moveCantidad" class="input" type="number" step="0.01" min="0.01" placeholder="Cantidad" required>
             </div>
             <div class="input-group">
                 <input id="moveObs" class="input" type="text" placeholder="Observación (opcional)">
@@ -137,7 +136,6 @@
         </div>
     </div>
 </div>
-
 <!-- MODAL DE ELIMINACIÓN -->
 <div id="modalDelete" class="modal">
     <div class="modal-content">
@@ -158,15 +156,48 @@
 </div>
 
 <script>
-const API = 'http://localhost:3000';
+// ✅ PUERTO CORREGIDO
+const API = 'http://localhost:5000';
+
+// ✅ VERIFICACIÓN INICIAL
+const token = localStorage.getItem('token');
+const currentUser = localStorage.getItem('currentUser');
+
+if (!token || !currentUser) {
+    window.location.href = 'login.html';
+}
+
 let inventoryData = [];
 let currentSort = {column:null, asc:true};
 let deleteId = null;
 
 // Helpers
 function qs(sel){ return document.querySelector(sel); }
-function getToken(){ return localStorage.getItem('token'); }
-function requireAuth(){ if(!getToken()){ window.location.href='login.html'; throw new Error('No autorizado'); } }
+
+// ✅ FUNCIÓN PARA HEADERS DE AUTORIZACIÓN
+function getAuthHeaders() {
+    return {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+    };
+}
+
+// ✅ FUNCIÓN PARA MANEJAR RESPUESTAS DE API
+async function handleApiResponse(response) {
+    if (response.status === 401) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('currentUser');
+        window.location.href = 'login.html';
+        throw new Error('Sesión expirada');
+    }
+    
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Error desconocido' }));
+        throw new Error(errorData.error || `Error ${response.status}`);
+    }
+    
+    return await response.json();
+}
 
 // ==== MODALES ====
 // Mensajes simples
@@ -274,16 +305,19 @@ function formatDateTime(iso){
 
 // ==== RENDER TABLA ====
 async function renderInv(){
-    requireAuth();
-    const res = await fetch(API+'/inventario',{headers:{'Authorization':'Bearer '+getToken()}});
-    if(!res.ok){
-        showError('Error al obtener inventario');
-        return;
+    try {
+        const response = await fetch(API+'/inventario', {
+            headers: getAuthHeaders()
+        });
+        
+        const data = await handleApiResponse(response);
+        inventoryData = data;
+        populateUnitFilter();
+        filterAndRenderTable();
+    } catch (error) {
+        console.error('Error al cargar inventario:', error);
+        showError('Error al obtener inventario: ' + error.message);
     }
-    const data = await res.json();
-    inventoryData = data;
-    populateUnitFilter();
-    filterAndRenderTable();
 }
 
 function populateUnitFilter(){
@@ -346,43 +380,72 @@ function filterAndRenderTable(){
 }
 
 // ==== CRUD ====
-async function createInsumo({nombre,cantidad,unidad}){
-    requireAuth();
-    const res = await fetch(API+'/insumos',{
-        method:'POST',
-        headers:{'Content-Type':'application/json','Authorization':'Bearer '+getToken()},
-        body: JSON.stringify({nombre,descripcion:null,stock:Number(cantidad)||0,unidad_medida:unidad,estado:"activo"})
-    });
-    if(!res.ok) return showError('Error al crear insumo');
-    await showSuccess('Insumo creado exitosamente');
-    renderInv();
+async function createInsumo({nombre, cantidad, unidad}){
+    try {
+        const response = await fetch(API+'/insumos',{
+            method:'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify({
+                nombre,
+                descripcion:null,
+                stock:Number(cantidad)||0,
+                unidad_medida:unidad,
+                estado:"activo"
+            })
+        });
+        
+        await handleApiResponse(response);
+        await showSuccess('Insumo creado exitosamente');
+        renderInv();
+    } catch (error) {
+        console.error('Error al crear insumo:', error);
+        showError('Error al crear insumo: ' + error.message);
+    }
 }
 
 async function delInsumo(id){
-    requireAuth();
     const ok = await showDeleteModal(id);
     if(!ok) return;
-    const res = await fetch(API+`/insumos/${id}`,{method:'DELETE',headers:{'Authorization':'Bearer '+getToken()}});
-    if(!res.ok) return showError('Error al eliminar insumo');
-    await showSuccess('Insumo eliminado correctamente');
-    renderInv();
+    
+    try {
+        const response = await fetch(API+`/insumos/${id}`,{
+            method:'DELETE',
+            headers: getAuthHeaders()
+        });
+        
+        await handleApiResponse(response);
+        await showSuccess('Insumo eliminado correctamente');
+        renderInv();
+    } catch (error) {
+        console.error('Error al eliminar insumo:', error);
+        showError('Error al eliminar insumo: ' + error.message);
+    }
 }
 
 async function editInsumo(id){
-    requireAuth();
-    const res = await fetch(API+'/insumos',{headers:{'Authorization':'Bearer '+getToken()}});
-    if(!res.ok) return showError('Error al obtener insumos');
-    const list = await res.json();
-    const ins = list.find(x=>x.id_insumo===id);
-    if(!ins) return showError('Insumo no encontrado');
-    qs('#inv_name').value = ins.nombre;
-    qs('#inv_qty').value = Number(ins.stock)||0;
-    qs('#inv_unit').value = ins.unidad_medida||'';
-    qs('#invForm').dataset.editing = id;
-    qs('#invForm button[type="submit"]').innerHTML='<i class="fas fa-save"></i> Actualizar';
-    qs('#invCancelEdit').style.display='inline-block';
+    try {
+        const response = await fetch(API+'/insumos', {
+            headers: getAuthHeaders()
+        });
+        
+        const list = await handleApiResponse(response);
+        const ins = list.find(x=>x.id_insumo===id);
+        
+        if(!ins) return showError('Insumo no encontrado');
+        
+        qs('#inv_name').value = ins.nombre;
+        qs('#inv_qty').value = Number(ins.stock)||0;
+        qs('#inv_unit').value = ins.unidad_medida||'';
+        qs('#invForm').dataset.editing = id;
+        qs('#invForm button[type="submit"]').innerHTML='<i class="fas fa-save"></i> Actualizar';
+        qs('#invCancelEdit').style.display='inline-block';
+    } catch (error) {
+        console.error('Error al cargar insumo:', error);
+        showError('Error al cargar insumo: ' + error.message);
+    }
 }
 
+// Cancelar edición
 qs('#invCancelEdit').addEventListener('click', ()=>{
     qs('#invForm').reset();
     delete qs('#invForm').dataset.editing;
@@ -390,29 +453,43 @@ qs('#invCancelEdit').addEventListener('click', ()=>{
     qs('#invCancelEdit').style.display='none';
 });
 
+// Manejar formulario
 async function handleInvForm(e){
     e.preventDefault();
-    requireAuth();
+    
     const nombre = qs('#inv_name').value.trim();
     const cantidad = parseFloat(qs('#inv_qty').value);
     const unidad = qs('#inv_unit').value.trim();
     const editingId = qs('#invForm').dataset.editing;
 
     if(!nombre || !unidad) return showError('Nombre y unidad requeridos');
+    if(cantidad < 0) return showError('La cantidad no puede ser negativa');
 
     if(!editingId){
         await createInsumo({nombre,cantidad,unidad});
     } else {
-        const res = await fetch(API+`/insumos/${editingId}`,{
-            method:'PUT',
-            headers:{'Content-Type':'application/json','Authorization':'Bearer '+getToken()},
-            body: JSON.stringify({nombre,descripcion:null,stock:cantidad,unidad_medida:unidad,estado:'activo'})
-        });
-        if(!res.ok) return showError('Error al actualizar insumo');
-        await showSuccess('Insumo actualizado correctamente');
-        delete qs('#invForm').dataset.editing;
-        qs('#invForm button[type="submit"]').innerHTML='<i class="fas fa-save"></i> Guardar';
-        qs('#invCancelEdit').style.display='none';
+        try {
+            const response = await fetch(API+`/insumos/${editingId}`,{
+                method:'PUT',
+                headers: getAuthHeaders(),
+                body: JSON.stringify({
+                    nombre,
+                    descripcion:null,
+                    stock:cantidad,
+                    unidad_medida:unidad,
+                    estado:'activo'
+                })
+            });
+            
+            await handleApiResponse(response);
+            await showSuccess('Insumo actualizado correctamente');
+            delete qs('#invForm').dataset.editing;
+            qs('#invForm button[type="submit"]').innerHTML='<i class="fas fa-save"></i> Guardar';
+            qs('#invCancelEdit').style.display='none';
+        } catch (error) {
+            console.error('Error al actualizar insumo:', error);
+            showError('Error al actualizar insumo: ' + error.message);
+        }
     }
 
     qs('#invForm').reset();
@@ -421,17 +498,28 @@ async function handleInvForm(e){
 
 // ==== MOVIMIENTO ====
 async function movimientoPrompt(id_insumo,nombre){
-    requireAuth();
     const data = await showMoveModal(nombre);
     if(!data || !data.tipo) return;
-    const res = await fetch(API+'/inventario/movimiento',{
-        method:'POST',
-        headers:{'Content-Type':'application/json','Authorization':'Bearer '+getToken()},
-        body: JSON.stringify({id_insumo,tipo_movimiento:data.tipo,cantidad:data.cantidad,observacion:data.obs})
-    });
-    if(!res.ok) return showError('Error al registrar movimiento');
-    await showSuccess('Movimiento registrado exitosamente');
-    renderInv();
+    
+    try {
+        const response = await fetch(API+'/inventario/movimiento',{
+            method:'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify({
+                id_insumo,
+                tipo_movimiento:data.tipo,
+                cantidad:data.cantidad,
+                observacion:data.obs
+            })
+        });
+        
+        await handleApiResponse(response);
+        await showSuccess('Movimiento registrado exitosamente');
+        renderInv();
+    } catch (error) {
+        console.error('Error al registrar movimiento:', error);
+        showError('Error al registrar movimiento: ' + error.message);
+    }
 }
 
 // FILTROS y ORDEN
@@ -448,10 +536,12 @@ document.querySelectorAll('#invTable th[data-column]').forEach(th=>{
     });
 });
 
+// INICIALIZACIÓN
 document.addEventListener('DOMContentLoaded', ()=>{
-    requireAuth();
-    renderInv();
-    qs('#invForm').addEventListener('submit',handleInvForm);
+    if (token && currentUser) {
+        renderInv();
+        qs('#invForm').addEventListener('submit',handleInvForm);
+    }
 });
 </script>
 </body>

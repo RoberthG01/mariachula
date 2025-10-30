@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Elegir Cola de Pedidos - María Chula</title>
+  <link rel="stylesheet" href="panel.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="icon" href="fotos/iconomch.ico" type="image/x-icon">
+  <style>
+    /* Animación de entrada suave */
+    @keyframes zoomIn {
+      from {
+        opacity: 0;
+        transform: scale(0.8);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    /* Imágenes cuadradas */
+    .option-image {
+      width: 120px;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 12px;
+      margin-bottom: 15px;
+      border: 3px solid var(--color-primary);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .option-card:hover .option-image {
+      transform: scale(1.05);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .option-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      text-decoration: none;
+      background-color: #fff;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      animation: zoomIn 0.6s ease;
+    }
+
+    .option-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .options-grid {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      flex-wrap: wrap;
+    }
+
+    .page-title {
+      text-align: center;
+      margin-bottom: 25px;
+      color: var(--color-primary);
+    }
+
+    .btn.primary {
+      background-color: var(--color-primary);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .btn.primary:hover {
+      background-color: #6a3171;
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <main class="main">
+    <div class="header">
+      <div class="title">Seleccionar Cola de Pedidos - María Chula</div>
+      <div class="actions">
+        <div class="user-info">
+          <i class="fas fa-user"></i>
+          <span id="username">Usuario</span>
+        </div>
+        <button class="btn ghost" id="logoutBtn">
+          <i class="fas fa-sign-out-alt"></i>Cerrar Sesión
+        </button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="options-container">
+        <h1 class="page-title">Elige una cola de pedidos</h1>
+
+        <!-- Botón para volver al panel principal -->
+        <div style="text-align: center; margin-bottom: 25px;">
+          <button class="btn primary" id="backToPanel">
+            <i class="fas fa-arrow-left"></i> Volver al Panel Principal
+          </button>
+        </div>
+
+        <div class="options-grid" id="optionsGrid">
+          <!-- Opciones cargadas dinámicamente -->
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Modal de confirmación de cierre de sesión -->
+<div class="modal" id="logoutModal">
+  <div class="modal-content">
+    <h2><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</h2>
+    <p>¿Estás seguro de que deseas cerrar la sesión?</p>
+    <div class="modal-buttons">
+      <button class="btn ghost" id="cancelLogout">Cancelar</button>
+      <button class="btn primary" id="confirmLogout">Sí, Cerrar Sesión</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Verificar sesión
+    const token = localStorage.getItem('token');
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+
+    if (!token || !currentUser) {
+      window.location.href = 'login.html';
+      return;
+    }
+
+    // Mostrar nombre del usuario
+    document.getElementById('username').textContent =
+      currentUser.nombre || currentUser.name || "Usuario";
+
+    // Referencias del DOM
+    const optionsGrid = document.getElementById('optionsGrid');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const logoutModal = document.getElementById('logoutModal');
+    const cancelLogout = document.getElementById('cancelLogout');
+    const confirmLogout = document.getElementById('confirmLogout');
+    const backToPanel = document.getElementById('backToPanel');
+
+    // 🔹 Aquí colocas las rutas reales de tus imágenes
+    const colaOptions = [
+      { 
+        id: 'cola_chef', 
+        image: 'fotos/iconoChef.png',   
+        title: 'Cola de Pedidos - Chef', 
+        desc: 'Pedidos en preparación', 
+        url: 'cola_pedidos_chef.html' 
+      },
+      { 
+        id: 'cola_mesero', 
+        image: 'fotos/iconoMesero.png',
+        title: 'Cola de Pedidos - Mesero',
+        desc: 'Pedidos listos para servir',
+        url: 'cola_pedidos_mesero.html'
+      }
+    ];
+
+    // Renderizar opciones
+    function renderOptions() {
+      optionsGrid.innerHTML = '';
+      colaOptions.forEach(option => {
+        const optionCard = document.createElement('a');
+        optionCard.className = 'option-card';
+        optionCard.href = option.url;
+        optionCard.dataset.id = option.id;
+        optionCard.innerHTML = `
+          <img src="${option.image}" alt="${option.title}" class="option-image">
+          <h3>${option.title}</h3>
+          <p>${option.desc}</p>
+        `;
+        optionsGrid.appendChild(optionCard);
+      });
+    }
+
+    // Acción del botón "Volver al Panel"
+    backToPanel.addEventListener('click', () => {
+      window.location.href = 'panel.html';
+    });
+
+    // Cerrar sesión
+    function logout() {
+      localStorage.removeItem('currentUser');
+      localStorage.removeItem('token');
+      window.location.href = 'login.html';
+    }
+
+    logoutBtn.addEventListener('click', () => {
+      logoutModal.style.display = 'flex';
+    });
+
+    cancelLogout.addEventListener('click', () => {
+      logoutModal.style.display = 'none';
+    });
+
+    confirmLogout.addEventListener('click', logout);
+
+    logoutModal.addEventListener('click', e => {
+      if (e.target === logoutModal) logoutModal.style.display = 'none';
+    });
+
+    // Inicializar
+    renderOptions();
+  });
+</script>
+</body>
+</html>

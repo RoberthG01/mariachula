@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Clientes - María Chula</title>
+  <link rel="stylesheet" href="clientes.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <link rel="icon" href="fotos/iconomch.ico" type="image/x-icon" />
+</head>
+<body>
+<div class="app">
+  <!-- Sidebar actualizado -->
+  <aside class="sidebar">
+    <div class="logo">
+        <img src="fotos/logomch.png" alt="Logo María Chula">
+        <h2>María Chula</h2>
+    </div>
+    <div class="menu-list">
+      <a href="menu.html" class="menu-item"><i class="fas fa-utensils"></i> Menú</a>
+      <a href="inventory.html" class="menu-item"><i class="fas fa-boxes"></i> Inventario</a>
+      <a href="dashboard.html" class="menu-item"><i class="fas fa-chart-bar"></i> Dashboard</a>
+      <a href="admin-menus.html" class="menu-item"><i class="fas fa-list-alt"></i> Admin Menús</a>
+      <a href="admin-users.html" class="menu-item"><i class="fas fa-users"></i> Admin Usuarios</a>
+      <a href="billing.html" class="menu-item"><i class="fas fa-receipt"></i> Facturación</a>
+      <a href="events.html" class="menu-item"><i class="fas fa-calendar-alt"></i> Eventos</a>
+      <a href="history-events.html" class="menu-item"><i class="fas fa-history"></i> Historial Eventos</a>
+      <a href="history-orders.html" class="menu-item"><i class="fas fa-clipboard-list"></i> Historial Pedidos</a>
+      <a href="queue.html" class="menu-item"><i class="fas fa-tasks"></i> Cola de pedidos</a>
+      <a href="cash-register.html" class="menu-item"><i class="fas fa-cash-register"></i> Caja Registradora</a>
+      <a href="clientes.html" class="menu-item active"><i class="fas fa-user-friends"></i> Clientes</a>
+    </div>
+  </aside>
+  <!-- Contenido principal -->
+  <main class="main">
+    <div class="header">
+      <h1 class="title"><i class="fas fa-users"></i> Lista de Clientes</h1>
+      <a href="menu.html" class="back-button"><i class="fas fa-arrow-left"></i> Regresar</a>
+    </div>
+    <div class="card">
+      <div class="table-container">
+        <table class="clientes-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nombre</th>
+              <th>Apellido</th>
+              <th>Correo</th>
+              <th>Teléfono</th>
+              <th>Dirección</th>
+              <th>Fecha Registro</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>María</td>
+              <td>González</td>
+              <td>maria@example.com</td>
+              <td>555-123-4567</td>
+              <td>Av. Central #123</td>
+              <td>2025-10-29</td>
+              <td class="acciones">
+                <button class="btn-action edit"><i class="fas fa-edit"></i></button>
+                <button class="btn-action delete" onclick="abrirModalEliminar()"><i class="fas fa-trash"></i></button>
+              </td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>Carlos</td>
+              <td>López</td>
+              <td>carlos@example.com</td>
+              <td>555-987-6543</td>
+              <td>Calle Reforma #45</td>
+              <td>2025-10-15</td>
+              <td class="acciones">
+                <button class="btn-action edit"><i class="fas fa-edit"></i></button>
+                <button class="btn-action delete" onclick="abrirModalEliminar()"><i class="fas fa-trash"></i></button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+<!-- Modal Eliminar -->
+<div class="modal" id="modalEliminar">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Confirmar eliminación</h3>
+      <button class="close-modal" onclick="cerrarModalEliminar()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p>¿Seguro que deseas eliminar este cliente? Esta acción no se puede deshacer.</p>
+      <div class="modal-actions">
+        <button class="btn ghost" onclick="cerrarModalEliminar()">Cancelar</button>
+        <button class="btn primary">Eliminar</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  // Modal Eliminar
+  const modalEliminar = document.getElementById('modalEliminar');
+  function abrirModalEliminar() { modalEliminar.classList.add('active'); }
+  function cerrarModalEliminar() { modalEliminar.classList.remove('active'); }
+</script>
+</body>
+</html>

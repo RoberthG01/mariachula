@@ -17,39 +17,46 @@
     </div>
     <div class="menu-list">
       <a href="menu.html" class="menu-item"><i class="fas fa-utensils"></i> Menú</a>
-      <a href="inventory.html" class="menu-item"><i class="fas fa-boxes"></i> Inventario</a>
-      <a href="dashboard.html" class="menu-item"><i class="fas fa-home"></i> Dashboard</a>
-      <a href="admin-menus.html" class="menu-item"><i class="fas fa-list-alt"></i> Admin Menús</a>
-      <a href="admin-users.html" class="menu-item"><i class="fas fa-users"></i> Admin Usuarios</a>
-      <a href="billing.html" class="menu-item"><i class="fas fa-receipt"></i> Facturación</a>
-      <a href="events.html" class="menu-item"><i class="fas fa-calendar-alt"></i> Eventos</a>
-      <a href="history-events.html" class="menu-item"><i class="fas fa-history"></i> Historial Eventos</a>
-      <a href="history-orders.html" class="menu-item"><i class="fas fa-clipboard-list"></i> Historial Pedidos</a>
-      <a href="queue.html" class="menu-item"><i class="fas fa-tasks"></i> Cola de pedidos</a>
+      <a href="inventario.html" class="menu-item"><i class="fas fa-boxes"></i> Inventario</a>
+      <a href="dashboard.html" class="menu-item"><i class="fas fa-chart-bar"></i> Dashboard</a>
+      <a href="gestionar_menu.html" class="menu-item"><i class="fas fa-list-alt"></i> Admin Menús</a>
+      <a href="gestionar_admin.html" class="menu-item active"><i class="fas fa-users"></i> Admin Usuarios</a>
+      <a href="factura.html" class="menu-item"><i class="fas fa-receipt"></i> Facturación</a>
+      <a href="eventos.html" class="menu-item"><i class="fas fa-calendar-alt"></i> Eventos</a>
+      <a href="historial_eventos.html" class="menu-item"><i class="fas fa-history"></i> Historial Eventos</a>
+      <a href="historial_pedidos.html" class="menu-item"><i class="fas fa-clipboard-list"></i> Historial Pedidos</a>
+      <a href="elige_cola.html" class="menu-item"><i class="fas fa-tasks"></i> Cola de pedidos</a>
+      <a href="cash_register.html" class="menu-item"><i class="fas fa-cash-register"></i> Caja Registradora</a>
     </div>
   </aside>
-
   <main class="main">
     <div class="header">
       <div class="title">Administración de Usuarios</div>
-      <a href="panel.html" class="back-button">
-        <i class="fas fa-arrow-left"></i> Regresar
-      </a>
+      <div class="user-info">
+        <span id="currentUserRole"></span>
+        <a href="panel.html" class="back-button">
+          <i class="fas fa-arrow-left"></i> Regresar
+        </a>
+      </div>
     </div>
-    
     <div class="card">
+      <div id="currentUserInfo" class="user-info-banner" style="display: none;">
+        <i class="fas fa-info-circle"></i>
+        <span id="userInfoText"></span>
+      </div>
       <form id="userForm">
-        <input type="hidden" id="u_id"> <!-- campo oculto para editar -->
+        <input type="hidden" id="u_id">
 
         <div class="form-row">
           <input id="u_name" class="input" placeholder="Nombre" required>
           <input id="u_lastname" class="input" placeholder="Apellido" required>
-          <input id="u_user" class="input" placeholder="Nombre de usuario" required>
+          <input id="u_user" class="input" placeholder="Correo electrónico" required type="email">
           <input id="u_pass" class="input" placeholder="Contraseña" type="password">
           <select id="u_role" class="input" required>
-            <option value="Administrador">Administrador</option>
-            <option value="Mesero">Mesero</option>
-            <option value="Cocinero">Cocinero</option>
+            <option value="">Seleccionar rol</option>
+            <option value="admin">Administrador</option>
+            <option value="mesero">Mesero</option>
+            <option value="cocinero">Cocinero</option>
           </select>          
         </div>
         <div style="margin-top:8px">
@@ -74,119 +81,227 @@
 </div>
 
 <script>
-  const API_URL = "http://localhost:3000/usuarios";
+  const API_URL = "http://localhost:5000/usuarios";
+  
   const token = localStorage.getItem("token");
+  const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
+  
+  if (!token || !currentUser.id) {
+    window.location.href = 'login.html';
+  }
 
   let editMode = false;
+  let currentUserRole = currentUser.rol || '';
 
-  // === LISTAR USUARIOS ===
-  async function refreshUsers() {
-    const res = await fetch(API_URL, {
-      headers: { "Authorization": `Bearer ${token}` }
-    });
-    const users = await res.json();
+  // ✅ Mostrar información del usuario actual
+  function showCurrentUserInfo() {
+    const userInfoBanner = document.getElementById('currentUserInfo');
+    const userInfoText = document.getElementById('userInfoText');
+    const currentUserRoleElement = document.getElementById('currentUserRole');
 
-    const usersList = document.getElementById("usersList");
-    if (!Array.isArray(users) || users.length === 0) {
-      usersList.innerHTML = '<p style="text-align:center;color:gray;">No hay usuarios registrados</p>';
-      return;
+    if (currentUserRoleElement) {
+      currentUserRoleElement.textContent = `Conectado como: ${currentUser.nombre} (${currentUserRole})`;
     }
 
-    usersList.innerHTML = users.map(user => `
-      <div class="user-card">
-        <div class="user-info">
-          <strong>${user.nombre} ${user.apellido}</strong>
-          <div>${user.correo} · ${user.rol || 'Sin rol'}</div>
-        </div>
-        <div class="user-actions">
-          <button class="btn" onclick='editUser(${JSON.stringify(user)})'>
-            <i class="fas fa-edit"></i> Editar
-          </button>
-          <button class="btn ghost" onclick='deleteUser(${user.id_usuario})'>
-            <i class="fas fa-trash"></i> Eliminar
-          </button>
-        </div>
-      </div>
-    `).join('');
+    if (userInfoBanner && userInfoText) {
+      const role = currentUserRole.toLowerCase();
+      if (role === 'admin' || role === 'administrador') {
+        userInfoText.textContent = 'Tienes permisos de administrador completo';
+        userInfoBanner.style.background = '#e8f5e8';
+        userInfoBanner.style.color = '#2e7d32';
+        userInfoBanner.style.border = '1px solid #4caf50';
+      } else {
+        userInfoText.textContent = 'Tienes permisos limitados. Solo puedes editar tu propia información.';
+        userInfoBanner.style.background = '#fff3cd';
+        userInfoBanner.style.color = '#856404';
+        userInfoBanner.style.border = '1px solid #ffeaa7';
+      }
+      userInfoBanner.style.display = 'flex';
+    }
   }
 
-  // === CREAR / ACTUALIZAR USUARIO ===
+  function getAuthHeaders() {
+    return {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`
+    };
+  }
+
+  async function handleApiResponse(response) {
+    if (response.status === 401) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("currentUser");
+      window.location.href = 'login.html';
+      throw new Error('Sesión expirada');
+    }
+    if (response.status === 403) throw new Error('No tienes permisos para realizar esta acción');
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ error: 'Error desconocido' }));
+      throw new Error(errorData.error || `Error ${response.status}`);
+    }
+    return await response.json();
+  }
+
+  // ✅ Verificar permisos de usuario
+  function checkUserPermissions(targetUserId = null) {
+    const role = currentUserRole.toLowerCase();
+
+    if (role !== 'admin' && role !== 'administrador') {
+      if (targetUserId && targetUserId !== currentUser.id) {
+        mostrarModal('No tienes permisos para editar otros usuarios');
+        return false;
+      }
+      if (!targetUserId) {
+        mostrarModal('Solo los administradores pueden crear nuevos usuarios');
+        return false;
+      }
+    }
+    return true;
+  }
+
+  // === Listar usuarios ===
+  async function refreshUsers() {
+    try {
+      const response = await fetch(API_URL, { headers: getAuthHeaders() });
+      const users = await handleApiResponse(response);
+      const usersList = document.getElementById("usersList");
+
+      if (!Array.isArray(users) || users.length === 0) {
+        usersList.innerHTML = '<p style="text-align:center;color:gray;">No hay usuarios registrados</p>';
+        return;
+      }
+
+      usersList.innerHTML = users.map(user => {
+        const canEdit = currentUserRole.toLowerCase().includes('admin') || user.id_usuario === currentUser.id;
+        const canDelete = currentUserRole.toLowerCase().includes('admin') && user.id_usuario !== currentUser.id;
+        
+        return `
+          <div class="user-card">
+            <div class="user-info">
+              <strong>${user.nombre} ${user.apellido}</strong>
+              <div>${user.correo} · ${user.rol || 'Sin rol'}</div>
+              <small>Estado: ${user.estado || 'activo'} | ID: ${user.id_usuario}</small>
+            </div>
+            <div class="user-actions">
+              <button class="btn" onclick='editUser(${JSON.stringify(user).replace(/'/g, "\\'")})' ${!canEdit ? 'disabled' : ''}>
+                <i class="fas fa-edit"></i> Editar
+              </button>
+              <button class="btn ghost" onclick='deleteUser(${user.id_usuario})' ${!canDelete ? 'disabled' : ''}>
+                <i class="fas fa-trash"></i> Eliminar
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    } catch (error) {
+      console.error('Error al cargar usuarios:', error);
+      mostrarModal('Error al cargar usuarios: ' + error.message);
+    }
+  }
+
+  // === Crear / Actualizar usuario ===
   document.getElementById("userForm").addEventListener("submit", async function(e) {
     e.preventDefault();
+    try {
+      const id = document.getElementById("u_id").value;
+      const email = document.getElementById("u_user").value;
+      if (!checkUserPermissions(id)) return;
 
-    const id = document.getElementById("u_id").value;
-    const body = {
-      nombre: document.getElementById("u_name").value,
-      apellido: document.getElementById("u_lastname").value,
-      correo: document.getElementById("u_user").value + "@mariachula.com",
-      password: document.getElementById("u_pass").value || undefined,
-      telefono: "-",
-      estado: "activo",
-      rol: document.getElementById("u_role").value
-    };
+      const body = {
+        nombre: document.getElementById("u_name").value,
+        apellido: document.getElementById("u_lastname").value,
+        correo: email,
+        password: document.getElementById("u_pass").value || undefined,
+        telefono: "-",
+        estado: "activo",
+        rol: document.getElementById("u_role").value
+      };
 
-    if (!editMode) {
-      // Crear
-      await fetch(API_URL, {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify(body)
-      });
-      mostrarModal("Usuario creado con éxito ✅");
-    } else {
-      // Actualizar
-      await fetch(`${API_URL}/${id}`, {
-        method: "PUT",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify(body)
-      });
-      mostrarModal("Usuario actualizado con éxito ✅");
+      if (!body.rol) {
+        mostrarModal('Por favor selecciona un rol');
+        return;
+      }
+
+      let response;
+      if (!editMode) {
+        if (!currentUserRole.toLowerCase().includes('admin')) {
+          mostrarModal('Solo los administradores pueden crear nuevos usuarios');
+          return;
+        }
+        if (!body.password) {
+          mostrarModal('La contraseña es requerida para crear un nuevo usuario');
+          return;
+        }
+        response = await fetch(API_URL, {
+          method: "POST",
+          headers: getAuthHeaders(),
+          body: JSON.stringify(body)
+        });
+      } else {
+        response = await fetch(`${API_URL}/${id}`, {
+          method: "PUT",
+          headers: getAuthHeaders(),
+          body: JSON.stringify(body)
+        });
+      }
+
+      const result = await handleApiResponse(response);
+      mostrarModal(editMode ? "Usuario actualizado con éxito ✅" : "Usuario creado con éxito ✅");
+      e.target.reset();
+      document.getElementById("u_id").value = "";
+      editMode = false;
+      refreshUsers();
+    } catch (error) {
+      console.error('Error al guardar usuario:', error);
+      mostrarModal('Error: ' + error.message);
     }
-
-    e.target.reset();
-    document.getElementById("u_id").value = "";
-    editMode = false;
-    refreshUsers();
   });
 
-  // === ELIMINAR USUARIO ===
+  // === Eliminar usuario ===
   async function deleteUser(id) {
+    if (!checkUserPermissions(id)) return;
+    if (id === currentUser.id) {
+      mostrarModal('No puedes eliminar tu propio usuario');
+      return;
+    }
     if (!confirm("¿Seguro que deseas eliminar este usuario?")) return;
-    await fetch(`${API_URL}/${id}`, {
-      method: "DELETE",
-      headers: { "Authorization": `Bearer ${token}` }
-    });
-    mostrarModal("Usuario eliminado correctamente 🗑️");
-    refreshUsers();
+    try {
+      const response = await fetch(`${API_URL}/${id}`, {
+        method: "DELETE",
+        headers: getAuthHeaders()
+      });
+      await handleApiResponse(response);
+      mostrarModal("Usuario eliminado correctamente 🗑️");
+      refreshUsers();
+    } catch (error) {
+      console.error('Error al eliminar usuario:', error);
+      mostrarModal('Error al eliminar usuario: ' + error.message);
+    }
   }
 
-  // === EDITAR USUARIO ===
+  // === Editar usuario ===
   function editUser(user) {
+    if (!checkUserPermissions(user.id_usuario)) return;
     editMode = true;
     document.getElementById("u_id").value = user.id_usuario;
     document.getElementById("u_name").value = user.nombre;
     document.getElementById("u_lastname").value = user.apellido;
-    document.getElementById("u_user").value = user.correo.split("@")[0];
+    document.getElementById("u_user").value = user.correo;
     document.getElementById("u_role").value = user.rol || "";
-    document.getElementById("u_pass").value = ""; // contraseña vacía por seguridad
-
+    document.getElementById("u_pass").value = "";
+    document.getElementById("u_pass").placeholder = "Dejar vacío para mantener contraseña actual";
+    document.getElementById("u_role").disabled = !currentUserRole.toLowerCase().includes('admin');
     mostrarModal("Modo edición activado: al guardar, se actualizará el usuario.");
   }
 
-  // === CANCELAR EDICIÓN ===
   function cancelEdit() {
     editMode = false;
     document.getElementById("userForm").reset();
     document.getElementById("u_id").value = "";
+    document.getElementById("u_pass").placeholder = "Contraseña";
+    document.getElementById("u_role").disabled = false;
   }
 
-  // === MODAL ===
   function mostrarModal(mensaje) {
     document.getElementById("modalTexto").textContent = mensaje;
     document.getElementById("modalMensaje").style.display = "flex";
@@ -196,32 +311,12 @@
     document.getElementById("modalMensaje").style.display = "none";
   }
 
-  document.addEventListener("DOMContentLoaded", refreshUsers);
+  document.addEventListener("DOMContentLoaded", function() {
+    if (token && currentUser.id) {
+      showCurrentUserInfo();
+      refreshUsers();
+    }
+  });
 </script>
-
-<style>
-  /* === ESTILOS DEL MODAL === */
-  .modal {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(0,0,0,0.6);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-  }
-  .modal-content {
-    background: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    max-width: 400px;
-    text-align: center;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-  }
-  .modal-actions {
-    margin-top: 15px;
-  }
-</style>
 </body>
 </html>

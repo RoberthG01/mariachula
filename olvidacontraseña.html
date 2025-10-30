@@ -3,48 +3,463 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recuperar Contraseña</title>
+    <title>Recuperar Contraseña - María Chula</title>
     <link rel="stylesheet" href="olvidarcontraseña.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="icon" href="fotos/iconomch.ico" type="image/x-icon">
 </head>
 <body>
-
-    <header class="header">
-        <h2>Recuperación de Contraseña</h2>
-    </header>
-
     <div class="recover-container">
-        <h3>Recuperar Contraseña</h3>
-        <form id="recoverForm">
-            <label for="emailOrPhone">Correo electrónico o número de celular:</label>
-            <input type="text" id="emailOrPhone" required>
-
-            <button type="button" id="sendCode">Enviar código</button>
-
-            <div id="codeSection" style="display:none;">
-                <label for="verificationCode">Código de verificación:</label>
-                <input type="text" id="verificationCode" required>
-
-                <label for="newPassword">Nueva Contraseña:</label>
-                <input type="password" id="newPassword" required>
-
-                <button type="submit">Guardar nueva contraseña</button>
+        <div class="recover-card">
+            <div class="recover-header">
+                <img src="fotos/logomch.png" alt="Logo María Chula" class="logo">
+                <h1>Recuperar Contraseña</h1>
+                <p>Ingresa tu correo electrónico para recuperar tu contraseña</p>
+                
+                <!-- Estado del servidor -->
+                <div id="serverStatus" class="server-status">
+                    <i class="fas fa-server"></i>
+                    <span id="statusText"></span>
+                </div>
+                
+                <!-- BOTÓN DE REGRESAR -->
+                <a href="login.html" class="back-button">
+                    <i class="fas fa-arrow-left"></i>
+                    Volver al Login
+                </a>
             </div>
-        </form>
-
-        <button onclick="window.location.href='login.html'">Volver al Login</button>
+            
+            <form id="recoverForm" class="recover-form">
+                <div class="input-group">
+                    <label for="email">
+                        <i class="fas fa-envelope"></i>
+                        Correo electrónico
+                    </label>
+                    <input type="email" id="email" class="input" placeholder="ejemplo@correo.com" required>
+                </div>
+                <button type="button" class="btn primary" id="sendCode">
+                    <i class="fas fa-paper-plane"></i>
+                    Enviar Código de Verificación
+                </button>
+                <div id="codeSection" class="code-section">
+                    <div class="input-group">
+                        <label for="verificationCode">
+                            <i class="fas fa-shield-alt"></i>
+                            Código de Verificación
+                        </label>
+                        <input type="text" id="verificationCode" class="input" placeholder="Ingresa el código de 6 dígitos" maxlength="6" required>
+                        <div class="code-timer">
+                            <span id="timerText">El código expira en: <strong id="timer">05:00</strong></span>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label for="newPassword">
+                            <i class="fas fa-lock"></i>
+                            Nueva Contraseña
+                        </label>
+                        <input type="password" id="newPassword" class="input" placeholder="Ingresa tu nueva contraseña" required>
+                        <div class="password-strength">
+                            <div class="strength-bar">
+                                <div class="strength-fill" id="strengthFill"></div>
+                            </div>
+                            <span id="strengthText">Seguridad de la contraseña</span>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label for="confirmPassword">
+                            <i class="fas fa-lock"></i>
+                            Confirmar Contraseña
+                        </label>
+                        <input type="password" id="confirmPassword" class="input" placeholder="Confirma tu nueva contraseña" required>
+                        <div class="password-match" id="passwordMatch">
+                            <i class="fas fa-check"></i>
+                            <span>Las contraseñas coinciden</span>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn success" id="submitBtn">
+                        <i class="fas fa-save"></i>
+                        Guardar Nueva Contraseña
+                    </button>
+                </div>
+            </form>
+            <div class="recover-footer">
+                <p>¿Recordaste tu contraseña? <a href="login.html">Inicia sesión aquí</a></p>
+            </div>
+        </div>
+    </div>
+    <!-- Modal de éxito -->
+    <div id="successModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-check-circle"></i> Contraseña Actualizada</h3>
+                <button class="close-modal" onclick="closeSuccessModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Tu contraseña ha sido cambiada exitosamente. Ahora puedes iniciar sesión con tu nueva contraseña.</p>
+                <div class="modal-actions">
+                    <button class="btn primary" onclick="redirectToLogin()">
+                        <i class="fas fa-sign-in-alt"></i>
+                        Ir al Login
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
-        document.getElementById('sendCode').addEventListener('click', function() {
-            alert('El código ha sido enviado a su correo o celular.');
-            document.getElementById('codeSection').style.display = 'block';
+        // ✅ CONFIGURACIÓN CORREGIDA - PUERTO 5000
+        const API_BASE_URL = 'http://localhost:5000';
+        
+        // Variables globales
+        let countdown;
+        let timeLeft = 300; // 5 minutos en segundos
+        let verificationCode = ''; // Código generado
+
+        // Elementos del DOM
+        const recoverForm = document.getElementById('recoverForm');
+        const codeSection = document.getElementById('codeSection');
+        const sendCodeBtn = document.getElementById('sendCode');
+        const submitBtn = document.getElementById('submitBtn');
+        const timerElement = document.getElementById('timer');
+        const timerText = document.getElementById('timerText');
+        const strengthFill = document.getElementById('strengthFill');
+        const strengthText = document.getElementById('strengthText');
+        const passwordMatch = document.getElementById('passwordMatch');
+        const newPassword = document.getElementById('newPassword');
+        const confirmPassword = document.getElementById('confirmPassword');
+        const serverStatus = document.getElementById('serverStatus');
+        const statusText = document.getElementById('statusText');
+
+        // ✅ VERIFICAR ESTADO DEL SERVIDOR AL CARGAR
+        document.addEventListener('DOMContentLoaded', function() {
+            checkServerStatus();
+            
+            // Ocultar sección de código inicialmente
+            codeSection.style.display = 'none';
+            passwordMatch.style.display = 'none';
         });
 
-        document.getElementById('recoverForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            alert('Contraseña cambiada con éxito. Ahora puede iniciar sesión.');
-            window.location.href = 'login.html';
+        // ✅ FUNCIÓN PARA VERIFICAR SERVIDOR
+        async function checkServerStatus() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/health`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    showServerStatus('Servidor conectado ✅', 'online');
+                } else {
+                    showServerStatus('Servidor con problemas ⚠️', 'offline');
+                }
+            } catch (error) {
+                console.error('Error verificando servidor:', error);
+                showServerStatus('Servidor no disponible ❌ - Verifica que esté en puerto 5000', 'offline');
+            }
+        }
+
+        function showServerStatus(message, status) {
+            serverStatus.style.display = 'block';
+            statusText.textContent = message;
+            serverStatus.className = `server-status server-${status}`;
+        }
+
+        // Función para generar código de 6 dígitos
+        function generateVerificationCode() {
+            return Math.floor(100000 + Math.random() * 900000).toString();
+        }
+
+        // Función para formatear el tiempo
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        // Función para iniciar el contador
+        function startCountdown() {
+            clearInterval(countdown);
+            timeLeft = 300;
+            updateTimer();
+            
+            countdown = setInterval(() => {
+                timeLeft--;
+                updateTimer();
+                
+                if (timeLeft <= 0) {
+                    clearInterval(countdown);
+                    timerText.innerHTML = '<i class="fas fa-exclamation-triangle"></i> El código ha expirado';
+                    timerText.style.color = 'var(--color-error)';
+                    document.getElementById('verificationCode').disabled = true;
+                    submitBtn.disabled = true;
+                }
+            }, 1000);
+        }
+
+        // Función para actualizar el timer
+        function updateTimer() {
+            timerElement.textContent = formatTime(timeLeft);
+            
+            // Cambiar color según el tiempo restante
+            if (timeLeft <= 60) {
+                timerElement.style.color = 'var(--color-error)';
+            } else if (timeLeft <= 120) {
+                timerElement.style.color = 'var(--color-warning)';
+            } else {
+                timerElement.style.color = 'var(--color-success)';
+            }
+        }
+
+        // Función para verificar fortaleza de contraseña
+        function checkPasswordStrength(password) {
+            let strength = 0;
+            
+            if (password.length >= 8) strength++;
+            if (password.match(/[a-z]/) && password.match(/[A-Z]/)) strength++;
+            if (password.match(/\d/)) strength++;
+            if (password.match(/[^a-zA-Z\d]/)) strength++;
+            
+            switch(strength) {
+                case 0:
+                case 1:
+                    return { strength: 25, text: "Débil", color: "var(--color-error)" };
+                case 2:
+                    return { strength: 50, text: "Moderada", color: "var(--color-warning)" };
+                case 3:
+                    return { strength: 75, text: "Fuerte", color: "var(--color-success)" };
+                case 4:
+                    return { strength: 100, text: "Muy fuerte", color: "var(--color-success)" };
+                default:
+                    return { strength: 0, text: "Muy débil", color: "var(--color-error)" };
+            }
+        }
+
+        // Función para verificar coincidencia de contraseñas
+        function checkPasswordMatch() {
+            const password = newPassword.value;
+            const confirm = confirmPassword.value;
+            
+            if (password && confirm) {
+                if (password === confirm) {
+                    passwordMatch.style.display = 'flex';
+                    passwordMatch.style.color = 'var(--color-success)';
+                    passwordMatch.querySelector('span').textContent = 'Las contraseñas coinciden';
+                    return true;
+                } else {
+                    passwordMatch.style.display = 'flex';
+                    passwordMatch.style.color = 'var(--color-error)';
+                    passwordMatch.querySelector('span').textContent = 'Las contraseñas no coinciden';
+                    return false;
+                }
+            } else {
+                passwordMatch.style.display = 'none';
+                return false;
+            }
+        }
+
+        // ✅ ENVIAR CÓDIGO DE VERIFICACIÓN - CORREGIDO
+        sendCodeBtn.addEventListener('click', async function() {
+            const email = document.getElementById('email').value.trim();
+            
+            if (!email) {
+                showMessage('Por favor ingresa tu correo electrónico', 'error');
+                return;
+            }
+            
+            // Validar formato de email
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            
+            if (!emailRegex.test(email)) {
+                showMessage('Por favor ingresa un correo electrónico válido', 'error');
+                return;
+            }
+            
+            try {
+                // Mostrar loading
+                const originalText = sendCodeBtn.innerHTML;
+                sendCodeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+                sendCodeBtn.disabled = true;
+                
+                // ✅ URL CORREGIDA - PUERTO 5000
+                const response = await fetch(`${API_BASE_URL}/api/send-recovery-code`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email: email })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showMessage('Código de verificación enviado. Revisa tu correo electrónico.', 'success');
+                    
+                    // En producción, el código se maneja en el servidor
+                    // Solo para desarrollo mostramos el código
+                    if (result.codigo) {
+                        console.log('Código de desarrollo:', result.codigo);
+                        verificationCode = result.codigo;
+                    }
+                    
+                    // Mostrar sección de código
+                    codeSection.style.display = 'block';
+                    
+                    // Iniciar contador
+                    startCountdown();
+                    
+                    // Deshabilitar botón de envío temporalmente
+                    sendCodeBtn.disabled = true;
+                    setTimeout(() => {
+                        sendCodeBtn.disabled = false;
+                        sendCodeBtn.innerHTML = originalText;
+                    }, 30000); // 30 segundos
+                    
+                } else {
+                    showMessage(result.error || 'Error al enviar el código', 'error');
+                    sendCodeBtn.innerHTML = originalText;
+                    sendCodeBtn.disabled = false;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('Error de conexión. Verifica que el servidor esté ejecutándose en puerto 5000.', 'error');
+                sendCodeBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar Código de Verificación';
+                sendCodeBtn.disabled = false;
+                
+                // Volver a verificar estado del servidor
+                checkServerStatus();
+            }
         });
+
+        // Verificar fortaleza de contraseña en tiempo real
+        newPassword.addEventListener('input', function() {
+            const password = this.value;
+            if (password) {
+                const strength = checkPasswordStrength(password);
+                strengthFill.style.width = strength.strength + '%';
+                strengthFill.style.backgroundColor = strength.color;
+                strengthText.textContent = strength.text;
+                strengthText.style.color = strength.color;
+            } else {
+                strengthFill.style.width = '0%';
+                strengthText.textContent = 'Seguridad de la contraseña';
+                strengthText.style.color = 'var(--color-muted)';
+            }
+            
+            checkPasswordMatch();
+        });
+
+        // Verificar coincidencia de contraseñas en tiempo real
+        confirmPassword.addEventListener('input', checkPasswordMatch);
+
+        // ✅ ENVIAR FORMULARIO - CORREGIDO
+        recoverForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value.trim();
+            const verificationCodeInput = document.getElementById('verificationCode').value.trim();
+            const newPasswordValue = newPassword.value;
+            const confirmPasswordValue = confirmPassword.value;
+            
+            // Validaciones
+            if (!verificationCodeInput || verificationCodeInput.length !== 6) {
+                showMessage('Por favor ingresa un código de verificación válido de 6 dígitos', 'error');
+                return;
+            }
+            
+            if (newPasswordValue.length < 8) {
+                showMessage('La contraseña debe tener al menos 8 caracteres', 'error');
+                return;
+            }
+            
+            if (!checkPasswordMatch()) {
+                showMessage('Las contraseñas no coinciden', 'error');
+                return;
+            }
+            
+            try {
+                // Mostrar loading
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+                submitBtn.disabled = true;
+                
+                // ✅ URL CORREGIDA - PUERTO 5000
+                const response = await fetch(`${API_BASE_URL}/api/reset-password`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        codigo: verificationCodeInput,
+                        nuevaPassword: newPasswordValue
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showSuccessModal();
+                } else {
+                    showMessage(result.error || 'Error al cambiar la contraseña', 'error');
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('Error de conexión. Verifica que el servidor esté ejecutándose.', 'error');
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+                
+                // Volver a verificar estado del servidor
+                checkServerStatus();
+            }
+        });
+
+        // Funciones de utilidad
+        function showMessage(message, type) {
+            // Remover mensajes existentes
+            const existingMessages = document.querySelectorAll('.message');
+            existingMessages.forEach(msg => msg.remove());
+            
+            // Crear elemento de mensaje
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            messageDiv.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+                <span>${message}</span>
+            `;
+            
+            // Insertar antes del formulario
+            recoverForm.parentNode.insertBefore(messageDiv, recoverForm);
+            
+            // Remover después de 5 segundos (excepto mensajes de éxito importantes)
+            if (type !== 'success') {
+                setTimeout(() => {
+                    if (messageDiv.parentNode) {
+                        messageDiv.remove();
+                    }
+                }, 5000);
+            }
+        }
+
+        function showSuccessModal() {
+            document.getElementById('successModal').classList.add('active');
+        }
+
+        function closeSuccessModal() {
+            document.getElementById('successModal').classList.remove('active');
+        }
+
+        function redirectToLogin() {
+            window.location.href = 'login.html';
+        }
+
+        // ✅ AUTO-REVISAR ESTADO DEL SERVIDOR CADA 30 SEGUNDOS
+        setInterval(checkServerStatus, 30000);
     </script>
 </body>
 </html>
