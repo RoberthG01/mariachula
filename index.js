@@ -4,39 +4,45 @@ import pool from './db.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import cors from 'cors';
-// ==================================
-// Importar nodemailer y dotenv para recuperación de contraseña
-// ==================================
+import facturasRoutes from "./routes/factura.js";
+// < - - - - - - - - - Importar nodemailer y dotenv para recuperación de contraseña - - - - - - - - ->
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
+import http from 'http';
+import { configurarSocket } from './eventos-socket.js';
 
-// Cargar variables de entorno
+// < - - - -  - - - - - - - - CARGAR VARIABLES DE ENTORNO - - - - - - - - - - - - - - - - >
 dotenv.config();
+console.log("JWT_SECRET desde .env:", process.env.JWT_SECRET);
+
+// < - - - - - - - - - - - - CONFIGURACIÓN Y CONSTANTES - - - - - - - - - - - - - - - - - >
+const JWT_SECRET = process.env.JWT_SECRET || 'restmariachula';
+const PORT = process.env.PORT || 5000;
+
+console.log("JWT_SECRET final usado:", JWT_SECRET);
 
 const app = express();
 
-// ==================================
-// CONFIGURACIÓN CORS PARA DESARROLLO
-// ==================================
+// < - - - - - - - - - - - - - CONFIGURACIÓN CORS PARA DESARROLLO - - - - - - - - - - - - - - - >
 app.use(cors({
   origin: function (origin, callback) {
-      // En desarrollo, permitir todos los origenes
-      if (process.env.NODE_ENV === 'development' || !process.env.NODE_ENV) {
-          callback(null, true);
-          return;
-      }
-      
-      // En producción, restringir a origenes específicos
-      const allowedOrigins = [
-          'https://tudominio.com', // Tu dominio de producción
-      ];
-      
-      if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-          callback(null, true);
-      } else {
-          console.log('Bloqueado por CORS:', origin);
-          callback(new Error('Not allowed by CORS'));
-      }
+    // En desarrollo, permitir todos los orígenes
+    if (process.env.NODE_ENV === 'development' || !process.env.NODE_ENV) {
+      callback(null, true);
+      return;
+    }
+
+    // En producción, restringir a dominios específicos
+    const allowedOrigins = [
+      'https://tudominio.com', // Mi dominio de producción
+    ];
+
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      console.log('Bloqueado por CORS:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -48,15 +54,7 @@ app.options('*', cors());
 
 app.use(express.json({ limit: '50mb' }));
 
-// ==================================
-// CONFIGURACIÓN Y CONSTANTES (ACTUALIZADO)
-// ==================================
-const JWT_SECRET = process.env.JWT_SECRET || 'mariachula_secreto_super_seguro';
-const PORT = process.env.PORT || 5000;
-
-// ==================================
-// CONFIGURACIÓN DE CORREO ELECTRÓNICO
-// ==================================
+// < - - - - - - - - - - - CONFIGURACIÓN DE CORREO ELECTRÓNICO - - - - - - - - - - - >
 const emailTransporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -65,38 +63,102 @@ const emailTransporter = nodemailer.createTransport({
     }
 });
 
-// ==================================
-// ALMACENAMIENTO TEMPORAL DE CÓDIGOS DE RECUPERACIÓN
-// ==================================
+// < - - - - - - - - - - - - ALMACENAMIENTO TEMPORAL DE CÓDIGOS DE RECUPERACIÓN - - - - - - - - - - - - >
 const codigosRecuperacion = new Map();
 
-// ==================================
-// GENERAR CÓDIGO DE VERIFICACIÓN
-// ==================================
+// < - - - - - - - - - - - - FUNCIONES UTILITARIAS UNIFICADAS - - - - - - - - - - - - - - >
+// Función única para ejecutar consultas
+async function ejecutarConsulta(consulta, parametros = []) {
+  try {
+    const result = await pool.query(consulta, parametros);
+    return result;
+  } catch (error) {
+    console.error('Error en consulta:', error);
+    throw error;
+  }
+}
+
+// Función única para transacciones
+async function ejecutarTransaccion(callback) {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const result = await callback(client);
+    await client.query('COMMIT');
+    return result;
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
+// Función única para consultas de pedidos
+function construirConsultaPedidos(filtroWhere = '') {
+  return `
+    SELECT 
+      p.id_pedido,
+      p.fecha,
+      p.estado,
+      p.tipo_pedido,
+      p.total,
+      p.notas,
+      COALESCE(c.nombre || ' ' || c.apellido, 'Cliente sin registrar') AS cliente,
+      json_agg(
+        json_build_object(
+          'producto', mi.nombre,
+          'cantidad', dp.cantidad,
+          'subtotal', dp.subtotal
+        ) ORDER BY dp.id_detalle
+      ) AS detalles
+    FROM restaurante.pedidos p
+    LEFT JOIN restaurante.clientes c ON p.id_cliente = c.id_cliente
+    LEFT JOIN restaurante.detalle_pedido dp ON p.id_pedido = dp.id_pedido
+    LEFT JOIN restaurante.menu_items mi ON dp.id_item = mi.id_item  -- CORREGIDO: id_item en lugar de id_producto
+    ${filtroWhere}
+    GROUP BY p.id_pedido, c.nombre, c.apellido
+    ORDER BY p.fecha DESC
+  `;
+}
+
+// Función única para emisión WebSocket
+function emitirEventoSocket(tipo, datos) {
+  io.emit(tipo, datos);
+  console.log(`🔔 ${tipo} emitido:`, datos.id_pedido || datos.id_evento || datos.id);
+}
+
+// Función única para obtener pedido completo
+async function obtenerPedidoCompleto(idPedido) {
+  const query = construirConsultaPedidos('WHERE p.id_pedido = $1');
+  const result = await ejecutarConsulta(query, [idPedido]);
+  return result.rows[0];
+}
+
+// < - - - - - - - - - - GENERAR CÓDIGO DE VERIFICACIÓN - - - - - - - - - - >
 function generarCodigoVerificacion() {
     return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
-// ==================================
-// MIDDLEWARES DE AUTENTICACIÓN
-// ==================================
-
+// < - - - - - - - - - - - MIDDLEWARES DE AUTENTICACIÓN - - - - - - - - - - - >
 // Middleware para verificar el token JWT
 function verificarToken(req, res, next) {
-  const authHeader = req.headers['authorization'];
-  let token = authHeader;
+  // Obtener header en mayúscula o minúscula
+  const authHeader = req.headers.authorization || req.headers.Authorization;
 
-  if (authHeader && authHeader.startsWith('Bearer ')) {
-    token = authHeader.slice(7);
-  }
-
-  if (!token) {
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return res.status(403).json({ error: 'Acceso denegado. Token requerido.' });
   }
 
-  jwt.verify(token, JWT_SECRET, (err, user) => {
-    if (err) return res.status(403).json({ error: 'Token inválido o expirado.' });
-    req.user = user;
+  const token = authHeader.split(' ')[1]; // Extraer token real
+
+  jwt.verify(token, JWT_SECRET, (err, decoded) => {
+    if (err) {
+      console.error('❌ Error verificando token:', err.message);
+      return res.status(403).json({ error: 'Token inválido o expirado.' });
+    }
+
+    req.user = decoded; // Guardar los datos del usuario del token
     next();
   });
 }
@@ -111,7 +173,7 @@ function crearMiddlewareRol(rolRequerido) {
     const rolUsuario = req.user.rol.toLowerCase();
     const rolRequeridoLower = rolRequerido.toLowerCase();
 
-    // ✅ Si el usuario es admin, puede acceder a cualquier ruta
+    // Si el usuario es admin, puede acceder a cualquier ruta
     if (rolUsuario === 'admin') {
       return next();
     }
@@ -129,25 +191,7 @@ const soloAdmin = crearMiddlewareRol('admin');
 const soloMesero = crearMiddlewareRol('mesero');
 const soloCocinero = crearMiddlewareRol('cocinero');
 
-// ==================================
-// UTILIDADES DE BASE DE DATOS
-// ==================================
-
-// Función helper para manejo de errores de consulta
-async function ejecutarConsulta(consulta, parametros = []) {
-  try {
-    const result = await pool.query(consulta, parametros);
-    return result;
-  } catch (error) {
-    console.error('Error en consulta:', error);
-    throw error;
-  }
-}
-
-// ==================================
-// RUTAS DE CAJA REGISTRADORA
-// ==================================
-
+// < - - - - - - - - - - - - RUTAS DE CAJA REGISTRADORA - - - - - - - - - - - - - >
 // Obtener estado actual de la caja
 app.get('/api/cash-register/status', verificarToken, async (req, res) => {
   try {
@@ -172,124 +216,150 @@ app.get('/api/cash-register/status', verificarToken, async (req, res) => {
 
 // Abrir caja
 app.post('/api/cash-register/open', verificarToken, async (req, res) => {
-  const client = await pool.connect();
   try {
     const { monto_inicial } = req.body;
-    const id_usuario = req.user.id;
 
     if (!monto_inicial || monto_inicial <= 0) {
       return res.status(400).json({ error: 'Monto inicial debe ser mayor a 0' });
     }
 
-    await client.query('BEGIN');
+    const resultado = await ejecutarTransaccion(async (client) => {
+      // Verificar si ya hay una caja abierta
+      const cajaAbierta = await client.query(
+        'SELECT id_caja FROM restaurante.caja WHERE estado = $1',
+        ['abierta']
+      );
 
-    // Verificar si ya hay una caja abierta
-    const cajaAbierta = await client.query(
-      'SELECT id_caja FROM restaurante.caja WHERE estado = $1',
-      ['abierta']
-    );
+      if (cajaAbierta.rows.length > 0) {
+        throw new Error('Ya existe una caja abierta');
+      }
 
-    if (cajaAbierta.rows.length > 0) {
-      await client.query('ROLLBACK');
-      return res.status(400).json({ error: 'Ya existe una caja abierta' });
+      // Abrir nueva caja
+      const result = await client.query(
+        `INSERT INTO restaurante.caja 
+         (fecha_apertura, monto_inicial, estado) 
+         VALUES (NOW(), $1, 'abierta') 
+         RETURNING id_caja, fecha_apertura, monto_inicial, estado`,
+        [monto_inicial]
+      );
+
+      const caja = result.rows[0];
+
+      // Registrar movimiento de apertura
+      await client.query(
+        `INSERT INTO restaurante.movimientos_caja 
+         (id_caja, tipo_movimiento, monto, descripcion, fecha) 
+         VALUES ($1, 'apertura', $2, 'Apertura de caja', NOW())`,
+        [caja.id_caja, monto_inicial]
+      );
+
+      return caja;
+    });
+
+    res.status(201).json(resultado);
+  } catch (error) {
+    console.error('Error al abrir caja:', error);
+    res.status(500).json({ error: error.message || 'Error al abrir caja' });
+  }
+});
+
+// 📌 Resetear caja (SOLO ADMINISTRADORES)
+app.post('/api/cash-register/reset', verificarToken, async (req, res) => {
+  try {
+    // Verificar que el usuario sea administrador
+    const user = req.user; // Asumiendo que verificarToken agrega el usuario a req
+    if (user.rol !== 'admin' && user.rol !== 'administrador') {
+      return res.status(403).json({ error: 'No tienes permisos para realizar esta acción' });
     }
 
-    // Abrir nueva caja
-    const result = await client.query(
-      `INSERT INTO restaurante.caja 
-       (fecha_apertura, monto_inicial, estado) 
-       VALUES (NOW(), $1, $2) 
-       RETURNING id_caja, fecha_apertura, monto_inicial, estado`,
-      [monto_inicial, 'abierta']
-    );
+    const resultado = await ejecutarTransaccion(async (client) => {
+      // Cerrar todas las cajas abiertas
+      await client.query(
+        `UPDATE restaurante.caja 
+         SET estado = 'cerrada', fecha_cierre = NOW() 
+         WHERE estado = 'abierta'`
+      );
 
-    // Registrar movimiento de apertura
-    await client.query(
-      `INSERT INTO restaurante.movimientos_caja 
-       (id_caja, tipo_movimiento, monto, descripcion, fecha) 
-       VALUES ($1, $2, $3, $4, NOW())`,
-      [result.rows[0].id_caja, 'apertura', monto_inicial, 'Apertura de caja']
-    );
+      // Opcional: Limpiar movimientos recientes (cuidado con esto)
+      // await client.query('DELETE FROM restaurante.movimientos_caja WHERE fecha::date = CURRENT_DATE');
 
-    await client.query('COMMIT');
-    res.status(201).json(result.rows[0]);
+      return { mensaje: 'Caja reseteada correctamente' };
+    });
+
+    res.json(resultado);
   } catch (error) {
-    await client.query('ROLLBACK');
-    console.error('Error al abrir caja:', error);
-    res.status(500).json({ error: 'Error al abrir caja' });
-  } finally {
-    client.release();
+    console.error('Error al resetear caja:', error);
+    res.status(500).json({ error: error.message || 'Error al resetear caja' });
   }
 });
 
 // Cerrar caja
 app.post('/api/cash-register/close', verificarToken, async (req, res) => {
-  const client = await pool.connect();
   try {
-    await client.query('BEGIN');
+    const resultado = await ejecutarTransaccion(async (client) => {
+      // Obtener caja abierta
+      const cajaResult = await client.query(
+        `SELECT id_caja, monto_inicial 
+         FROM restaurante.caja 
+         WHERE estado = 'abierta' 
+         ORDER BY fecha_apertura DESC 
+         LIMIT 1`
+      );
 
-    // Obtener caja abierta
-    const cajaResult = await client.query(
-      `SELECT id_caja, monto_inicial 
-       FROM restaurante.caja 
-       WHERE estado = $1 
-       ORDER BY fecha_apertura DESC 
-       LIMIT 1`,
-      ['abierta']
-    );
+      if (cajaResult.rows.length === 0) {
+        throw new Error('No hay caja abierta para cerrar');
+      }
 
-    if (cajaResult.rows.length === 0) {
-      await client.query('ROLLBACK');
-      return res.status(400).json({ error: 'No hay caja abierta para cerrar' });
-    }
+      const caja = cajaResult.rows[0];
 
-    const caja = cajaResult.rows[0];
+      // Calcular total de ventas (usando movimientos_caja)
+      const ventasResult = await client.query(
+        `SELECT COALESCE(SUM(monto), 0) as total_ventas
+         FROM restaurante.movimientos_caja 
+         WHERE id_caja = $1 
+         AND tipo_movimiento = 'venta'
+         AND DATE(fecha) = CURRENT_DATE`,
+        [caja.id_caja]
+      );
 
-    // Calcular total de ventas del día
-    const ventasResult = await client.query(
-      `SELECT COALESCE(SUM(total), 0) as total_ventas
-       FROM restaurante.facturas 
-       WHERE fecha::date = CURRENT_DATE 
-       AND estado = 'pagada'`
-    );
+      const totalVentas = parseFloat(ventasResult.rows[0].total_ventas);
+      const montoFinal = parseFloat(caja.monto_inicial) + totalVentas;
 
-    const totalVentas = parseFloat(ventasResult.rows[0].total_ventas);
-    const montoFinal = parseFloat(caja.monto_inicial) + totalVentas;
+      // Cerrar caja
+      const updateResult = await client.query(
+        `UPDATE restaurante.caja 
+         SET fecha_cierre = NOW(), monto_final = $1, estado = 'cerrada'
+         WHERE id_caja = $2 
+         RETURNING *`,
+        [montoFinal, caja.id_caja]
+      );
 
-    // Cerrar caja
-    const updateResult = await client.query(
-      `UPDATE restaurante.caja 
-       SET fecha_cierre = NOW(), monto_final = $1, estado = $2 
-       WHERE id_caja = $3 
-       RETURNING *`,
-      [montoFinal, 'cerrada', caja.id_caja]
-    );
+      // Registrar movimiento de cierre
+      await client.query(
+        `INSERT INTO restaurante.movimientos_caja 
+         (id_caja, tipo_movimiento, monto, descripcion, fecha) 
+         VALUES ($1, 'cierre', $2, 'Cierre de caja', NOW())`,
+        [caja.id_caja, montoFinal]
+      );
 
-    // Registrar movimiento de cierre
-    await client.query(
-      `INSERT INTO restaurante.movimientos_caja 
-       (id_caja, tipo_movimiento, monto, descripcion, fecha) 
-       VALUES ($1, $2, $3, $4, NOW())`,
-      [caja.id_caja, 'cierre', montoFinal, 'Cierre de caja']
-    );
+      return {
+        caja: updateResult.rows[0],
+        total_ventas: totalVentas,
+        monto_final: montoFinal
+      };
+    });
 
-    await client.query('COMMIT');
-    res.json(updateResult.rows[0]);
+    res.json(resultado);
   } catch (error) {
-    await client.query('ROLLBACK');
     console.error('Error al cerrar caja:', error);
-    res.status(500).json({ error: 'Error al cerrar caja' });
-  } finally {
-    client.release();
+    res.status(500).json({ error: error.message || 'Error al cerrar caja' });
   }
 });
 
 // Registrar venta en caja
 app.post('/api/cash-register/sales', verificarToken, async (req, res) => {
-  const client = await pool.connect();
   try {
     const { id_caja, total, recibido, cambio } = req.body;
-    const id_usuario = req.user.id;
 
     if (!id_caja || !total || !recibido || cambio === undefined) {
       return res.status(400).json({ error: 'Faltan campos obligatorios' });
@@ -299,53 +369,49 @@ app.post('/api/cash-register/sales', verificarToken, async (req, res) => {
       return res.status(400).json({ error: 'Monto recibido insuficiente' });
     }
 
-    await client.query('BEGIN');
+    const resultado = await ejecutarTransaccion(async (client) => {
+      // Verificar que la caja esté abierta
+      const cajaResult = await client.query(
+        'SELECT id_caja FROM restaurante.caja WHERE id_caja = $1 AND estado = $2',
+        [id_caja, 'abierta']
+      );
 
-    // Verificar que la caja esté abierta
-    const cajaResult = await client.query(
-      'SELECT id_caja FROM restaurante.caja WHERE id_caja = $1 AND estado = $2',
-      [id_caja, 'abierta']
-    );
+      if (cajaResult.rows.length === 0) {
+        throw new Error('Caja no está abierta');
+      }
 
-    if (cajaResult.rows.length === 0) {
-      await client.query('ROLLBACK');
-      return res.status(400).json({ error: 'Caja no está abierta' });
-    }
+      // Registrar movimiento de venta
+      const movimientoResult = await client.query(
+        `INSERT INTO restaurante.movimientos_caja 
+         (id_caja, tipo_movimiento, monto, descripcion, fecha) 
+         VALUES ($1, 'venta', $2, $3, NOW()) 
+         RETURNING *`,
+        [id_caja, total, `Venta - Recibido: Q${recibido}, Cambio: Q${cambio}`]
+      );
 
-    // Registrar movimiento de venta
-    const movimientoResult = await client.query(
-      `INSERT INTO restaurante.movimientos_caja 
-       (id_caja, tipo_movimiento, monto, descripcion, fecha) 
-       VALUES ($1, $2, $3, $4, NOW()) 
-       RETURNING *`,
-      [id_caja, 'venta', total, `Venta registrada - Recibido: Q${recibido}, Cambio: Q${cambio}`]
-    );
+      // Crear factura (sin pedido asociado para ventas directas)
+      const facturaResult = await client.query(
+        `INSERT INTO restaurante.facturas 
+         (fecha, total, metodo_pago, estado) 
+         VALUES (NOW(), $1, 'efectivo', 'pagada') 
+         RETURNING *`,
+        [total]
+      );
 
-    // Crear factura automáticamente
-    const facturaResult = await client.query(
-      `INSERT INTO restaurante.facturas 
-       (id_pedido, fecha, total, metodo_pago, estado) 
-       VALUES ($1, NOW(), $2, $3, $4) 
-       RETURNING *`,
-      [null, total, 'efectivo', 'pagada']
-    );
-
-    await client.query('COMMIT');
-
-    res.status(201).json({
-      movimiento: movimientoResult.rows[0],
-      factura: facturaResult.rows[0]
+      return {
+        movimiento: movimientoResult.rows[0],
+        factura: facturaResult.rows[0]
+      };
     });
+
+    res.status(201).json(resultado);
   } catch (error) {
-    await client.query('ROLLBACK');
     console.error('Error al registrar venta:', error);
-    res.status(500).json({ error: 'Error al registrar venta' });
-  } finally {
-    client.release();
+    res.status(500).json({ error: error.message || 'Error al registrar venta' });
   }
 });
 
-// Obtener movimientos de caja
+// Obtener movimientos de caja actual
 app.get('/api/cash-register/movements', verificarToken, async (req, res) => {
   try {
     const result = await ejecutarConsulta(`
@@ -383,10 +449,7 @@ app.get('/api/cash-register/today-sales', verificarToken, async (req, res) => {
   }
 });
 
-// ==================================
-// RUTAS DE RECUPERACIÓN DE CONTRASEÑA
-// ==================================
-
+// < - - - - - - - - - RUTAS DE RECUPERACIÓN DE CONTRASEÑA - - - - - - - - - - - >
 // Enviar código de recuperación por email
 app.post('/api/send-recovery-code', async (req, res) => {
     try {
@@ -517,9 +580,7 @@ app.post('/api/reset-password', async (req, res) => {
     }
 });
 
-// ==================================
-// LIMPIAR CÓDIGOS EXPIRADOS PERIÓDICAMENTE
-// ==================================
+// < - - - - - - - - - - LIMPIAR CÓDIGOS EXPIRADOS PERIÓDICAMENTE - - - - - - - - - - - >
 setInterval(() => {
     const ahora = Date.now();
     for (const [email, datos] of codigosRecuperacion.entries()) {
@@ -530,9 +591,7 @@ setInterval(() => {
     }
 }, 5 * 60 * 1000); // Cada 5 minutos
 
-// ==================================
-// RUTA DE SALUD DEL SERVIDOR
-// ==================================
+// < - - - - - - - - - RUTA DE SALUD DEL SERVIDOR - - - - - - - - - - - >
 app.get('/health', async (req, res) => {
   try {
     await pool.query('SELECT 1');
@@ -552,10 +611,7 @@ app.get('/health', async (req, res) => {
   }
 });
 
-// ==================================
-// RUTAS DE AUTENTICACIÓN - MEJORADA CON MÁS LOGS
-// ==================================
-
+// < - - - - - - - - - - - - - RUTAS DE AUTENTICACIÓN - - - - - - - - - - - - - >
 // Login de usuarios
 app.post('/login', async (req, res) => {
   try {
@@ -631,10 +687,7 @@ app.post('/login', async (req, res) => {
   }
 });
 
-// ==================================
-// RUTAS DE USUARIOS
-// ==================================
-
+// < - - - - - - - - - - - - -  RUTAS DE USUARIOS - - - - - - - - - - - - - - - >
 // Obtener todos los usuarios
 app.get('/usuarios', verificarToken, async (req, res) => {
   try {
@@ -786,10 +839,7 @@ app.delete('/usuarios/:id', verificarToken, soloAdmin, async (req, res) => {
   }
 });
 
-// ==================================
-// RUTAS DE INSUMOS E INVENTARIO
-// ==================================
-
+// < - - - - - - - - - - - RUTAS DE INSUMOS E INVENTARIO - - - - - - - - - - - - - >
 // CRUD de insumos
 app.get('/insumos', verificarToken, async (req, res) => {
   try {
@@ -905,10 +955,7 @@ app.post('/inventario/movimiento', verificarToken, async (req, res) => {
   }
 });
 
-// ==================================
-// RUTAS DE CLIENTES
-// ==================================
-
+// < - - - - - - - - - - - - - RUTAS DE CLIENTES - - - - - - - - - - - - - - >
 app.get('/clientes', verificarToken, async (req, res) => {
   try {
     const result = await ejecutarConsulta(
@@ -937,206 +984,143 @@ app.post('/clientes', verificarToken, async (req, res) => {
   }
 });
 
-// ==================================
-// RUTAS DE PEDIDOS Y DETALLES
-// ==================================
-
+// < - - - - - - - - - - - - - - RUTA: OBTENER PEDIDOS - - - - - - - - - - - - - - - >
 app.get('/pedidos', verificarToken, async (req, res) => {
   try {
-    const result = await ejecutarConsulta(`
-      SELECT p.id_pedido, p.fecha, p.estado, p.total,
-             c.nombre || ' ' || c.apellido AS cliente
-      FROM restaurante.pedidos p
-      LEFT JOIN restaurante.clientes c ON p.id_cliente = c.id_cliente
-      ORDER BY p.id_pedido DESC
-    `);
+    const query = construirConsultaPedidos();
+    const result = await ejecutarConsulta(query);
     res.json(result.rows);
   } catch (err) {
+    console.error('Error al obtener pedidos:', err);
     res.status(500).json({ error: 'Error al obtener pedidos' });
   }
 });
 
-// Crear pedido (mesa o domicilio) con sus detalles
-app.post('/pedidos', verificarToken, soloMesero, async (req, res) => {
-  const client = await pool.connect();
+// < - - - - - - - - - - - - - - CREAR PEDIDO - - - - - - - - - - - - - - - >
+app.post('/pedidos', verificarToken, async (req, res) => {
   try {
-    const { tipo_pedido, id_cliente, id_mesa = null, direccion_entrega = null, telefono_contacto = null, items } = req.body;
+    const { tipo_pedido, id_cliente, total, detalles, notas } = req.body;
 
-    if (!tipo_pedido || !items || items.length === 0) {
-      return res.status(400).json({ error: 'Faltan datos del pedido o no hay productos.' });
+    // Validación básica
+    if (!tipo_pedido || !id_cliente || !Array.isArray(detalles) || !detalles.length) {
+      return res.status(400).json({ error: 'Faltan datos del pedido o detalles vacíos' });
     }
 
-    await client.query('BEGIN');
-
-    // Calcular total
-    const total = items.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
-
-    // Insertar pedido base
-    const pedidoRes = await client.query(
-      `INSERT INTO restaurante.pedidos (id_cliente, id_usuario, fecha, estado, tipo_pedido, total)
-       VALUES ($1, $2, NOW(), 'pendiente', $3, $4)
-       RETURNING id_pedido`,
-      [id_cliente, req.user.id, tipo_pedido, total]
-    );
-
-    const idPedido = pedidoRes.rows[0].id_pedido;
-
-    // Insertar los detalles del pedido
-    for (const item of items) {
-      await client.query(
-        `INSERT INTO restaurante.detalle_pedido (id_pedido, id_producto, cantidad, precio_unitario, subtotal)
-         VALUES ($1, $2, $3, $4, $5)`,
-        [idPedido, item.id_producto, item.cantidad, item.precio, item.precio * item.cantidad]
+    const idPedido = await ejecutarTransaccion(async (client) => {
+      // Insertar pedido principal
+      const pedidoRes = await client.query(
+        `INSERT INTO restaurante.pedidos 
+          (id_cliente, id_usuario, fecha, estado, tipo_pedido, total, notas)
+         VALUES ($1, $2, NOW(), 'pendiente', $3, $4, $5)
+         RETURNING id_pedido`,
+        [id_cliente, req.user.id, tipo_pedido, total, notas || null]
       );
 
-      // Actualizar stock del producto
-      await client.query(
-        `UPDATE restaurante.productos
-         SET stock_actual = stock_actual - $1
-         WHERE id_producto = $2`,
-        [item.cantidad, item.id_producto]
-      );
-    }
+      const idPedido = pedidoRes.rows[0].id_pedido;
 
-    // Si es pedido de mesa
-    if (tipo_pedido === 'mesa' && id_mesa) {
-      await client.query(
-        `INSERT INTO restaurante.pedidos_mesa (id_pedido, id_mesa)
-         VALUES ($1, $2)`,
-        [idPedido, id_mesa]
-      );
-    }
+      // Insertar los detalles del pedido
+      for (const item of detalles) {
+        await client.query(
+          `INSERT INTO restaurante.detalle_pedido 
+            (id_pedido, id_item, cantidad, precio_unitario, subtotal)
+           VALUES ($1, $2, $3, $4, $5)`,
+          [idPedido, item.id_item, item.cantidad, item.precio_unitario, item.subtotal]
+        );
+      }
 
-    // Si es pedido a domicilio
-    if (tipo_pedido === 'domicilio' && direccion_entrega && telefono_contacto) {
-      await client.query(
-        `INSERT INTO restaurante.pedidos_domicilio (id_pedido, direccion_entrega, telefono_contacto, estado_envio)
-         VALUES ($1, $2, $3, 'pendiente')`,
-        [idPedido, direccion_entrega, telefono_contacto]
-      );
-    }
+      return idPedido;
+    });
 
-    await client.query('COMMIT');
+    // Obtener el pedido completo para emitirlo al WebSocket
+    const nuevoPedido = await obtenerPedidoCompleto(idPedido);
+    emitirEventoSocket('nuevo_pedido', nuevoPedido);
 
-// 🔹 Obtener el pedido recién creado con todos sus detalles
-const nuevoPedido = await ejecutarConsulta(`
-  SELECT p.id_pedido, p.fecha, p.estado, p.tipo_pedido, p.total,
-         c.nombre || ' ' || c.apellido AS cliente,
-         json_agg(json_build_object(
-           'producto', pr.nombre,
-           'cantidad', dp.cantidad,
-           'subtotal', dp.subtotal
-         )) AS detalles
-  FROM restaurante.pedidos p
-  LEFT JOIN restaurante.clientes c ON p.id_cliente = c.id_cliente
-  LEFT JOIN restaurante.detalle_pedido dp ON p.id_pedido = dp.id_pedido
-  LEFT JOIN restaurante.productos pr ON dp.id_producto = pr.id_producto
-  WHERE p.id_pedido = $1
-  GROUP BY p.id_pedido, c.nombre, c.apellido
-`, [idPedido]);
+    // Respuesta HTTP
+    res.status(201).json({
+      mensaje: 'Pedido registrado con éxito',
+      id_pedido: idPedido
+    });
 
-// 🔹 Emitir el nuevo pedido por WebSocket (para todos los clientes conectados)
-emitirNuevoPedido(nuevoPedido.rows[0]);
-
-// 🔹 Responder al frontend
-res.status(201).json({
-  mensaje: 'Pedido registrado con éxito',
-  id_pedido: idPedido
-});
   } catch (err) {
-    await client.query('ROLLBACK');
     console.error('Error al crear pedido:', err);
-    res.status(500).json({ error: 'Error al crear el pedido' });
-  } finally {
-    client.release();
+    res.status(500).json({ error: 'Error al crear pedido' });
   }
 });
 
+// DETALLE: compatible con id_item (menu) e id_producto
 app.get('/detalle_pedido/:id_pedido', verificarToken, async (req, res) => {
   try {
     const { id_pedido } = req.params;
     const result = await ejecutarConsulta(
-      `SELECT d.id_detalle, d.cantidad, d.precio_unitario, d.subtotal,
-              pr.nombre AS producto
+      `SELECT d.id_detalle,
+              d.cantidad,
+              d.precio_unitario,
+              d.subtotal,
+              COALESCE(mi.nombre, pr.nombre) AS producto,
+              d.id_item,
+              d.id_producto
        FROM restaurante.detalle_pedido d
+       LEFT JOIN restaurante.menu_items mi ON d.id_item = mi.id_item
        LEFT JOIN restaurante.productos pr ON d.id_producto = pr.id_producto
-       WHERE d.id_pedido=$1`,
+       WHERE d.id_pedido=$1
+       ORDER BY d.id_detalle`,
       [id_pedido]
     );
     res.json(result.rows);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: 'Error al obtener detalle de pedido' });
   }
 });
 
+// Crear detalle puntual (acepta id_item O id_producto)
 app.post('/detalle_pedido', verificarToken, async (req, res) => {
   try {
-    const { id_pedido, id_producto, cantidad, precio_unitario } = req.body;
-    if (!id_pedido || !id_producto || !cantidad || !precio_unitario) {
+    const { id_pedido, id_item = null, id_producto = null, cantidad, precio_unitario } = req.body;
+
+    if (!id_pedido || !cantidad || !precio_unitario) {
       return res.status(400).json({ error: 'Faltan campos obligatorios' });
     }
-    
+
+    const usaItem = !!id_item;
+    const usaProducto = !!id_producto;
+
+    if (usaItem === usaProducto) {
+      return res.status(400).json({ error: 'Proporciona exactamente uno: id_item o id_producto' });
+    }
+
     const subtotal = cantidad * precio_unitario;
+
     const result = await ejecutarConsulta(
-      `INSERT INTO restaurante.detalle_pedido (id_pedido, id_producto, cantidad, precio_unitario, subtotal)
-       VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-      [id_pedido, id_producto, cantidad, precio_unitario, subtotal]
+      `INSERT INTO restaurante.detalle_pedido (id_pedido, id_item, id_producto, cantidad, precio_unitario, subtotal)
+       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+      [id_pedido, id_item, id_producto, cantidad, precio_unitario, subtotal]
     );
+
     res.status(201).json(result.rows[0]);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: 'Error al crear detalle de pedido' });
   }
 });
 
-// ----------------------
-// COLA DEL CHEF
-// ----------------------
+// < - - - - - - - - - - - - - COLA DEL CHEF - - - - - - - - - - - - - - - >
 app.get('/cola_chef', verificarToken, soloCocinero, async (req, res) => {
   try {
-    const result = await ejecutarConsulta(`
-      SELECT p.id_pedido, p.fecha, p.estado, p.tipo_pedido, p.total,
-             c.nombre || ' ' || c.apellido AS cliente,
-             json_agg(json_build_object(
-               'producto', pr.nombre,
-               'cantidad', dp.cantidad,
-               'subtotal', dp.subtotal
-             )) AS detalles
-      FROM restaurante.pedidos p
-      LEFT JOIN restaurante.clientes c ON p.id_cliente = c.id_cliente
-      LEFT JOIN restaurante.detalle_pedido dp ON p.id_pedido = dp.id_pedido
-      LEFT JOIN restaurante.productos pr ON dp.id_producto = pr.id_producto
-      WHERE p.estado IN ('pendiente', 'en preparación')
-      GROUP BY p.id_pedido, c.nombre, c.apellido
-      ORDER BY p.fecha ASC
-    `);
+    const query = construirConsultaPedidos("WHERE p.estado IN ('pendiente', 'en preparación')");
+    const result = await ejecutarConsulta(query);
     res.json(result.rows);
   } catch (err) {
+    console.error('Error al obtener la cola del chef:', err);
     res.status(500).json({ error: 'Error al obtener la cola del chef' });
   }
 });
 
-// ----------------------
-// COLA DEL MESERO
-// ----------------------
+// < - - - - - - - - - - - COLA DEL MESERO - - - - - - - - - - - - - >
 app.get('/cola_mesero', verificarToken, soloMesero, async (req, res) => {
   try {
-    const result = await ejecutarConsulta(`
-      SELECT p.id_pedido, p.fecha, p.estado, p.tipo_pedido, p.total,
-             c.nombre || ' ' || c.apellido AS cliente,
-             json_agg(json_build_object(
-               'producto', pr.nombre,
-               'cantidad', dp.cantidad,
-               'subtotal', dp.subtotal
-             )) AS detalles
-      FROM restaurante.pedidos p
-      LEFT JOIN restaurante.clientes c ON p.id_cliente = c.id_cliente
-      LEFT JOIN restaurante.detalle_pedido dp ON p.id_pedido = dp.id_pedido
-      LEFT JOIN restaurante.productos pr ON dp.id_producto = pr.id_producto
-      WHERE p.estado IN ('pendiente', 'en preparación', 'listo')
-      GROUP BY p.id_pedido, c.nombre, c.apellido
-      ORDER BY p.fecha ASC
-    `);
-
+    const query = construirConsultaPedidos("WHERE p.estado IN ('pendiente', 'en preparación', 'listo')");
+    const result = await ejecutarConsulta(query);
     res.json(result.rows);
   } catch (err) {
     console.error('Error al obtener la cola del mesero:', err);
@@ -1144,10 +1128,7 @@ app.get('/cola_mesero', verificarToken, soloMesero, async (req, res) => {
   }
 });
 
-// ==================================
-// RUTAS DEL MENÚ (CATEGORÍAS E ITEMS)
-// ==================================
-
+// < - - - - - - - - - - RUTAS DEL MENÚ (CATEGORÍAS E ITEMS) - - - - - - - - - - >
 // Categorías del menú
 app.get('/categorias_menu', verificarToken, async (req, res) => {
   try {
@@ -1316,21 +1297,47 @@ app.delete('/ingredientes_menu/:id', verificarToken, soloAdmin, async (req, res)
   }
 });
 
-// ==================================
-// RUTAS DE PRODUCTOS
-// ==================================
-
-app.get('/productos', verificarToken, async (req, res) => {
+// < - - - - - - - - - RUTA API para platillos del menú (frontend) - - - - - - - - - >
+app.get('/api/menu_items', verificarToken, async (req, res) => {
   try {
     const result = await ejecutarConsulta(`
-      SELECT id_producto, nombre, descripcion, precio, categoria,
-             stock_actual, unidad_medida, estado
-      FROM restaurante.productos
-      ORDER BY id_producto
+      SELECT 
+        id_item,
+        nombre,
+        precio
+      FROM restaurante.menu_items
+      WHERE estado = 'disponible'
+      ORDER BY nombre ASC;
     `);
     res.json(result.rows);
   } catch (err) {
-    res.status(500).json({ error: 'Error al obtener productos' });
+    console.error('Error al obtener items del menú (API):', err);
+    res.status(500).json({ error: 'Error al obtener items del menú' });
+  }
+});
+
+// < - - - - - - - - - - - RUTAS DE PRODUCTOS (INVENTARIO) - - - - - - - - - - - >
+app.get('/productos', verificarToken, async (req, res) => {
+  try {
+    const result = await ejecutarConsulta(`
+      SELECT 
+        m.id_item AS id,
+        m.nombre AS name,
+        m.descripcion AS description,
+        m.precio AS price,
+        m.estado,
+        COALESCE(m.img, 'fotos/no-image.png') AS img,
+        c.nombre_categoria AS category
+      FROM restaurante.menu_items m
+      LEFT JOIN restaurante.categorias_menu c ON m.id_categoria = c.id_categoria
+      WHERE m.estado = 'disponible'
+      ORDER BY m.id_item;
+    `);
+
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Error al obtener platillos del menú:', err);
+    res.status(500).json({ error: 'Error al obtener platillos del menú' });
   }
 });
 
@@ -1399,81 +1406,500 @@ app.delete('/productos/:id', verificarToken, soloAdmin, async (req, res) => {
   }
 });
 
-// ==================================
-// RUTAS ESPECIALIZADAS
-// ==================================
-
-// Actualizar estado del pedido (para cocineros)
-app.put('/pedidos/:id/estado', verificarToken, soloCocinero, async (req, res) => {
+// < - - - - - - - - - - - ACTUALIZAR ESTADO DE UN PEDIDO (Chef o Mesero) - - - - - - - - - - - - - - >
+app.put('/pedidos/:id/estado', verificarToken, async (req, res) => {
   try {
-    const { id } = req.params;
+    const idPedido = parseInt(req.params.id);
     const { estado } = req.body;
-    
-    if (!estado || !['pendiente', 'en preparación', 'listo', 'entregado'].includes(estado)) {
-      return res.status(400).json({ error: 'Estado no válido' });
+
+    if (!idPedido || !estado) {
+      return res.status(400).json({ error: 'Faltan datos: idPedido o estado' });
     }
 
-    const result = await ejecutarConsulta(
-      'UPDATE restaurante.pedidos SET estado = $1 WHERE id_pedido = $2 RETURNING *',
-      [estado, id]
-    );
-
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'Pedido no encontrado' });
+    // Validar estados permitidos
+    const estadosValidos = ['pendiente', 'en preparación', 'listo', 'entregado', 'cancelado'];
+    if (!estadosValidos.includes(estado)) {
+      return res.status(400).json({ error: `Estado inválido: ${estado}` });
     }
 
-    // 🔹 Obtener el pedido actualizado
-    const pedidoActualizado = result.rows[0];
+    const pedido = await ejecutarTransaccion(async (client) => {
+      // Actualizar el estado del pedido
+      const updateRes = await client.query(
+        `UPDATE restaurante.pedidos 
+         SET estado = $1 
+         WHERE id_pedido = $2 
+         RETURNING *`,
+        [estado, idPedido]
+      );
 
-    // 🔹 Emitir actualización por WebSocket (chef ↔ mesero)
-    emitirCambioEstado(pedidoActualizado);
+      if (updateRes.rowCount === 0) {
+        throw new Error('Pedido no encontrado');
+      }
 
-    // 🔹 Responder al frontend
-    res.json({ mensaje: 'Estado actualizado', pedido: pedidoActualizado });
+      // Obtener los datos completos del pedido actualizado
+      const query = construirConsultaPedidos('WHERE p.id_pedido = $1');
+      const pedidoCompleto = await client.query(query, [idPedido]);
+      return pedidoCompleto.rows[0];
+    });
+
+    emitirEventoSocket('pedido_actualizado', pedido);
+    console.log(`Pedido #${idPedido} → ${estado}`);
+
+    res.json({ mensaje: 'Estado actualizado con éxito', pedido });
+
   } catch (err) {
-    console.error('Error al actualizar estado:', err);
-    res.status(500).json({ error: 'Error al actualizar estado del pedido' });
+    console.error('Error al actualizar estado del pedido:', err);
+    res.status(500).json({ error: err.message || 'Error al actualizar estado del pedido' });
   }
 });
 
-// ==================================
-// MARCAR PEDIDO COMO ENTREGADO (para Meseros)
-// ==================================
-app.put('/pedidos/:id/entregar', verificarToken, soloMesero, async (req, res) => {
+// < - - - - - - - - - - - - RUTAS DE EVENTOS - - - - - - - - - - - - - >
+// Obtener todos los eventos (SIMPLE)
+app.get('/eventos', verificarToken, async (req, res) => {
+  try {
+    const result = await ejecutarConsulta(`
+      SELECT 
+        id_evento,
+        nombre_cliente,
+        nombre_evento,
+        fecha_evento,
+        cantidad_personas,
+        estado,
+        observacion,
+        id_vajilla,
+        total
+      FROM restaurante.eventos 
+      ORDER BY fecha_evento DESC;
+    `);
+    
+    res.json({ eventos: result.rows });
+  } catch (err) {
+    console.error('Error al obtener eventos:', err);
+    res.status(500).json({ error: 'Error al obtener eventos' });
+  }
+});
+
+// Obtener un evento específico por ID
+app.get('/eventos/:id', verificarToken, async (req, res) => {
   try {
     const { id } = req.params;
-
-    // 🔹 Actualizamos el estado directamente a "entregado"
-    const result = await ejecutarConsulta(
-      'UPDATE restaurante.pedidos SET estado = $1 WHERE id_pedido = $2 RETURNING *',
-      ['entregado', id]
-    );
+    
+    const result = await ejecutarConsulta(`
+      SELECT 
+        id_evento,
+        nombre_cliente,
+        nombre_evento,
+        fecha_evento,
+        cantidad_personas,
+        estado,
+        observacion,
+        id_vajilla,
+        total
+      FROM restaurante.eventos 
+      WHERE id_evento = $1;
+    `, [id]);
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'Pedido no encontrado' });
+      return res.status(404).json({ error: 'Evento no encontrado' });
     }
 
-    const pedidoEntregado = result.rows[0];
+    res.json({ evento: result.rows[0] });
+  } catch (err) {
+    console.error('Error al obtener evento:', err);
+    res.status(500).json({ error: 'Error al obtener evento' });
+  }
+});
 
-    // 🔹 Emitimos el evento WebSocket para actualizar en tiempo real
-    emitirCambioEstado(pedidoEntregado);
+// Crear nuevo evento
+app.post('/eventos', verificarToken, async (req, res) => {
+  const client = await pool.connect();
+  try {
+    const {
+      nombre_cliente,
+      nombre_evento,
+      fecha_evento,
+      cantidad_personas,
+      id_vajilla,
+      observacion,
+      total,
+      estado = 'Confirmado',
+      items = []
+    } = req.body;
 
-    // 🔹 Respuesta HTTP
-    res.json({
-      mensaje: 'Pedido marcado como entregado correctamente',
-      pedido: pedidoEntregado
+    // Validación básica
+    if (!nombre_cliente || !nombre_evento || !fecha_evento || !cantidad_personas) {
+      return res.status(400).json({ 
+        error: 'Datos incompletos' 
+      });
+    }
+
+    await client.query('BEGIN');
+
+    // Crear el evento principal
+    const resultEvento = await client.query(
+      `INSERT INTO restaurante.eventos 
+        (nombre_cliente, nombre_evento, fecha_evento, cantidad_personas, id_vajilla, observacion, total, estado)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+       RETURNING *;`,
+      [nombre_cliente, nombre_evento, fecha_evento, cantidad_personas, id_vajilla, observacion, total, estado]
+    );
+
+    const nuevoEvento = resultEvento.rows[0];
+    const idEvento = nuevoEvento.id_evento;
+
+    // Insertar detalles si existen
+    if (items && items.length > 0) {
+      for (const item of items) {
+        await client.query(
+          `INSERT INTO restaurante.detalles_evento 
+            (id_evento, id_item, cantidad, precio_unitario, subtotal)
+           VALUES ($1, $2, $3, $4, $5);`,
+          [idEvento, item.id_item, item.cantidad, item.precio_unitario, item.subtotal]  // ← CORREGIDO: item.id_item
+        );
+      }
+    }
+
+    await client.query('COMMIT');
+
+    // Emitir por WebSocket
+    emitirEventoSocket('nuevo_evento', nuevoEvento);
+
+    res.status(201).json({ 
+      mensaje: 'Evento registrado con éxito', 
+      evento: nuevoEvento 
     });
 
   } catch (err) {
-    console.error('Error al marcar pedido como entregado:', err);
-    res.status(500).json({ error: 'Error al marcar pedido como entregado' });
+    await client.query('ROLLBACK');
+    console.error('Error al crear evento:', err);
+    res.status(500).json({ error: 'Error al crear evento: ' + err.message });
+  } finally {
+    client.release();
   }
 });
 
-// ==================================
-// RUTAS DEL SISTEMA
-// ==================================
+// Eliminar evento
+app.delete('/eventos/:id', verificarToken, async (req, res) => {
+  const { id } = req.params;
+  const client = await pool.connect();
+  
+  try {
+    await client.query('BEGIN');
 
+    // Eliminar detalles primero
+    await client.query('DELETE FROM restaurante.detalles_evento WHERE id_evento = $1;', [id]);
+    
+    // Eliminar evento principal
+    const result = await client.query('DELETE FROM restaurante.eventos WHERE id_evento = $1 RETURNING *;', [id]);
+
+    if (result.rows.length === 0) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ error: 'Evento no encontrado' });
+    }
+
+    await client.query('COMMIT');
+
+    // Emitir por WebSocket
+    emitirEventoSocket('evento_eliminado', { id_evento: parseInt(id) });
+
+    res.json({ 
+      mensaje: 'Evento eliminado correctamente',
+      evento: result.rows[0] 
+    });
+
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error('Error al eliminar evento:', err);
+    res.status(500).json({ error: 'Error al eliminar evento: ' + err.message });
+  } finally {
+    client.release();
+  }
+});
+
+// < - - - - - - - - - - - - - - ENDPOINTS PARA DASHBOARD - - - - - - - - - - - - - - - >
+
+// Estadísticas generales
+app.get('/api/dashboard/stats', verificarToken, async (req, res) => {
+  try {
+    const { range = 'month' } = req.query;
+    
+    let dateCondition;
+    switch(range) {
+      case 'today':
+        dateCondition = "fecha::date = CURRENT_DATE";
+        break;
+      case 'week':
+        dateCondition = "fecha >= CURRENT_DATE - INTERVAL '7 days'";
+        break;
+      case 'month':
+        dateCondition = "fecha >= DATE_TRUNC('month', CURRENT_DATE)";
+        break;
+      case 'year':
+        dateCondition = "fecha >= DATE_TRUNC('year', CURRENT_DATE)";
+        break;
+      default:
+        dateCondition = "fecha >= DATE_TRUNC('month', CURRENT_DATE)";
+    }
+
+    let pedidosDateCondition = dateCondition.replace('fecha', 'p.fecha');
+
+    // Obtener ingresos totales
+    const revenueResult = await ejecutarConsulta(`
+      SELECT COALESCE(SUM(total), 0) as total_revenue
+      FROM restaurante.facturas 
+      WHERE estado = 'pagada'
+      AND ${dateCondition}
+    `);
+
+    // Obtener total de pedidos
+    const ordersResult = await ejecutarConsulta(`
+      SELECT COUNT(*) as total_orders
+      FROM restaurante.pedidos p
+      WHERE ${pedidosDateCondition}
+    `);
+
+    // Obtener eventos activos
+    const eventsResult = await ejecutarConsulta(`
+      SELECT COUNT(*) as active_events
+      FROM restaurante.eventos 
+      WHERE estado = 'Confirmado'
+      AND fecha_evento >= CURRENT_DATE
+    `);
+
+    // Calcular ticket promedio
+    const avgResult = await ejecutarConsulta(`
+      SELECT COALESCE(AVG(total), 0) as avg_order_value
+      FROM restaurante.facturas 
+      WHERE estado = 'pagada'
+      AND ${dateCondition}
+    `);
+
+    res.json({
+      total_revenue: parseFloat(revenueResult.rows[0].total_revenue),
+      total_orders: parseInt(ordersResult.rows[0].total_orders),
+      active_events: parseInt(eventsResult.rows[0].active_events),
+      avg_order_value: parseFloat(avgResult.rows[0].avg_order_value)
+    });
+
+  } catch (error) {
+    console.error('Error al obtener estadísticas:', error);
+    res.status(500).json({ error: 'Error al obtener estadísticas: ' + error.message });
+  }
+});
+
+// Gráfica de ventas
+app.get('/api/dashboard/sales-chart', verificarToken, async (req, res) => {
+  try {
+    const { range = 'week' } = req.query;
+    
+    let groupBy, dateCondition;
+    switch(range) {
+      case 'today':
+        groupBy = "DATE_TRUNC('hour', fecha)";
+        dateCondition = "fecha::date = CURRENT_DATE";
+        break;
+      case 'week':
+        groupBy = "DATE(fecha)";
+        dateCondition = "fecha >= CURRENT_DATE - INTERVAL '7 days'";
+        break;
+      case 'month':
+        groupBy = "DATE(fecha)";
+        dateCondition = "fecha >= DATE_TRUNC('month', CURRENT_DATE)";
+        break;
+      case 'year':
+        groupBy = "DATE_TRUNC('month', fecha)";
+        dateCondition = "fecha >= DATE_TRUNC('year', CURRENT_DATE)";
+        break;
+      default:
+        groupBy = "DATE(fecha)";
+        dateCondition = "fecha >= CURRENT_DATE - INTERVAL '7 days'";
+    }
+
+    const result = await ejecutarConsulta(`
+      SELECT 
+        ${groupBy} as periodo,
+        COALESCE(SUM(total), 0) as venta_total
+      FROM restaurante.facturas 
+      WHERE estado = 'pagada'
+      AND ${dateCondition}
+      GROUP BY periodo
+      ORDER BY periodo
+    `);
+
+    const labels = result.rows.map(row => {
+      const date = new Date(row.periodo);
+      switch(range) {
+        case 'today':
+          return date.toLocaleTimeString('es-GT', { hour: '2-digit', minute: '2-digit' });
+        case 'week':
+        case 'month':
+          return date.toLocaleDateString('es-GT', { day: '2-digit', month: '2-digit' });
+        case 'year':
+          return date.toLocaleDateString('es-GT', { month: 'short' });
+        default:
+          return date.toLocaleDateString('es-GT');
+      }
+    });
+    
+    const data = result.rows.map(row => parseFloat(row.venta_total));
+
+    res.json({ labels, data });
+  } catch (error) {
+    console.error('Error en sales-chart:', error);
+    res.status(500).json({ error: 'Error al obtener datos de ventas: ' + error.message });
+  }
+});
+
+// Gráfica de estado de pedidos
+app.get('/api/dashboard/orders-chart', verificarToken, async (req, res) => {
+  try {
+    const ordersQuery = `
+      SELECT 
+        estado,
+        COUNT(*) as cantidad
+      FROM restaurante.pedidos
+      WHERE fecha >= CURRENT_DATE - INTERVAL '30 days'
+      GROUP BY estado
+    `;
+
+    const ordersResult = await ejecutarConsulta(ordersQuery);
+    
+    const chartData = {
+      labels: ordersResult.rows.map(row => row.estado),
+      data: ordersResult.rows.map(row => parseInt(row.cantidad))
+    };
+
+    res.json(chartData);
+  } catch (error) {
+    console.error('Error en orders-chart:', error);
+    res.status(500).json({ error: 'Error al obtener datos de pedidos: ' + error.message });
+  }
+});
+
+// Gráfica de productos más vendidos
+app.get('/api/dashboard/products-chart', verificarToken, async (req, res) => {
+  try {
+    const { range = 'month' } = req.query;
+    
+    let dateCondition;
+    switch(range) {
+      case 'today':
+        dateCondition = "p.fecha::date = CURRENT_DATE";
+        break;
+      case 'week':
+        dateCondition = "p.fecha >= CURRENT_DATE - INTERVAL '7 days'";
+        break;
+      case 'month':
+        dateCondition = "p.fecha >= DATE_TRUNC('month', CURRENT_DATE)";
+        break;
+      case 'year':
+        dateCondition = "p.fecha >= DATE_TRUNC('year', CURRENT_DATE)";
+        break;
+      default:
+        dateCondition = "p.fecha >= DATE_TRUNC('month', CURRENT_DATE)";
+    }
+
+    const productsQuery = `
+      SELECT 
+        mi.nombre,
+        SUM(dp.cantidad) as total_vendido
+      FROM restaurante.detalle_pedido dp
+      JOIN restaurante.menu_items mi ON dp.id_item = mi.id_item
+      JOIN restaurante.pedidos p ON dp.id_pedido = p.id_pedido
+      WHERE ${dateCondition}
+      GROUP BY mi.id_item, mi.nombre
+      ORDER BY total_vendido DESC
+      LIMIT 10
+    `;
+
+    const productsResult = await ejecutarConsulta(productsQuery);
+    
+    const chartData = {
+      labels: productsResult.rows.map(row => row.nombre),
+      data: productsResult.rows.map(row => parseInt(row.total_vendido))
+    };
+
+    res.json(chartData);
+  } catch (error) {
+    console.error('Error en products-chart:', error);
+    res.status(500).json({ error: 'Error al obtener productos más vendidos: ' + error.message });
+  }
+});
+
+// Gráfica de métodos de pago
+app.get('/api/dashboard/payments-chart', verificarToken, async (req, res) => {
+  try {
+    const { range = 'month' } = req.query;
+    
+    let dateCondition;
+    switch(range) {
+      case 'today':
+        dateCondition = "fecha::date = CURRENT_DATE";
+        break;
+      case 'week':
+        dateCondition = "fecha >= CURRENT_DATE - INTERVAL '7 days'";
+        break;
+      case 'month':
+        dateCondition = "fecha >= DATE_TRUNC('month', CURRENT_DATE)";
+        break;
+      case 'year':
+        dateCondition = "fecha >= DATE_TRUNC('year', CURRENT_DATE)";
+        break;
+      default:
+        dateCondition = "fecha >= DATE_TRUNC('month', CURRENT_DATE)";
+    }
+
+    const paymentsQuery = `
+      SELECT 
+        COALESCE(metodo_pago, 'No especificado') as metodo_pago,
+        COUNT(*) as cantidad,
+        COALESCE(SUM(total), 0) as monto_total
+      FROM restaurante.facturas
+      WHERE ${dateCondition}
+      GROUP BY metodo_pago
+    `;
+
+    const paymentsResult = await ejecutarConsulta(paymentsQuery);
+    
+    const chartData = {
+      labels: paymentsResult.rows.map(row => row.metodo_pago),
+      data: paymentsResult.rows.map(row => parseInt(row.cantidad))
+    };
+
+    res.json(chartData);
+  } catch (error) {
+    console.error('Error en payments-chart:', error);
+    res.status(500).json({ error: 'Error al obtener métodos de pago: ' + error.message });
+  }
+});
+
+// Pedidos recientes
+app.get('/api/dashboard/recent-orders', verificarToken, async (req, res) => {
+  try {
+    const recentOrdersQuery = `
+      SELECT 
+        p.id_pedido,
+        COALESCE(c.nombre, 'Cliente no registrado') as nombre_cliente,
+        p.fecha,
+        COALESCE(f.total, 0) as total,
+        p.estado,
+        COALESCE(f.metodo_pago, 'No especificado') as metodo_pago
+      FROM restaurante.pedidos p
+      LEFT JOIN restaurante.clientes c ON p.id_cliente = c.id_cliente
+      LEFT JOIN restaurante.facturas f ON p.id_pedido = f.id_pedido
+      ORDER BY p.fecha DESC
+      LIMIT 10
+    `;
+
+    const ordersResult = await ejecutarConsulta(recentOrdersQuery);
+    res.json(ordersResult.rows);
+  } catch (error) {
+    console.error('Error en recent-orders:', error);
+    res.status(500).json({ error: 'Error al obtener pedidos recientes: ' + error.message });
+  }
+});
+
+// < - - - - - - - - RUTAS DEL SISTEMA - - - - - - - - - >
 // Ruta de prueba para verificar servidor
 app.get('/', (req, res) => {
   res.json({ 
@@ -1488,14 +1914,14 @@ app.get('/', (req, res) => {
       reset_password: '/api/reset-password (POST)',
       cola_chef: '/cola_chef',
       pedidos: '/pedidos',
-      caja_registradora: '/api/cash-register/*'
+      eventos: '/eventos',
+      caja_registradora: '/api/cash-register/*',
+      facturas: '/api/facturas'
     }
   });
 });
 
-// ==================================
-// MANEJO DE ERRORES GLOBAL
-// ==================================
+// < - - - - - - - - - - - MANEJO DE ERRORES GLOBAL - - - - - - - - - - >
 app.use((err, req, res, next) => {
   console.error('Error global:', err);
   
@@ -1506,14 +1932,18 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Error interno del servidor' });
 });
 
-// ==================================
-// INICIO DEL SERVIDOR CON SOCKET.IO
-// ==================================
+// < - - - - - - -  EXPRESS.STATIC Y API/FACTURAS - - - - - - - - - >
+app.use(express.static("public"));
+
+app.use("/api/facturas", facturasRoutes);
+
+// < - - - - - - - INICIO DEL SERVIDOR CON SOCKET.IO - - - - - - - - >
 import { createServer } from 'http';
 import { Server as SocketServer } from 'socket.io';
 
-// Crear servidor HTTP base con Express
+// Crear servidor HTTP base con Express + SOCKET .IO
 const httpServer = createServer(app);
+configurarSocket(httpServer);
 
 // Configurar Socket.IO con CORS
 const io = new SocketServer(httpServer, {
@@ -1523,9 +1953,7 @@ const io = new SocketServer(httpServer, {
   }
 });
 
-// ==================================
-// EVENTOS SOCKET.IO
-// ==================================
+// < - - - - - - - - - - EVENTOS SOCKET.IO - - - - - - - - - - >
 io.on('connection', (socket) => {
   console.log('🟢 Cliente conectado:', socket.id);
 
@@ -1534,27 +1962,7 @@ io.on('connection', (socket) => {
   });
 });
 
-// ==================================
-// FUNCIONES AUXILIARES PARA EMITIR EVENTOS
-// ==================================
-function emitirNuevoPedido(pedido) {
-  io.emit('nuevo_pedido', pedido);
-  console.log('📦 Pedido emitido a todos los clientes:', pedido.id_pedido);
-}
-
-function emitirCambioEstado(pedido) {
-  io.emit('pedido_actualizado', pedido);
-  console.log('🔁 Pedido actualizado emitido:', pedido.id_pedido, pedido.estado);
-}
-
-// ==================================
-// EXPORTAR FUNCIONES PARA USARLAS EN RUTAS
-// ==================================
-export { emitirNuevoPedido, emitirCambioEstado };
-
-// ==================================
-// ARRANQUE FINAL DEL SERVIDOR
-// ==================================
+// < - - - - - - - - - ARRANQUE FINAL DEL SERVIDOR - - - - - - - - - - - >
 httpServer.listen(PORT, () => {
   console.log('='.repeat(60));
   console.log(' SERVIDOR MARÍA CHULA INICIADO');
@@ -1565,6 +1973,7 @@ httpServer.listen(PORT, () => {
   console.log(` Login: http://localhost:${PORT}/login`);
   console.log(` Recuperación: http://localhost:${PORT}/api/send-recovery-code`);
   console.log(` Caja Registradora: http://localhost:${PORT}/api/cash-register/status`);
+  console.log(` Eventos: http://localhost:${PORT}/eventos`);
   console.log('='.repeat(60));
   console.log(' Servidor listo para recibir requests y WebSockets ');
 });

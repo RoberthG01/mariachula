@@ -17,18 +17,18 @@
       </div>
       <div class="menu-list">
         <a href="menu.html" class="menu-item"><i class="fas fa-utensils"></i> Menú</a>
-        <a href="inventory.html" class="menu-item"><i class="fas fa-boxes"></i> Inventario</a>
+        <a href="inventario.html" class="menu-item"><i class="fas fa-boxes"></i> Inventario</a>
         <a href="dashboard.html" class="menu-item"><i class="fas fa-chart-bar"></i> Dashboard</a>
-        <a href="admin-menus.html" class="menu-item"><i class="fas fa-list-alt"></i> Admin Menús</a>
-        <a href="admin-users.html" class="menu-item"><i class="fas fa-users"></i> Admin Usuarios</a>
-        <a href="billing.html" class="menu-item"><i class="fas fa-receipt"></i> Facturación</a>
-        <a href="events.html" class="menu-item"><i class="fas fa-calendar-alt"></i> Eventos</a>
-        <a href="history-events.html" class="menu-item"><i class="fas fa-history"></i> Historial Eventos</a>
-        <a href="history-orders.html" class="menu-item"><i class="fas fa-clipboard-list"></i> Historial Pedidos</a>
-        <a href="queue.html" class="menu-item"><i class="fas fa-tasks"></i> Cola de pedidos</a>
-        <a href="cash-register.html" class="menu-item active"><i class="fas fa-cash-register"></i> Caja Registradora</a>
-      </div>
+        <a href="gestionar_menu.html" class="menu-item"><i class="fas fa-list-alt"></i> Admin Menús</a>
+        <a href="gestionar_admin.html" class="menu-item"><i class="fas fa-users"></i> Admin Usuarios</a>
+        <a href="factura.html" class="menu-item active"><i class="fas fa-receipt"></i> Facturación</a>
+        <a href="eventos.html" class="menu-item"><i class="fas fa-calendar-alt"></i> Eventos</a>
+        <a href="elige_cola.html" class="menu-item"><i class="fas fa-tasks"></i> Cola de pedidos</a>
+        <a href="cash_register.html" class="menu-item"><i class="fas fa-cash-register"></i> Caja Registradora</a>
+        <a href="clientes.html" class="menu-item"><i class="fas fa-users"></i> Clientes</a>
+    </div>
     </aside>
+
     <main class="main">
       <div class="header">
         <div class="title">Cola de Pedidos - Vista Cocinero/Chef</div>
@@ -36,6 +36,7 @@
           <i class="fas fa-arrow-left"></i> Regresar
         </a>
       </div>
+
       <div class="card">
         <h2>Lista de Pedidos en Cola</h2>
         <table class="table" id="ordersTable">
@@ -49,14 +50,13 @@
               <th>Acciones</th>
             </tr>
           </thead>
-          <tbody>
-            <!-- Los pedidos se insertarán aquí -->
-          </tbody>
+          <tbody></tbody>
         </table>
       </div>
     </main>
   </div>
-  <!-- Modal Detalles del Pedido -->
+
+  <!-- Modal Detalles -->
   <div class="modal" id="orderModal">
     <div class="modal-content">
       <div class="modal-header">
@@ -66,208 +66,232 @@
       <div id="modalBody"></div>
     </div>
   </div>
+
   <!-- Socket.IO -->
   <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
-  <script>
-    // ============================================
-    // CONFIGURACIÓN GENERAL
-    // ============================================
-    let orders = [];
-    const API_URL = "http://localhost:5000/cola_chef"; // cambia en producción
+<script>
+// ============================================
+// CONFIGURACIÓN INICIAL
+// ============================================
+let orders = [];
+const API_URL = "http://localhost:5000/cola_chef";
 
-    // Detectar si está en producción o local
-    const socketServer = window.location.hostname.includes("localhost")
-      ? "http://localhost:5000"
-      : window.location.origin;
+const socketServer = window.location.hostname.includes("localhost")
+  ? "http://localhost:5000"
+  : window.location.origin;
 
-    // ============================================
-    // CONEXIÓN WEBSOCKET
-    // ============================================
-    const socket = io(socketServer);
+const socket = io(socketServer);
 
-    socket.on("connect", () => {
-      console.log("🟢 Conectado al servidor WebSocket:", socket.id);
+socket.on("connect", () => console.log("🟢 Conectado a WebSocket:", socket.id));
+socket.on("disconnect", () => console.log("🔴 Desconectado del servidor WebSocket"));
+
+socket.on("nuevo_pedido", (pedido) => {
+  mostrarNotificacion("Nuevo pedido recibido", `Pedido #${pedido.id_pedido}`);
+  agregarOActualizarPedido(pedido);
+});
+
+socket.on("pedido_actualizado", (pedido) => {
+  mostrarNotificacion("Pedido actualizado", `Pedido #${pedido.id_pedido} - ${pedido.estado}`);
+  agregarOActualizarPedido(pedido);
+});
+
+// ============================================
+// UTILIDADES
+// ============================================
+function mostrarNotificacion(titulo, mensaje) {
+  const notif = document.createElement("div");
+  notif.className = "toast";
+  notif.innerHTML = `<strong>${titulo}</strong><br><span>${mensaje}</span>`;
+  document.body.appendChild(notif);
+  setTimeout(() => notif.remove(), 4000);
+}
+
+function agregarOActualizarPedido(pedido) {
+  const index = orders.findIndex(o => o.id_pedido === pedido.id_pedido);
+  if (index !== -1) orders[index] = pedido;
+  else orders.push(pedido);
+  renderOrders();
+}
+
+// ============================================
+// CARGAR PEDIDOS
+// ============================================
+async function cargarPedidos() {
+  try {
+    const token = localStorage.getItem("token");
+    const res = await fetch(API_URL, {
+      headers: { "Authorization": `Bearer ${token}` }
     });
+    if (!res.ok) throw new Error("Error al obtener pedidos");
+    orders = await res.json();
+    renderOrders();
+  } catch (err) {
+    console.error("Error cargando pedidos:", err);
+    document.querySelector("#ordersTable tbody").innerHTML = `
+      <tr><td colspan="6" style="text-align:center;color:gray;">❌ Error al cargar pedidos</td></tr>`;
+  }
+}
+document.addEventListener("DOMContentLoaded", cargarPedidos);
 
-    socket.on("disconnect", () => {
-      console.log("🔴 Desconectado del servidor WebSocket");
-    });
+// ============================================
+// RENDERIZAR TABLA
+// ============================================
+function renderOrders() {
+  const tbody = document.querySelector("#ordersTable tbody");
+  tbody.innerHTML = "";
 
-    // 📦 Evento: Nuevo pedido recibido
-    socket.on("nuevo_pedido", (pedido) => {
-      console.log("🆕 Nuevo pedido recibido:", pedido);
-      mostrarNotificacion("Nuevo pedido recibido", `Pedido #${pedido.id_pedido}`);
-      agregarOActualizarPedido(pedido);
-    });
+  if (!orders.length) {
+    tbody.innerHTML = `
+      <tr><td colspan="6" style="text-align:center;padding:20px;color:gray;">
+        <i class="fas fa-clipboard-list" style="font-size:22px;"></i><p>No hay pedidos en cola</p>
+      </td></tr>`;
+    return;
+  }
 
-    // 🔁 Evento: Pedido actualizado
-    socket.on("pedido_actualizado", (pedido) => {
-      console.log("🔄 Pedido actualizado:", pedido);
-      mostrarNotificacion("Pedido actualizado", `Pedido #${pedido.id_pedido} - ${pedido.estado}`);
-      agregarOActualizarPedido(pedido);
-    });
+  const sorted = [...orders].sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
 
-    // ============================================
-    // FUNCIONES DE UTILIDAD
-    // ============================================
-
-    // 🔹 Mostrar notificación flotante
-    function mostrarNotificacion(titulo, mensaje) {
-      const notif = document.createElement("div");
-      notif.className = "toast";
-      notif.innerHTML = `<strong>${titulo}</strong><br><span>${mensaje}</span>`;
-      document.body.appendChild(notif);
-      setTimeout(() => notif.remove(), 4000);
-    }
-
-    // 🔹 Agregar o actualizar pedido en lista local
-    function agregarOActualizarPedido(pedido) {
-      const index = orders.findIndex(o => o.id_pedido === pedido.id_pedido);
-      if (index !== -1) {
-        orders[index] = pedido;
-      } else {
-        orders.push(pedido);
-      }
-      renderOrders();
-    }
-
-    // ============================================
-    // CARGAR PEDIDOS DESDE BACKEND
-    // ============================================
-    async function cargarPedidos() {
-      try {
-        const token = localStorage.getItem("token");
-        const response = await fetch(API_URL, {
-          headers: { "Authorization": `Bearer ${token}` }
-        });
-
-        if (!response.ok) throw new Error("Error al obtener pedidos");
-        const data = await response.json();
-        orders = data;
-        renderOrders();
-      } catch (err) {
-        console.error("Error cargando pedidos:", err);
-        const tableBody = document.querySelector("#ordersTable tbody");
-        tableBody.innerHTML = `
-          <tr>
-            <td colspan="6" style="text-align: center; padding: 20px; color: var(--color-muted);">
-              <i class="fas fa-exclamation-triangle" style="font-size: 24px; margin-bottom: 10px;"></i>
-              <p>Error al cargar pedidos</p>
-            </td>
-          </tr>
-        `;
-      }
-    }
-
-    document.addEventListener("DOMContentLoaded", cargarPedidos);
-
-    // ============================================
-    // RENDERIZAR PEDIDOS EN TABLA
-    // ============================================
-    function renderOrders() {
-      const tableBody = document.querySelector("#ordersTable tbody");
-      tableBody.innerHTML = "";
-
-      if (orders.length === 0) {
-        tableBody.innerHTML = `
-          <tr>
-            <td colspan="6" style="text-align: center; padding: 20px; color: var(--color-muted);">
-              <i class="fas fa-clipboard-list" style="font-size: 24px; margin-bottom: 10px;"></i>
-              <p>No hay pedidos en cola</p>
-            </td>
-          </tr>
-        `;
-        return;
-      }
-
-      const sortedOrders = [...orders].sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
-
-      sortedOrders.forEach(order => {
-        const itemsList = (order.detalles || [])
-          .map(item => `${item.cantidad}x ${item.producto}`)
-          .join(", ");
-
-        const estados = {
-          "pendiente": ["Pendiente", "status-pending"],
-          "en preparación": ["En preparación", "status-preparation"],
-          "listo": ["Listo", "status-ready"],
-          "entregado": ["Entregado", "status-delivered"]
-        };
-        const [statusText, statusClass] = estados[order.estado] || ["Pendiente", "status-pending"];
-
-        const row = document.createElement("tr");
-        row.innerHTML = `
-          <td>#${order.id_pedido}</td>
-          <td>${order.cliente || "---"}</td>
-          <td>${itemsList}</td>
-          <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-          <td>${formatTime(order.fecha)}</td>
-          <td>
-            <button class="btn primary" onclick="viewOrder(${order.id_pedido})">
-              <i class="fas fa-eye"></i> Ver
-            </button>
-          </td>
-        `;
-        tableBody.appendChild(row);
-      });
-    }
-
-    // ============================================
-    // MODAL DETALLES DEL PEDIDO
-    // ============================================
-    function viewOrder(id) {
-      const order = orders.find(o => o.id_pedido === id);
-      if (!order) return;
-
-      const modal = document.getElementById("orderModal");
-      const modalBody = document.getElementById("modalBody");
-
-      const itemsHTML = (order.detalles || []).map(item => `
-        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-          <div>${item.cantidad}x ${item.producto}</div>
-          <div>Q${item.subtotal.toFixed(2)}</div>
-        </div>
-      `).join("");
-
-      modalBody.innerHTML = `
-        <div style="margin-bottom: 20px;">
-          <div><strong>Cliente:</strong> ${order.cliente || "---"}</div>
-          <div><strong>Tipo de pedido:</strong> ${order.tipo_pedido}</div>
-          <div><strong>Estado:</strong> ${order.estado}</div>
-          <div><strong>Hora:</strong> ${formatDateTime(order.fecha)}</div>
-        </div>
-        <h4 style="margin-bottom: 15px; color: var(--color-primary);">Detalles del Pedido</h4>
-        ${itemsHTML}
-        <div style="display: flex; justify-content: space-between; margin-top: 15px; font-weight: bold; border-top: 2px solid var(--color-primary); padding-top: 10px;">
-          <div>Total:</div>
-          <div>Q${order.total.toFixed(2)}</div>
-        </div>
-      `;
-
-      modal.style.display = "flex";
-    }
-
-    function closeModal() {
-      document.getElementById("orderModal").style.display = "none";
-    }
-
-    window.onclick = function(event) {
-      const modal = document.getElementById("orderModal");
-      if (event.target === modal) closeModal();
+  sorted.forEach(order => {
+    const items = (order.detalles || []).map(i => `${i.cantidad}x ${i.producto}`).join(", ");
+    const estados = {
+      "pendiente": ["Pendiente", "status-pending"],
+      "en preparación": ["En preparación", "status-preparation"],
+      "listo": ["Listo", "status-ready"],
+      "entregado": ["Entregado", "status-delivered"]
     };
+    const [statusText, statusClass] = estados[order.estado] || ["Pendiente", "status-pending"];
 
-    // ============================================
-    // FORMATOS DE FECHA Y HORA
-    // ============================================
-    function formatDateTime(timestamp) {
-      const date = new Date(timestamp);
-      return date.toLocaleString("es-ES");
-    }
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>#${order.id_pedido}</td>
+      <td>${order.cliente || "---"}</td>
+      <td>${items}</td>
+      <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+      <td>${formatTime(order.fecha)}</td>
+      <td>
+        <button class="btn primary" onclick="viewOrder(${order.id_pedido})">
+          <i class="fas fa-eye"></i> Ver
+        </button>
+        ${order.estado === "pendiente" ? `
+          <button class="btn success" onclick="marcarPreparacion(${order.id_pedido})">
+            <i class="fas fa-play"></i> Iniciar
+          </button>` : ""}
+        ${order.estado === "en preparación" ? `
+          <button class="btn warning" onclick="marcarListo(${order.id_pedido})">
+            <i class="fas fa-check"></i> Marcar Listo
+          </button>` : ""}
+      </td>`;
+    tbody.appendChild(row);
+  });
+}
 
-    function formatTime(timestamp) {
-      const date = new Date(timestamp);
-      return date.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" });
-    }
-  </script>
+// ============================================
+// MODAL DETALLES
+// ============================================
+function viewOrder(id) {
+  const order = orders.find(o => o.id_pedido === id);
+  if (!order) return;
+
+  const modal = document.getElementById("orderModal");
+  const modalBody = document.getElementById("modalBody");
+
+  const itemsHTML = (order.detalles || []).map(i => `
+    <tr>
+      <td>${i.cantidad}</td>
+      <td>${i.producto || "—"}</td>
+      <td>Q${parseFloat(i.subtotal || 0).toFixed(2)}</td>
+    </tr>`).join("");
+
+  const estadoColores = {
+    "pendiente": "#d39e00",
+    "en preparación": "#0dcaf0",
+    "listo": "#198754",
+    "entregado": "#6c757d"
+  };
+  const color = estadoColores[order.estado] || "#999";
+
+  modalBody.innerHTML = `
+    <div style="margin-bottom:15px;">
+      <h3>Pedido #${order.id_pedido}</h3>
+      <div><strong>Cliente:</strong> ${order.cliente || "—"}</div>
+      <div><strong>Tipo:</strong> ${order.tipo_pedido}</div>
+      <div><strong>Hora:</strong> ${formatDateTime(order.fecha)}</div>
+      <div><strong>Estado:</strong> 
+        <span style="background:${color};color:white;padding:4px 10px;border-radius:8px;">
+          ${order.estado.toUpperCase()}
+        </span>
+      </div>
+    </div>
+    <h4 style="color:var(--color-primary)">🍽️ Detalles del Pedido</h4>
+    <table style="width:100%;border-collapse:collapse;margin-top:10px;">
+      <thead><tr style="background:#f2f2f2;"><th>Cant.</th><th>Platillo</th><th>Subtotal</th></tr></thead>
+      <tbody>${itemsHTML}</tbody>
+    </table>
+    <div style="display:flex;justify-content:space-between;margin-top:10px;font-weight:bold;border-top:2px solid var(--color-primary);padding-top:10px;">
+      <span>Total:</span><span>Q${parseFloat(order.total || 0).toFixed(2)}</span>
+    </div>
+    ${order.estado === "pendiente" ? `
+      <div style="text-align:center;margin-top:20px;">
+        <button class="btn success" onclick="marcarPreparacion(${order.id_pedido});closeModal();">
+          <i class="fas fa-play"></i> Iniciar Preparación
+        </button>
+      </div>` : ""}
+    ${order.estado === "en preparación" ? `
+      <div style="text-align:center;margin-top:20px;">
+        <button class="btn warning" onclick="marcarListo(${order.id_pedido});closeModal();">
+          <i class="fas fa-check-circle"></i> Marcar como Listo
+        </button>
+      </div>` : ""}
+  `;
+
+  modal.style.display = "flex";
+}
+
+function closeModal() {
+  const modal = document.getElementById("orderModal");
+  modal.style.display = "none";
+}
+window.addEventListener("click", e => {
+  const modal = document.getElementById("orderModal");
+  if (e.target === modal) closeModal();
+});
+
+// ============================================
+// ACTUALIZAR ESTADO
+// ============================================
+async function marcarPreparacion(id) { await actualizarEstado(id, "en preparación"); }
+async function marcarListo(id) { await actualizarEstado(id, "listo"); }
+
+async function actualizarEstado(id, estado) {
+  try {
+    const token = localStorage.getItem("token");
+    const res = await fetch(`http://localhost:5000/pedidos/${id}/estado`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify({ estado })
+    });
+    if (!res.ok) throw new Error("Error al actualizar estado");
+    const data = await res.json();
+    mostrarNotificacion("Estado actualizado", `Pedido #${id} → ${estado}`);
+    agregarOActualizarPedido(data.pedido);
+  } catch (err) {
+    console.error("Error al actualizar estado:", err);
+  }
+}
+
+// ============================================
+// FORMATO: FECHA Y HORA
+// ============================================
+function formatDateTime(ts) {
+  const d = new Date(ts);
+  return d.toLocaleString("es-ES");
+}
+function formatTime(ts) {
+  const d = new Date(ts);
+  return d.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" });
+}
+</script>
 </body>
 </html>

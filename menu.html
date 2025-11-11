@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Menú - María Chula</title>
   <link rel="stylesheet" href="menu.css">
+  <link rel="stylesheet" href="modals.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <link rel="icon" href="fotos/iconomch.ico" type="image/x-icon">
 </head>
@@ -13,43 +14,43 @@
   <!-- Sidebar -->
   <aside class="sidebar">
     <div class="logo">
-        <img src="fotos/logomch.png" alt="Logo María Chula">
-        <h2>María Chula</h2>
+      <img src="fotos/logomch.png" alt="Logo María Chula">
+      <h2>María Chula</h2>
     </div>
     <div class="menu-list">
-      <a href="menu.html" class="menu-item active"><i class="fas fa-utensils"></i> Menú</a>
-      <a href="inventory.html" class="menu-item"><i class="fas fa-boxes"></i> Inventario</a>
+      <a href="menu.html" class="menu-item"><i class="fas fa-utensils"></i> Menú</a>
+      <a href="inventario.html" class="menu-item"><i class="fas fa-boxes"></i> Inventario</a>
       <a href="dashboard.html" class="menu-item"><i class="fas fa-chart-bar"></i> Dashboard</a>
-      <a href="admin-menus.html" class="menu-item"><i class="fas fa-list-alt"></i> Admin Menús</a>
-      <a href="admin-users.html" class="menu-item"><i class="fas fa-users"></i> Admin Usuarios</a>
-      <a href="billing.html" class="menu-item"><i class="fas fa-receipt"></i> Facturación</a>
-      <a href="events.html" class="menu-item"><i class="fas fa-calendar-alt"></i> Eventos</a>
-      <a href="history-events.html" class="menu-item"><i class="fas fa-history"></i> Historial Eventos</a>
-      <a href="history-orders.html" class="menu-item"><i class="fas fa-clipboard-list"></i> Historial Pedidos</a>
-      <a href="queue.html" class="menu-item"><i class="fas fa-tasks"></i> Cola de pedidos</a>
-      <a href="cash-register.html" class="menu-item"><i class="fas fa-cash-register"></i> Caja Registradora</a>
-    </div>
+      <a href="gestionar_menu.html" class="menu-item"><i class="fas fa-list-alt"></i> Admin Menús</a>
+      <a href="gestionar_admin.html" class="menu-item"><i class="fas fa-users"></i> Admin Usuarios</a>
+      <a href="factura.html" class="menu-item active"><i class="fas fa-receipt"></i> Facturación</a>
+      <a href="eventos.html" class="menu-item"><i class="fas fa-calendar-alt"></i> Eventos</a>
+      <a href="elige_cola.html" class="menu-item"><i class="fas fa-tasks"></i> Cola de pedidos</a>
+      <a href="cash_register.html" class="menu-item"><i class="fas fa-cash-register"></i> Caja Registradora</a>
+      <a href="clientes.html" class="menu-item"><i class="fas fa-users"></i> Clientes</a>
+  </div>
   </aside>
+
   <!-- Contenido principal -->
   <main class="main">
     <div class="header">
       <div class="title">Menú de Pedidos</div>
       <div class="actions">
-        <a href="panel.html" class="back-button">
-          <i class="fas fa-arrow-left"></i> Regresar
-        </a>
-        <button id="cartButton" class="btn primary">
-          <i class="fas fa-shopping-cart"></i> Ver Carrito (<span id="cartCount">0</span>)
-        </button>
+        <a href="panel.html" class="back-button"><i class="fas fa-arrow-left"></i> Regresar</a>
+        <button id="cartButton" class="btn primary"><i class="fas fa-shopping-cart"></i> Ver Carrito (<span id="cartCount">0</span>)</button>
       </div>
     </div>
+
     <div class="card">
       <h3>Platos disponibles</h3>
       <div id="menuGrid" class="menu-grid"></div>
     </div>
   </main>
 </div>
-<!-- Modal del Carrito -->
+
+<!-- MODALES -->
+
+<!-- 1️⃣ Carrito de Platillos -->
 <div id="cartModal" class="modal">
   <div class="modal-content" style="max-width:500px;">
     <div class="modal-header">
@@ -60,18 +61,15 @@
       <div id="cartItems"></div>
       <div id="emptyCart" class="empty-cart">No hay productos en el carrito</div>
       <div class="cart-total">Total: <span id="cartTotal">Q0.00</span></div>
-      <h4 style="margin-top:15px;">Datos del Cliente</h4>
-      <div id="clientForm"></div>
-      <h4>Notas del pedido</h4>
-      <textarea id="orderNotes" placeholder="Ejemplo: sin cebolla, con extra queso..."></textarea>
     </div>
     <div class="modal-footer">
       <button class="btn" onclick="closeCartModal()">Cancelar</button>
-      <button class="btn primary" onclick="openOrderTypeModal()">Enviar pedido</button>
+      <button class="btn primary" onclick="openOrderTypeModal()">Continuar</button>
     </div>
   </div>
 </div>
-<!--  Modal para tipo de pedido -->
+
+<!-- 2️⃣ Selección de tipo de pedido -->
 <div id="orderTypeModal" class="modal">
   <div class="modal-content" style="max-width:400px;">
     <div class="modal-header">
@@ -79,15 +77,31 @@
       <button class="close-modal" onclick="closeOrderTypeModal()">&times;</button>
     </div>
     <div class="modal-body">
-      <button class="btn" onclick="selectOrderType('mesa')">
-        <i class="fas fa-utensils"></i> En mesa
-      </button>
-      <button class="btn primary" onclick="selectOrderType('domicilio')">
-        <i class="fas fa-truck"></i> A domicilio
-      </button>
+      <button class="btn" onclick="selectOrderType('mesa')"><i class="fas fa-utensils"></i> En mesa</button>
+      <button class="btn primary" onclick="selectOrderType('domicilio')"><i class="fas fa-truck"></i> A domicilio</button>
     </div>
   </div>
 </div>
+
+<!-- 3️⃣ Datos del cliente y confirmación -->
+<div id="clientModal" class="modal">
+  <div class="modal-content" style="max-width:500px;">
+    <div class="modal-header">
+      <h3>Datos del Cliente</h3>
+      <button class="close-modal" onclick="closeClientModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div id="clientForm"></div>
+      <h4>Notas del pedido</h4>
+      <textarea id="orderNotes" placeholder="Ejemplo: sin cebolla, con extra queso..."></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeClientModal()">Cancelar</button>
+      <button class="btn primary" onclick="submitOrder()">Enviar Pedido</button>
+    </div>
+  </div>
+</div>
+
 <!-- Modal de mensajes -->
 <div id="messageModal" class="modal">
   <div class="modal-content message-modal">
@@ -99,303 +113,227 @@
     </div>
   </div>
 </div>
-<!-- 🔔 Contenedor de notificaciones -->
+
 <div id="toastContainer"></div>
+
+<script src="auth.js"></script>
 <script>
 let cart = [];
-let orderNotes = "";
 let orderType = null;
 
 // ==============================
-// TOAST
+// MODALES DE MENSAJES
 // ==============================
-function showToast(mensaje, tipo = "info") {
-  const container = document.getElementById("toastContainer");
-  const toast = document.createElement("div");
-  toast.className = `toast toast-${tipo}`;
-  toast.innerHTML = `
-    ${tipo === "success" ? "✅" : tipo === "warning" ? "⚠️" : tipo === "error" ? "❌" : "ℹ️"} 
-    ${mensaje}
-  `;
-  container.appendChild(toast);
-  setTimeout(() => {
-    toast.style.opacity = "0";
-    setTimeout(() => toast.remove(), 300);
-  }, 2500);
+function showMessage(title, message, icon = "fa-info-circle") {
+  document.getElementById("messageTitle").textContent = title;
+  document.getElementById("messageText").textContent = message;
+  document.getElementById("messageIcon").innerHTML = `<i class="fas ${icon}"></i>`;
+  document.getElementById("messageModal").classList.add("active");
 }
-
-// ==============================
-// MODAL DE MENSAJES
-// ==============================
-function showMessage(titulo, texto, tipo = "info") {
-  const modal = document.getElementById("messageModal");
-  const title = document.getElementById("messageTitle");
-  const text = document.getElementById("messageText");
-  const icon = document.getElementById("messageIcon");
-
-  title.textContent = titulo;
-  text.textContent = texto;
-
-  const icons = { success: "✅", error: "❌", warning: "⚠️", info: "ℹ️" };
-  icon.textContent = icons[tipo] || "ℹ️";
-
-  modal.classList.add("active");
-}
-
 function closeMessageModal() {
   document.getElementById("messageModal").classList.remove("active");
 }
 
 // ==============================
-// OBTENER MENÚ
+// CARGAR MENÚ
 // ==============================
-function getMenu() {
-  const saved = localStorage.getItem("mc_menu");
-  if (saved) return JSON.parse(saved);
-  return [
-    { id: 1, name: "Tacos al Pastor", description: "Carne adobada con piña", price: 45, img: "fotos/no-image.png" },
-    { id: 2, name: "Enchiladas Verdes", description: "Pollo con salsa verde", price: 55, img: "fotos/no-image.png" }
-  ];
-}
+async function loadMenu() {
+  const token = localStorage.getItem("token");
+  try {
+    const res = await fetch("http://localhost:5000/menu_items", {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const data = await res.json();
+    const grid = document.getElementById("menuGrid");
 
-// ==============================
-// RENDERIZAR MENÚ
-// ==============================
-function renderMenuGrid() {
-  const menu = getMenu();
-  const grid = document.getElementById("menuGrid");
+    if (!res.ok || !Array.isArray(data)) {
+      grid.innerHTML = `<div class="empty">⚠️ No se pudieron cargar los platillos</div>`;
+      return;
+    }
+    if (data.length === 0) {
+      grid.innerHTML = `<div class="empty">No hay platillos disponibles</div>`;
+      return;
+    }
 
-  if (!menu.length) {
-    grid.innerHTML = `
-      <div style="text-align:center; padding:40px; color:#888;">
-        <i class="fas fa-utensils" style="font-size:48px;"></i>
-        <p>No hay platillos en el menú</p>
-        <a href="admin-menus.html" class="btn primary"><i class="fas fa-plus"></i> Agregar Platillos</a>
-      </div>`;
-    return;
+    grid.innerHTML = data.map(item => `
+      <div class="menu-item-card">
+        <img src="${item.img || 'fotos/no-image.png'}" alt="${item.nombre}" class="menu-img">
+        <h4>${item.nombre}</h4>
+        <p>${item.descripcion || ""}</p>
+        <div class="price">Q${parseFloat(item.precio || 0).toFixed(2)}</div>
+        <button class="btn primary" onclick="addToCart(${item.id_item}, '${item.nombre}', ${parseFloat(item.precio)})">
+          <i class="fas fa-plus"></i> Agregar
+        </button>
+      </div>
+    `).join("");
+  } catch (error) {
+    console.error("Error al cargar menú:", error);
+    document.getElementById("menuGrid").innerHTML = `<div class="empty">❌ Error al cargar el menú</div>`;
   }
-
-  grid.innerHTML = menu.map(item => `
-    <div class="menu-item-card">
-      <img src="${item.img || 'fotos/no-image.png'}" alt="${item.name}" class="menu-img">
-      <h4>${item.name}</h4>
-      <p>${item.description || ''}</p>
-      <div class="price">Q${item.price.toFixed(2)}</div>
-      <button class="btn primary" onclick="addToCart(${item.id})">
-        <i class="fas fa-plus"></i> Agregar
-      </button>
-    </div>
-  `).join("");
 }
 
 // ==============================
-// CARRITO
+// CARRITO DE PEDIDOS
 // ==============================
-function addToCart(id) {
-  const menu = getMenu();
-  const item = menu.find(p => p.id === id);
-  if (!item) return;
-  const existing = cart.find(i => i.id === id);
+function addToCart(id, name, price) {
+  const existing = cart.find(i => i.id_item === id);
   if (existing) existing.quantity++;
-  else cart.push({ id: item.id, name: item.name, price: item.price, quantity: 1 });
-  updateCartCount();
-  saveCart();
-  showToast(`${item.name} agregado al carrito`, "success");
+  else cart.push({ id_item: id, name, price, quantity: 1 });
+  updateCart();
 }
 
-function changeQty(id, delta) {
-  const item = cart.find(i => i.id === id);
-  if (!item) return;
-  item.quantity += delta;
-  if (item.quantity <= 0) cart = cart.filter(i => i.id !== id);
-  renderCart();
-  updateCartCount();
-  saveCart();
-}
-
-function removeFromCart(id) {
-  const item = cart.find(i => i.id === id);
-  cart = cart.filter(i => i.id !== id);
-  renderCart();
-  updateCartCount();
-  saveCart();
-  showToast(`${item?.name || "Producto"} eliminado del carrito`, "warning");
-}
-
-function updateCartCount() {
-  const count = cart.reduce((sum, i) => sum + i.quantity, 0);
-  document.getElementById("cartCount").textContent = count;
-}
-
-function saveCart() {
-  localStorage.setItem("mariaChulaCart", JSON.stringify(cart));
-}
-
-function renderCart() {
+function updateCart() {
   const cartItems = document.getElementById("cartItems");
   const empty = document.getElementById("emptyCart");
   const totalEl = document.getElementById("cartTotal");
+  const countEl = document.getElementById("cartCount");
 
   if (!cart.length) {
     cartItems.innerHTML = "";
     empty.style.display = "block";
     totalEl.textContent = "Q0.00";
+    countEl.textContent = 0;
     return;
   }
 
   empty.style.display = "none";
   let total = 0;
-  cartItems.innerHTML = cart.map(i => `
-    <div class="cart-item">
-      <div><strong>${i.name}</strong><div>Q${i.price.toFixed(2)} x ${i.quantity}</div></div>
-      <div class="cart-item-actions">
-        <button class="btn ghost" onclick="changeQty(${i.id}, -1)">-</button>
-        <span>${i.quantity}</span>
-        <button class="btn ghost" onclick="changeQty(${i.id}, 1)">+</button>
-        <button class="btn danger" onclick="removeFromCart(${i.id})"><i class="fas fa-trash"></i></button>
-      </div>
-    </div>
-  `).join("");
-
-  total = cart.reduce((s, i) => s + i.price * i.quantity, 0);
+  cartItems.innerHTML = cart.map(i => {
+    total += i.price * i.quantity;
+    return `
+      <div class="cart-item">
+        <strong>${i.name}</strong>
+        <div>Q${i.price.toFixed(2)} x ${i.quantity}</div>
+        <div>
+          <button onclick="changeQty(${i.id_item}, -1)">-</button>
+          <button onclick="changeQty(${i.id_item}, 1)">+</button>
+          <button onclick="removeFromCart(${i.id_item})">❌</button>
+        </div>
+      </div>`;
+  }).join("");
   totalEl.textContent = `Q${total.toFixed(2)}`;
+  countEl.textContent = cart.reduce((sum, i) => sum + i.quantity, 0);
 }
 
-function openCartModal() {
-  renderCart();
-  document.getElementById("cartModal").classList.add("active");
+function changeQty(id, delta) {
+  const item = cart.find(i => i.id_item === id);
+  if (!item) return;
+  item.quantity += delta;
+  if (item.quantity <= 0) cart = cart.filter(i => i.id_item !== id);
+  updateCart();
+}
+function removeFromCart(id) {
+  cart = cart.filter(i => i.id_item !== id);
+  updateCart();
 }
 
-function closeCartModal() {
-  document.getElementById("cartModal").classList.remove("active");
-}
+function openCartModal() { document.getElementById("cartModal").classList.add("active"); }
+function closeCartModal() { document.getElementById("cartModal").classList.remove("active"); }
 
 // ==============================
-// PEDIDOS
+// MODALES DE TIPO Y CLIENTE
 // ==============================
 function openOrderTypeModal() {
-  if (!cart.length) return showMessage("Carrito vacío", "Agrega productos antes de enviar un pedido.", "warning");
+  if (!cart.length) return showMessage("Aviso", "Agrega productos antes de continuar.", "fa-exclamation-circle");
   closeCartModal();
   document.getElementById("orderTypeModal").classList.add("active");
 }
-
 function closeOrderTypeModal() {
   document.getElementById("orderTypeModal").classList.remove("active");
 }
-
 function selectOrderType(type) {
   orderType = type;
+  closeOrderTypeModal();
+  openClientModal();
+}
+
+function openClientModal() {
   const form = document.getElementById("clientForm");
-  if (type === "mesa") {
+  if (orderType === "mesa") {
     form.innerHTML = `
       <input id="clienteNombre" placeholder="Nombre del cliente" required>
-      <input id="clienteApellido" placeholder="Apellido del cliente" required>
-    `;
+      <input id="clienteApellido" placeholder="Apellido del cliente" required>`;
   } else {
     form.innerHTML = `
       <input id="clienteNombre" placeholder="Nombre" required>
       <input id="clienteApellido" placeholder="Apellido" required>
       <input id="clienteCorreo" type="email" placeholder="Correo" required>
       <input id="clienteTelefono" placeholder="Teléfono" required>
-      <input id="clienteDireccion" placeholder="Dirección" required>
-    `;
+      <input id="clienteDireccion" placeholder="Dirección" required>`;
   }
-  closeOrderTypeModal();
-  openCartModal();
-  document.querySelector('.modal-footer .primary').setAttribute('onclick', 'submitOrder()');
+  document.getElementById("clientModal").classList.add("active");
+}
+function closeClientModal() {
+  document.getElementById("clientModal").classList.remove("active");
 }
 
 // ==============================
-// ENVIAR PEDIDO (con registro de cliente)
+// ENVÍO FINAL DEL PEDIDO
 // ==============================
 async function submitOrder() {
-  if (!cart.length) return showMessage("Error", "El carrito está vacío.", "error");
-
+  const token = localStorage.getItem("token");
   const nombre = document.getElementById("clienteNombre")?.value?.trim();
   const apellido = document.getElementById("clienteApellido")?.value?.trim();
-  const correo = document.getElementById("clienteCorreo")?.value?.trim();
-  const telefono = document.getElementById("clienteTelefono")?.value?.trim();
-  const direccion = document.getElementById("clienteDireccion")?.value?.trim();
-  const notas = document.getElementById("orderNotes").value.trim();
+  const correo = document.getElementById("clienteCorreo")?.value?.trim() || null;
+  const telefono = document.getElementById("clienteTelefono")?.value?.trim() || null;
+  const direccion = document.getElementById("clienteDireccion")?.value?.trim() || null;
+  const notas = document.getElementById("orderNotes")?.value?.trim() || "";
 
-  if (!nombre || !apellido)
-    return showMessage("Faltan datos", "Debe ingresar nombre y apellido del cliente.", "warning");
-  if (orderType === "domicilio" && (!correo || !telefono || !direccion))
-    return showMessage("Datos incompletos", "Complete todos los datos para pedidos a domicilio.", "warning");
+  if (!nombre || !apellido) {
+    showMessage("Faltan datos", "Debe ingresar nombre y apellido del cliente.", "fa-user-times");
+    return;
+  }
 
-  const token = localStorage.getItem("token");
-  const total = cart.reduce((s, i) => s + i.price * i.quantity, 0);
-
-  // 1️⃣ Registrar cliente antes del pedido
-  const clienteData = { nombre, apellido, correo, telefono, direccion };
-
-  let clienteId = null;
   try {
     const resCliente = await fetch("http://localhost:5000/clientes", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`
-      },
-      body: JSON.stringify(clienteData)
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ nombre, apellido, correo, telefono, direccion })
     });
+    const cliente = await resCliente.json();
+    if (!resCliente.ok) throw new Error(cliente.error || "Error al registrar cliente");
 
-    const clienteResp = await resCliente.json();
-    if (!resCliente.ok) throw new Error(clienteResp.error || "Error al registrar cliente");
-    clienteId = clienteResp.id_cliente;
-  } catch (err) {
-    console.error("Error al registrar cliente:", err);
-    return showMessage("Error", "No se pudo registrar el cliente: " + err.message, "error");
-  }
+    const total = cart.reduce((s, i) => s + i.price * i.quantity, 0);
+    const pedido = {
+      tipo_pedido: orderType,
+      id_cliente: cliente.id_cliente,
+      total,
+      notas,
+      detalles: cart.map(i => ({
+        id_producto: i.id_item,
+        cantidad: i.quantity,
+        precio_unitario: i.price,
+        subtotal: i.price * i.quantity
+      }))
+    };
 
-  // 2️⃣ Registrar pedido
-  const pedidoData = {
-    tipo_pedido: orderType,
-    total,
-    id_cliente: clienteId,
-    detalles: cart.map(i => ({
-      id_producto: i.id,
-      cantidad: i.quantity,
-      precio_unitario: i.price,
-      subtotal: i.price * i.quantity
-    })),
-    notas
-  };
-
-  try {
-    const res = await fetch("http://localhost:5000/pedidos", {
+    const resPedido = await fetch("http://localhost:5000/pedidos", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`
-      },
-      body: JSON.stringify(pedidoData)
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify(pedido)
     });
-    const data = await res.json();
 
-    if (!res.ok) throw new Error(data.error || "Error al registrar pedido");
+    const data = await resPedido.json();
+    if (!resPedido.ok) throw new Error(data.error || "Error al registrar pedido");
 
-    showMessage("Éxito", `✅ Pedido enviado con éxito (ID: ${data.id_pedido})`, "success");
+    showMessage("Éxito", `Pedido enviado correctamente (ID: ${data.id_pedido})`, "fa-check-circle");
     cart = [];
-    saveCart();
-    updateCartCount();
-    closeCartModal();
+    updateCart();
+    closeClientModal();
   } catch (err) {
-    console.error(err);
-    showMessage("Error", "Error al enviar el pedido: " + err.message, "error");
+    console.error("Error al enviar pedido:", err);
+    showMessage("Error", err.message || "Error al enviar pedido.", "fa-times-circle");
   }
 }
 
 // ==============================
-// INICIO
+// EVENTOS INICIALES
 // ==============================
 document.addEventListener("DOMContentLoaded", () => {
-  const saved = localStorage.getItem("mariaChulaCart");
-  if (saved) cart = JSON.parse(saved);
-  renderMenuGrid();
-  updateCartCount();
   document.getElementById("cartButton").addEventListener("click", openCartModal);
+  loadMenu();
 });
 </script>
+
 </body>
 </html>

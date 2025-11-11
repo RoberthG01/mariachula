@@ -3,10 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reportes - Restaurante María Chula</title>
+    <title>Dashboard - Restaurante María Chula</title>
     <link rel="stylesheet" href="dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="icon" href="fotos/iconomch.ico" type="image/x-icon">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 <div class="app">
@@ -17,113 +19,104 @@
         </div>
         <div class="menu-list">
             <a href="menu.html" class="menu-item"><i class="fas fa-utensils"></i> Menú</a>
-            <a href="inventory.html" class="menu-item"><i class="fas fa-boxes"></i> Inventario</a>
-            <a href="dashboard.html" class="menu-item"><i class="fas fa-home"></i> Dashboard</a>
-            <a href="admin-menus.html" class="menu-item"><i class="fas fa-list-alt"></i> Admin Menús</a>
-            <a href="admin-users.html" class="menu-item"><i class="fas fa-users"></i> Admin Usuarios</a>
-            <a href="billing.html" class="menu-item"><i class="fas fa-receipt"></i> Facturación</a>
-            <a href="events.html" class="menu-item"><i class="fas fa-calendar-alt"></i> Eventos</a>
-            <a href="history-events.html" class="menu-item"><i class="fas fa-history"></i> Historial Eventos</a>
-            <a href="history-orders.html" class="menu-item"><i class="fas fa-clipboard-list"></i> Historial Pedidos</a>
-            <a href="queue.html" class="menu-item"><i class="fas fa-tasks"></i> Cola de pedidos</a>
-            <a href="reportes.html" class="menu-item active"><i class="fas fa-chart-bar"></i> Reportes</a>
+            <a href="inventario.html" class="menu-item"><i class="fas fa-boxes"></i> Inventario</a>
+            <a href="dashboard.html" class="menu-item"><i class="fas fa-chart-bar"></i> Dashboard</a>
+            <a href="gestionar_menu.html" class="menu-item"><i class="fas fa-list-alt"></i> Admin Menús</a>
+            <a href="gestionar_admin.html" class="menu-item"><i class="fas fa-users"></i> Admin Usuarios</a>
+            <a href="factura.html" class="menu-item active"><i class="fas fa-receipt"></i> Facturación</a>
+            <a href="eventos.html" class="menu-item"><i class="fas fa-calendar-alt"></i> Eventos</a>
+            <a href="elige_cola.html" class="menu-item"><i class="fas fa-tasks"></i> Cola de pedidos</a>
+            <a href="cash_register.html" class="menu-item"><i class="fas fa-cash-register"></i> Caja Registradora</a>
+            <a href="clientes.html" class="menu-item"><i class="fas fa-users"></i> Clientes</a>
         </div>
     </aside>
     <main class="main">
         <div class="header">
-            <div class="title">Reportes y Estadísticas</div>
+            <div class="title">Dashboard y Reportes</div>
             <div class="actions">
+                <select id="timeRange" class="input" onchange="loadDashboardData()">
+                    <option value="today">Hoy</option>
+                    <option value="week">Esta Semana</option>
+                    <option value="month" selected>Este Mes</option>
+                    <option value="year">Este Año</option>
+                </select>
                 <a href="panel.html" class="back-button">
                     <i class="fas fa-arrow-left"></i> Regresar
                 </a>
             </div>
         </div>
+
+        <!-- Tarjetas de Resumen -->
         <div class="card">
             <h2>Resumen General</h2>
             <div class="stats-cards">
                 <div class="stat-card">
-                    <i class="fas fa-users"></i>
-                    <div class="number" id="userCount">15</div>
-                    <h3>Usuarios Registrados</h3>
-                    <div class="description">Total de usuarios activos</div>
+                    <i class="fas fa-dollar-sign"></i>
+                    <div class="number" id="totalRevenue">Q0.00</div>
+                    <h3>Ingresos Totales</h3>
+                    <div class="description" id="revenueDescription">Este mes</div>
                 </div>
                 <div class="stat-card">
-                    <i class="fas fa-clipboard-list"></i>
-                    <div class="number" id="activeOrders">8</div>
-                    <h3>Pedidos Activos</h3>
-                    <div class="description">En proceso de preparación</div>
+                    <i class="fas fa-receipt"></i>
+                    <div class="number" id="totalOrders">0</div>
+                    <h3>Total Pedidos</h3>
+                    <div class="description" id="ordersDescription">Este mes</div>
                 </div>
                 <div class="stat-card">
                     <i class="fas fa-calendar-alt"></i>
-                    <div class="number" id="scheduledEvents">3</div>
-                    <h3>Eventos Programados</h3>
-                    <div class="description">Próximos eventos</div>
+                    <div class="number" id="totalEvents">0</div>
+                    <h3>Eventos Activos</h3>
+                    <div class="description">Programados</div>
                 </div>
                 <div class="stat-card">
                     <i class="fas fa-utensils"></i>
-                    <div class="number" id="menuItems">24</div>
-                    <h3>Platillos en Menú</h3>
-                    <div class="description">Total de opciones disponibles</div>
-                </div>
-                <div class="stat-card">
-                    <i class="fas fa-box"></i>
-                    <div class="number" id="inventoryItems">42</div>
-                    <h3>Items en Inventario</h3>
-                    <div class="description">Insumos disponibles</div>
-                </div>
-                <div class="stat-card">
-                    <i class="fas fa-dollar-sign"></i>
-                    <div class="number">Q12,450</div>
-                    <h3>Ingresos del Mes</h3>
-                    <div class="description">Total de ventas</div>
+                    <div class="number" id="avgOrderValue">Q0.00</div>
+                    <h3>Ticket Promedio</h3>
+                    <div class="description">Por pedido</div>
                 </div>
             </div>
         </div>
-        <div class="card">
-            <h2>Métricas de Rendimiento</h2>
-            <div class="metrics-grid">
-                <div class="metric-card">
-                    <h3><i class="fas fa-chart-line"></i> Tasa de Ocupación</h3>
-                    <div class="metric-value">78%</div>
-                    <div class="metric-change positive">
-                        <i class="fas fa-arrow-up"></i> 5% vs mes anterior
-                    </div>
+
+        <!-- Gráficas Principales -->
+        <div class="charts-grid">
+            <!-- Gráfica de Ventas por Día -->
+            <div class="card chart-card">
+                <h2>Ventas Diarias</h2>
+                <div class="chart-container">
+                    <canvas id="salesChart"></canvas>
                 </div>
-                <div class="metric-card">
-                    <h3><i class="fas fa-clock"></i> Tiempo Promedio de Espera</h3>
-                    <div class="metric-value">12 min</div>
-                    <div class="metric-change negative">
-                        <i class="fas fa-arrow-up"></i> 2 min vs mes anterior
-                    </div>
+            </div>
+
+            <!-- Gráfica de Pedidos por Estado -->
+            <div class="card chart-card">
+                <h2>Estado de Pedidos</h2>
+                <div class="chart-container">
+                    <canvas id="ordersChart"></canvas>
                 </div>
-                <div class="metric-card">
-                    <h3><i class="fas fa-star"></i> Satisfacción del Cliente</h3>
-                    <div class="metric-value">4.7/5</div>
-                    <div class="metric-change positive">
-                        <i class="fas fa-arrow-up"></i> 0.2 vs mes anterior
-                    </div>
+            </div>
+
+            <!-- Gráfica de Productos Más Vendidos -->
+            <div class="card chart-card">
+                <h2>Productos Más Vendidos</h2>
+                <div class="chart-container">
+                    <canvas id="productsChart"></canvas>
                 </div>
-                <div class="metric-card">
-                    <h3><i class="fas fa-utensil-spoon"></i> Platillo Más Popular</h3>
-                    <div class="metric-value">Tacos al Pastor</div>
-                    <div class="metric-change">128 ventas este mes</div>
+            </div>
+
+            <!-- Gráfica de Métodos de Pago -->
+            <div class="card chart-card">
+                <h2>Métodos de Pago</h2>
+                <div class="chart-container">
+                    <canvas id="paymentChart"></canvas>
                 </div>
             </div>
         </div>
-        <div class="card">
-            <h2>Ventas por Categoría</h2>
-            <div class="chart-container">
-                <h3>Distribución de Ventas</h3>
-                <div class="chart-placeholder">
-                    <i class="fas fa-chart-pie" style="font-size: 48px; margin-right: 15px;"></i>
-                    Gráfico de ventas por categoría (Comidas 45%, Bebidas 30%, Postres 25%)
-                </div>
-            </div>
-        </div>
+
+        <!-- Tabla de Pedidos Recientes -->
         <div class="card">
             <h2>Pedidos Recientes</h2>
             <div class="table-container">
-                <table class="table">
+                <table class="table" id="recentOrdersTable">
                     <thead>
                         <tr>
                             <th>Pedido ID</th>
@@ -131,37 +124,11 @@
                             <th>Fecha</th>
                             <th>Total</th>
                             <th>Estado</th>
+                            <th>Método Pago</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>#00125</td>
-                            <td>Juan Pérez</td>
-                            <td>15 Nov 2023</td>
-                            <td>Q185.00</td>
-                            <td><span class="status-badge status-completed">Completado</span></td>
-                        </tr>
-                        <tr>
-                            <td>#00124</td>
-                            <td>María González</td>
-                            <td>15 Nov 2023</td>
-                            <td>Q220.50</td>
-                            <td><span class="status-badge status-active">En proceso</span></td>
-                        </tr>
-                        <tr>
-                            <td>#00123</td>
-                            <td>Carlos López</td>
-                            <td>14 Nov 2023</td>
-                            <td>Q95.75</td>
-                            <td><span class="status-badge status-completed">Completado</span></td>
-                        </tr>
-                        <tr>
-                            <td>#00122</td>
-                            <td>Ana Martínez</td>
-                            <td>14 Nov 2023</td>
-                            <td>Q310.00</td>
-                            <td><span class="status-badge status-pending">Pendiente</span></td>
-                        </tr>
+                        <!-- Los datos se cargarán dinámicamente -->
                     </tbody>
                 </table>
             </div>
@@ -169,44 +136,297 @@
     </main>
 </div>
 <script>
-    // Datos de ejemplo para las estadísticas
-    document.addEventListener('DOMContentLoaded', function() {
-        // Estos valores podrían venir de una API en una implementación real
-        const stats = {
-            users: 15,
-            activeOrders: 8,
-            scheduledEvents: 3,
-            menuItems: 24,
-            inventoryItems: 42
-        };
+// Configuración
+const API_BASE = 'http://localhost:5000/api';
+let charts = {};
 
-        // Actualizar los valores en la interfaz
-        document.getElementById('userCount').textContent = stats.users;
-        document.getElementById('activeOrders').textContent = stats.activeOrders;
-        document.getElementById('scheduledEvents').textContent = stats.scheduledEvents;
-        document.getElementById('menuItems').textContent = stats.menuItems;
-        document.getElementById('inventoryItems').textContent = stats.inventoryItems;
+// Funciones de utilidad
+function getToken() {
+    return localStorage.getItem('token');
+}
 
-        // Simular actualización en tiempo real (cada 30 segundos)
-        setInterval(() => {
-            // En una implementación real, aquí se haría una llamada a la API
-            // Por ahora, solo simulamos pequeños cambios
-            const randomChange = Math.floor(Math.random() * 3) - 1; // -1, 0 o 1
-            const newOrders = Math.max(0, stats.activeOrders + randomChange);
-            
-            if (newOrders !== stats.activeOrders) {
-                stats.activeOrders = newOrders;
-                document.getElementById('activeOrders').textContent = stats.activeOrders;
-                
-                // Agregar una animación sutil al cambiar el valor
-                const element = document.getElementById('activeOrders');
-                element.style.transform = 'scale(1.1)';
-                setTimeout(() => {
-                    element.style.transform = 'scale(1)';
-                }, 300);
-            }
-        }, 30000);
+function formatCurrency(amount) {
+    return `Q${parseFloat(amount).toFixed(2)}`;
+}
+
+function formatDate(dateString) {
+    return new Date(dateString).toLocaleDateString('es-GT');
+}
+
+// Función para hacer fetch con autenticación
+async function fetchWithAuth(url, options = {}) {
+    const token = getToken();
+    if (!token) {
+        window.location.href = 'login.html';
+        return null;
+    }
+
+    const defaultOptions = {
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            ...options.headers
+        }
+    };
+
+    try {
+        const response = await fetch(url, { ...defaultOptions, ...options });
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        return await response.json();
+    } catch (error) {
+        console.error('Error en fetch:', error);
+        throw error;
+    }
+}
+
+// Función para mostrar errores
+function showError(message) {
+    console.error('Error:', message);
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #f44336;
+        color: white;
+        padding: 15px;
+        border-radius: 5px;
+        z-index: 1000;
+    `;
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        document.body.removeChild(notification);
+    }, 5000);
+}
+
+// Función para limpiar gráficas
+function clearCharts() {
+    Object.values(charts).forEach(chart => {
+        if (chart) chart.destroy();
     });
+    charts = {};
+}
+
+// Función para mostrar estado vacío
+function showEmptyState() {
+    document.getElementById('totalRevenue').textContent = 'Q0.00';
+    document.getElementById('totalOrders').textContent = '0';
+    document.getElementById('totalEvents').textContent = '0';
+    document.getElementById('avgOrderValue').textContent = 'Q0.00';
+    
+    const tbody = document.querySelector('#recentOrdersTable tbody');
+    tbody.innerHTML = `
+        <tr>
+            <td colspan="6" style="text-align: center; padding: 20px; color: #666;">
+                No se pudieron cargar los datos
+            </td>
+        </tr>
+    `;
+}
+
+// Cargar datos del dashboard
+async function loadDashboardData() {
+    const timeRange = document.getElementById('timeRange').value;
+    
+    try {
+        // Cargar estadísticas generales
+        const stats = await fetchWithAuth(`${API_BASE}/dashboard/stats?range=${timeRange}`);
+        updateStatsCards(stats);
+
+        // Cargar datos para gráficas
+        const salesData = await fetchWithAuth(`${API_BASE}/dashboard/sales-chart?range=${timeRange}`);
+        const ordersData = await fetchWithAuth(`${API_BASE}/dashboard/orders-chart?range=${timeRange}`);
+        const productsData = await fetchWithAuth(`${API_BASE}/dashboard/products-chart?range=${timeRange}`);
+        const paymentsData = await fetchWithAuth(`${API_BASE}/dashboard/payments-chart?range=${timeRange}`);
+        const recentOrders = await fetchWithAuth(`${API_BASE}/dashboard/recent-orders`);
+
+        // Actualizar gráficas
+        updateCharts(salesData, ordersData, productsData, paymentsData);
+        updateRecentOrdersTable(recentOrders);
+
+    } catch (error) {
+        console.error('Error cargando datos del dashboard:', error);
+        // SOLO MOSTRAR ERROR - NO CARGAR DATOS DE EJEMPLO
+        showError('No se pudieron cargar los datos del dashboard. Por favor, intente más tarde.');
+        
+        // Limpiar las gráficas y mostrar estado vacío
+        clearCharts();
+        showEmptyState();
+    }
+}
+
+// Actualizar tarjetas de estadísticas
+function updateStatsCards(stats) {
+    document.getElementById('totalRevenue').textContent = formatCurrency(stats.total_revenue || 0);
+    document.getElementById('totalOrders').textContent = stats.total_orders || 0;
+    document.getElementById('totalEvents').textContent = stats.active_events || 0;
+    document.getElementById('avgOrderValue').textContent = formatCurrency(stats.avg_order_value || 0);
+    
+    const range = document.getElementById('timeRange').value;
+    const rangeText = getRangeText(range);
+    document.getElementById('revenueDescription').textContent = rangeText;
+    document.getElementById('ordersDescription').textContent = rangeText;
+}
+
+function getRangeText(range) {
+    const texts = {
+        'today': 'Hoy',
+        'week': 'Esta semana',
+        'month': 'Este mes',
+        'year': 'Este año'
+    };
+    return texts[range] || 'Este mes';
+}
+
+// Actualizar gráficas
+function updateCharts(salesData, ordersData, productsData, paymentsData) {
+    // Destruir gráficas existentes
+    Object.values(charts).forEach(chart => {
+        if (chart) chart.destroy();
+    });
+
+    // Gráfica de ventas diarias (Línea)
+    const salesCtx = document.getElementById('salesChart').getContext('2d');
+    charts.sales = new Chart(salesCtx, {
+        type: 'line',
+        data: {
+            labels: salesData.labels || [],
+            datasets: [{
+                label: 'Ventas (Q)',
+                data: salesData.data || [],
+                borderColor: '#4CAF50',
+                backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: { display: true, text: 'Evolución de Ventas' }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // Gráfica de estado de pedidos (Dona)
+    const ordersCtx = document.getElementById('ordersChart').getContext('2d');
+    charts.orders = new Chart(ordersCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ordersData.labels || [],
+            datasets: [{
+                data: ordersData.data || [],
+                backgroundColor: ['#4CAF50', '#FFC107', '#F44336', '#2196F3', '#9C27B0']
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'bottom' }
+            }
+        }
+    });
+
+    // Gráfica de productos más vendidos (Barras)
+    const productsCtx = document.getElementById('productsChart').getContext('2d');
+    charts.products = new Chart(productsCtx, {
+        type: 'bar',
+        data: {
+            labels: productsData.labels || [],
+            datasets: [{
+                label: 'Cantidad Vendida',
+                data: productsData.data || [],
+                backgroundColor: '#2196F3'
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: { display: true, text: 'Top Productos' }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // Gráfica de métodos de pago (Pie)
+    const paymentCtx = document.getElementById('paymentChart').getContext('2d');
+    charts.payment = new Chart(paymentCtx, {
+        type: 'pie',
+        data: {
+            labels: paymentsData.labels || [],
+            datasets: [{
+                data: paymentsData.data || [],
+                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4CAF50', '#9C27B0']
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'bottom' }
+            }
+        }
+    });
+}
+
+// Actualizar tabla de pedidos recientes
+function updateRecentOrdersTable(orders) {
+    const tbody = document.querySelector('#recentOrdersTable tbody');
+    tbody.innerHTML = '';
+
+    if (!orders || orders.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="6" style="text-align: center; padding: 20px; color: #666;">
+                    No hay pedidos recientes
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    orders.forEach(order => {
+        const row = tbody.insertRow();
+        row.innerHTML = `
+            <td>#${order.id_pedido}</td>
+            <td>${order.nombre_cliente || 'Cliente no especificado'}</td>
+            <td>${formatDate(order.fecha)}</td>
+            <td>${formatCurrency(order.total || 0)}</td>
+            <td><span class="status-badge status-${order.estado}">${order.estado}</span></td>
+            <td>${order.metodo_pago || 'Efectivo'}</td>
+        `;
+    });
+}
+
+// Inicialización
+document.addEventListener('DOMContentLoaded', function() {
+    // Verificar autenticación primero
+    const token = getToken();
+    if (!token) {
+        window.location.href = 'login.html';
+        return;
+    }
+
+    loadDashboardData();
+    
+    // Actualizar automáticamente cada 2 minutos
+    setInterval(loadDashboardData, 120000);
+});
+
+// Para debugging
+window.dashboard = {
+    reload: loadDashboardData
+};
 </script>
 </body>
 </html>

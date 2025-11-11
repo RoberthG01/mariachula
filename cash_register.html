@@ -17,16 +17,15 @@
         </div>
         <div class="menu-list">
             <a href="menu.html" class="menu-item"><i class="fas fa-utensils"></i> Menú</a>
-            <a href="inventory.html" class="menu-item"><i class="fas fa-boxes"></i> Inventario</a>
+            <a href="inventario.html" class="menu-item"><i class="fas fa-boxes"></i> Inventario</a>
             <a href="dashboard.html" class="menu-item"><i class="fas fa-chart-bar"></i> Dashboard</a>
-            <a href="admin-menus.html" class="menu-item"><i class="fas fa-list-alt"></i> Admin Menús</a>
-            <a href="admin-users.html" class="menu-item"><i class="fas fa-users"></i> Admin Usuarios</a>
-            <a href="billing.html" class="menu-item"><i class="fas fa-receipt"></i> Facturación</a>
-            <a href="events.html" class="menu-item"><i class="fas fa-calendar-alt"></i> Eventos</a>
-            <a href="history-events.html" class="menu-item"><i class="fas fa-history"></i> Historial Eventos</a>
-            <a href="history-orders.html" class="menu-item"><i class="fas fa-clipboard-list"></i> Historial Pedidos</a>
-            <a href="queue.html" class="menu-item"><i class="fas fa-tasks"></i> Cola de pedidos</a>
-            <a href="cash-register.html" class="menu-item active"><i class="fas fa-cash-register"></i> Caja Registradora</a>
+            <a href="gestionar_menu.html" class="menu-item"><i class="fas fa-list-alt"></i> Admin Menús</a>
+            <a href="gestionar_admin.html" class="menu-item"><i class="fas fa-users"></i> Admin Usuarios</a>
+            <a href="factura.html" class="menu-item active"><i class="fas fa-receipt"></i> Facturación</a>
+            <a href="eventos.html" class="menu-item"><i class="fas fa-calendar-alt"></i> Eventos</a>
+            <a href="elige_cola.html" class="menu-item"><i class="fas fa-tasks"></i> Cola de pedidos</a>
+            <a href="cash_register.html" class="menu-item"><i class="fas fa-cash-register"></i> Caja Registradora</a>
+            <a href="clientes.html" class="menu-item"><i class="fas fa-users"></i> Clientes</a>
         </div>
     </aside>
     <main class="main">
@@ -180,7 +179,7 @@
 </div>
 <script>
     // Configuración de la API - VERIFICA ESTA URL
-    const API_BASE = 'http://localhost:5000';
+    const API_BASE = 'http://localhost:5000/api';
 
     // Variables globales
     let currentCashRegister = null;
@@ -210,8 +209,18 @@
     }
 
     function getUserId() {
-        return localStorage.getItem('user_id');
+    const user = localStorage.getItem('user');
+    if (user) {
+        try {
+            const userData = JSON.parse(user);
+            return userData.id_usuario || userData.user_id || 1;
+        } catch (e) {
+            console.error('Error parsing user data:', e);
+            return 1;
+        }
     }
+    return 1;
+}
 
     function showResult(message, type = 'success') {
         resultado.innerHTML = `<div class="result ${type}">${message}</div>`;
@@ -259,6 +268,32 @@
         }
     }
 
+    // Funciones para verificar rol de usuario
+function getUserRole() {
+    const user = localStorage.getItem('user');
+    if (user) {
+        try {
+            const userData = JSON.parse(user);
+            return userData.rol || userData.role || 'usuario';
+        } catch (e) {
+            console.error('Error parsing user data:', e);
+            return 'usuario';
+        }
+    }
+    return 'usuario';
+}
+
+function isAdmin() {
+    const role = getUserRole();
+    return role === 'admin' || role === 'administrador';
+}
+
+function showAdminOnlyElements() {
+    const resetButton = document.querySelector('.btn.error');
+    if (resetButton) {
+        resetButton.style.display = isAdmin() ? 'block' : 'none';
+    }
+}
     // API Functions - VERSIÓN MEJORADA
     async function fetchCashRegisterStatus() {
         try {
@@ -631,17 +666,37 @@
         document.getElementById("recibido").value = "";
     }
 
-    // Resetear caja (solo para desarrollo)
-    async function resetearCaja() {
-        if (confirm("¿Está seguro de resetear toda la caja? Esta acción es solo para desarrollo.")) {
-            try {
-                await loadCashRegister();
-                showResult("✅ Datos de caja recargados", "success");
-            } catch (error) {
-                showResult("❌ Error al resetear la caja", "error");
-            }
+// Resetear caja - SOLO ADMINISTRADORES
+async function resetearCaja() {
+    if (!isAdmin()) {
+        showResult("❌ No tienes permisos para resetear la caja. Solo administradores pueden realizar esta acción.", "error");
+        return;
+    }
+    
+    if (confirm("¿Está seguro de que desea resetear toda la caja? Esta acción cerrará todas las cajas abiertas. Esta acción NO se puede deshacer.")) {
+        try {
+            const resetBtn = document.querySelector('.btn.error');
+            resetBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Reseteando...';
+            resetBtn.disabled = true;
+
+            // Llamar al endpoint de reset
+            const data = await fetchWithAuth(`${API_BASE}/cash-register/reset`, {
+                method: 'POST'
+            });
+
+            showResult("✅ " + (data.mensaje || "Caja reseteada correctamente"), "success");
+            await loadCashRegister();
+            
+        } catch (error) {
+            console.error('Error al resetear caja:', error);
+            showResult("❌ Error al resetear la caja: " + error.message, "error");
+        } finally {
+            const resetBtn = document.querySelector('.btn.error');
+            resetBtn.innerHTML = '<i class="fas fa-trash"></i> Resetear caja';
+            resetBtn.disabled = false;
         }
     }
+}
 
     // Función para probar la conexión
     async function testConnection() {
@@ -663,20 +718,25 @@
         }
     }
 
-    // Inicialización mejorada
-    document.addEventListener('DOMContentLoaded', async function() {
-        console.log('🚀 Inicializando caja registradora...');
-        
-        // Primero probar conexión
-        const isConnected = await testConnection();
-        
-        if (isConnected) {
-            // Si hay conexión, cargar datos
-            await loadCashRegister();
-        } else {
-            showResult('❌ No se puede conectar con el servidor. Verifica que el backend esté corriendo en el puerto 5000.', 'error');
-        }
-    });
+// Inicialización mejorada
+document.addEventListener('DOMContentLoaded', async function() {
+    console.log('🚀 Inicializando caja registradora...');
+    console.log('👤 Rol de usuario:', getUserRole());
+    console.log('🛡️ Es administrador:', isAdmin());
+    
+    // Mostrar/ocultar elementos de administrador
+    showAdminOnlyElements();
+    
+    // Primero probar conexión
+    const isConnected = await testConnection();
+    
+    if (isConnected) {
+        // Si hay conexión, cargar datos
+        await loadCashRegister();
+    } else {
+        showResult('❌ No se puede conectar con el servidor. Verifica que el backend esté corriendo en el puerto 5000.', 'error');
+    }
+});
 
     // Agregar esto para debugging en la consola
     window.debugCashRegister = {
