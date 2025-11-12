@@ -150,6 +150,69 @@
     }
     
     // ------------------------------
+    // SINCRONIZAR MENÚ CON LOCALSTORAGE (VERSIÓN COMPATIBLE)
+    // ------------------------------
+    function updateLocalMenu(menuData) {
+        if (!Array.isArray(menuData)) return;
+        
+        try {
+            // ✅ MANTENER ESTRUCTURA ORIGINAL para compatibilidad
+            const localMenu = menuData.map(item => ({
+                id_item: item.id_item,
+                nombre: item.nombre,
+                precio: parseFloat(item.precio),
+                nombre_categoria: item.nombre_categoria || '',
+                descripcion: item.descripcion || '',
+                img: item.img || '',
+                estado: item.estado || 'disponible'
+            }));
+
+            // Verificar tamaño
+            const datosString = JSON.stringify(localMenu);
+            const tamañoKB = new Blob([datosString]).size / 1024;
+            
+            console.log(`📊 Tamaño del menú local: ${tamañoKB.toFixed(2)} KB`);
+            
+            if (tamañoKB > 4000) {
+                console.warn('⚠️ Menú muy grande, aplicando optimización conservadora...');
+                
+                // Optimizar sin romper compatibilidad
+                const menuOptimizado = localMenu.map(item => ({
+                    id_item: item.id_item,
+                    nombre: item.nombre.substring(0, 60),
+                    precio: item.precio,
+                    nombre_categoria: item.nombre_categoria.substring(0, 30)
+                }));
+                
+                localStorage.setItem('mc_menu', JSON.stringify(menuOptimizado));
+                console.log('✅ Menú optimizado guardado (estructura compatible)');
+            } else {
+                localStorage.setItem('mc_menu', datosString);
+                console.log('✅ Menú completo guardado (estructura compatible)');
+            }
+            
+            console.log(`✅ Menú sincronizado: ${localMenu.length} elementos`);
+            
+        } catch (error) {
+            console.error('❌ Error en sync localStorage:', error);
+            
+            if (error.name === 'QuotaExceededError') {
+                console.warn('💾 Quota excedida, guardando versión mínima compatible...');
+                
+                const datosMinimos = menuData.slice(0, 80).map(item => ({
+                    id_item: item.id_item,
+                    nombre: item.nombre,
+                    precio: item.precio,
+                    nombre_categoria: item.nombre_categoria || 'General'
+                }));
+                
+                localStorage.setItem('mc_menu', JSON.stringify(datosMinimos));
+                console.log('✅ Guardada versión mínima compatible');
+            }
+        }
+    }
+    
+    // ------------------------------
     // SISTEMA DE MODALES
     // ------------------------------
     
@@ -283,7 +346,7 @@
                 </div>
             `).join('');
             
-            // Sincronizar con localStorage
+            // Sincronizar con localStorage (versión COMPATIBLE)
             updateLocalMenu(menu);
             
         } catch (err) {
@@ -428,23 +491,6 @@
         qs('#menuForm').reset();
         qs('#m_img_file').value = '';
         document.getElementById('file-name').textContent = 'No se ha seleccionado ningún archivo';
-    }
-    
-    // ------------------------------
-    // SINCRONIZAR MENÚ CON LOCALSTORAGE
-    // ------------------------------
-    function updateLocalMenu(menuData) {
-        if (!Array.isArray(menuData)) return;
-        const localMenu = menuData.map(item => ({
-            id: item.id_item,
-            name: item.nombre,
-            price: parseFloat(item.precio),
-            category: item.nombre_categoria || '',
-            description: item.descripcion || '',
-            img: item.img || ''
-        }));
-        localStorage.setItem('mc_menu', JSON.stringify(localMenu));
-        console.log('Menú sincronizado con localStorage:', localMenu);
     }
     
     // ------------------------------

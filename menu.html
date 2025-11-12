@@ -135,40 +135,159 @@ function closeMessageModal() {
 }
 
 // ==============================
-// CARGAR MENÚ
+// CARGAR MENÚ (VERSIÓN COMPATIBLE)
 // ==============================
 async function loadMenu() {
   const token = localStorage.getItem("token");
   try {
+    // Primero intentar cargar desde localStorage
+    const localMenu = loadLocalMenu();
+    
+    if (localMenu && localMenu.length > 0) {
+      console.log('Cargando menú desde localStorage:', localMenu.length, 'elementos');
+      displayMenu(localMenu);
+    }
+
+    // Siempre hacer fetch para tener datos actualizados
     const res = await fetch("http://localhost:5000/menu_items", {
       headers: { Authorization: `Bearer ${token}` }
     });
+    
+    if (!res.ok) {
+      throw new Error(`Error ${res.status}: ${res.statusText}`);
+    }
+    
     const data = await res.json();
     const grid = document.getElementById("menuGrid");
 
-    if (!res.ok || !Array.isArray(data)) {
-      grid.innerHTML = `<div class="empty">⚠️ No se pudieron cargar los platillos</div>`;
-      return;
+    if (!Array.isArray(data)) {
+      throw new Error("Formato de respuesta inválido");
     }
+
     if (data.length === 0) {
       grid.innerHTML = `<div class="empty">No hay platillos disponibles</div>`;
       return;
     }
 
-    grid.innerHTML = data.map(item => `
+    // Mostrar datos actualizados del servidor
+    displayMenu(data);
+    
+    // Actualizar localStorage con datos correctos
+    updateLocalMenuCompatible(data);
+    
+  } catch (error) {
+    console.error("Error al cargar menú:", error);
+    
+    // Intentar usar localStorage como respaldo
+    const localMenu = loadLocalMenu();
+    if (localMenu && localMenu.length > 0) {
+      console.log('Usando menú local como respaldo');
+      displayMenu(localMenu);
+    } else {
+      document.getElementById("menuGrid").innerHTML = 
+        `<div class="empty">❌ Error al cargar el menú: ${error.message}</div>`;
+    }
+  }
+}
+
+// Función para mostrar el menú en la grid
+function displayMenu(menuData) {
+  const grid = document.getElementById("menuGrid");
+  
+  grid.innerHTML = menuData.map(item => {
+    // Manejar diferentes estructuras de datos
+    const id = item.id_item || item.id;
+    const nombre = item.nombre || item.name;
+    const precio = item.precio || item.price;
+    const descripcion = item.descripcion || item.description || "";
+    const img = item.img || 'fotos/no-image.png';
+    
+    return `
       <div class="menu-item-card">
-        <img src="${item.img || 'fotos/no-image.png'}" alt="${item.nombre}" class="menu-img">
-        <h4>${item.nombre}</h4>
-        <p>${item.descripcion || ""}</p>
-        <div class="price">Q${parseFloat(item.precio || 0).toFixed(2)}</div>
-        <button class="btn primary" onclick="addToCart(${item.id_item}, '${item.nombre}', ${parseFloat(item.precio)})">
+        <img src="${img}" alt="${nombre}" class="menu-img" onerror="this.src='fotos/no-image.png'">
+        <h4>${nombre}</h4>
+        <p>${descripcion}</p>
+        <div class="price">Q${parseFloat(precio || 0).toFixed(2)}</div>
+        <button class="btn primary" onclick="addToCart(${id}, '${nombre.replace(/'/g, "\\'")}', ${parseFloat(precio)})">
           <i class="fas fa-plus"></i> Agregar
         </button>
       </div>
-    `).join("");
+    `;
+  }).join("");
+}
+
+// Función para cargar menú desde localStorage (compatible)
+function loadLocalMenu() {
+  try {
+    const menuData = localStorage.getItem('mc_menu');
+    if (!menuData) return null;
+    
+    let menu;
+    
+    try {
+      menu = JSON.parse(menuData);
+    } catch (e) {
+      return null;
+    }
+    
+    // Verificar estructura y adaptar si es necesario
+    if (Array.isArray(menu) && menu.length > 0) {
+      return menu.map(item => {
+        // Si es la estructura correcta (id_item)
+        if (item.id_item !== undefined) {
+          return {
+            id_item: item.id_item,
+            nombre: item.nombre,
+            precio: item.precio,
+            nombre_categoria: item.nombre_categoria || 'General',
+            descripcion: item.descripcion || '',
+            img: item.img || ''
+          };
+        }
+        // Si ya es la estructura correcta
+        return item;
+      });
+    }
+    
+    return null;
   } catch (error) {
-    console.error("Error al cargar menú:", error);
-    document.getElementById("menuGrid").innerHTML = `<div class="empty">❌ Error al cargar el menú</div>`;
+    console.error('Error al cargar menú local:', error);
+    return null;
+  }
+}
+
+// Función para actualizar localStorage manteniendo compatibilidad
+function updateLocalMenuCompatible(menuData) {
+  if (!Array.isArray(menuData)) return;
+  
+  try {
+    const localMenu = menuData.map(item => ({
+      id_item: item.id_item,
+      nombre: item.nombre,
+      precio: parseFloat(item.precio),
+      nombre_categoria: item.nombre_categoria || '',
+      descripcion: item.descripcion || '',
+      img: item.img || ''
+    }));
+
+    const tamaño = new Blob([JSON.stringify(localMenu)]).size / 1024;
+    console.log(`Tamaño menú compatible: ${tamaño.toFixed(2)} KB`);
+    
+    if (tamaño > 4000) {
+      // Si es muy grande, guardar versión reducida pero compatible
+      const menuReducido = localMenu.slice(0, 100).map(item => ({
+        id_item: item.id_item,
+        nombre: item.nombre.substring(0, 40),
+        precio: item.precio,
+        nombre_categoria: item.nombre_categoria.substring(0, 20)
+      }));
+      localStorage.setItem('mc_menu', JSON.stringify(menuReducido));
+    } else {
+      localStorage.setItem('mc_menu', JSON.stringify(localMenu));
+    }
+    
+  } catch (error) {
+    console.error('Error al actualizar menú local:', error);
   }
 }
 
@@ -300,7 +419,7 @@ async function submitOrder() {
       total,
       notas,
       detalles: cart.map(i => ({
-        id_producto: i.id_item,
+        id_item: i.id_item,  // ✅ Usar id_item
         cantidad: i.quantity,
         precio_unitario: i.price,
         subtotal: i.price * i.quantity

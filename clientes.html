@@ -7,10 +7,35 @@
   <link rel="stylesheet" href="clientes.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
   <link rel="icon" href="fotos/iconomch.ico" type="image/x-icon" />
+  <style>
+    /* Estilos para el modo solo lectura */
+    .readonly-notice {
+      background: #e3f2fd;
+      border: 1px solid #2196f3;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    
+    .readonly-notice i {
+      color: #2196f3;
+      margin-right: 8px;
+    }
+    
+    .clientes-table th:last-child,
+    .clientes-table td:last-child {
+      display: none;
+    }
+    
+    .header-actions .btn.primary {
+      display: none;
+    }
+  </style>
 </head>
 <body>
 <div class="app">
-  <!-- Sidebar actualizado -->
+  <!-- Sidebar -->
   <aside class="sidebar">
     <div class="logo">
         <img src="fotos/logomch.png" alt="Logo María Chula">
@@ -26,16 +51,41 @@
       <a href="eventos.html" class="menu-item"><i class="fas fa-calendar-alt"></i> Eventos</a>
       <a href="elige_cola.html" class="menu-item"><i class="fas fa-tasks"></i> Cola de pedidos</a>
       <a href="cash_register.html" class="menu-item"><i class="fas fa-cash-register"></i> Caja Registradora</a>
-      <a href="clientes.html" class="menu-item"><i class="fas fa-users"></i> Clientes</a>
+      <a href="clientes.html" class="menu-item active"><i class="fas fa-users"></i> Clientes</a>
     </div>
   </aside>
+
   <!-- Contenido principal -->
   <main class="main">
     <div class="header">
       <h1 class="title"><i class="fas fa-users"></i> Lista de Clientes</h1>
-      <a href="panel.html" class="back-button"><i class="fas fa-arrow-left"></i> Regresar</a>
+      <div class="header-actions">
+        <button class="btn primary" onclick="abrirModalCliente()" style="display: none;">
+          <i class="fas fa-plus"></i> Nuevo Cliente
+        </button>
+        <a href="panel.html" class="back-button"><i class="fas fa-arrow-left"></i> Regresar</a>
+      </div>
     </div>
+
     <div class="card">
+      <div class="readonly-notice">
+        <i class="fas fa-info-circle"></i>
+        <strong>Modo de solo lectura:</strong> Esta vista muestra la lista de clientes registrados en el sistema.
+      </div>
+
+      <div class="search-section">
+        <div class="search-box">
+          <i class="fas fa-search"></i>
+          <input type="text" id="searchInput" placeholder="Buscar clientes..." onkeyup="filtrarClientes()">
+        </div>
+        <div class="stats">
+          <span class="stat-item">
+            <i class="fas fa-users"></i>
+            Total: <span id="totalClientes">0</span>
+          </span>
+        </div>
+      </div>
+
       <div class="table-container">
         <table class="clientes-table">
           <thead>
@@ -47,63 +97,222 @@
               <th>Teléfono</th>
               <th>Dirección</th>
               <th>Fecha Registro</th>
-              <th>Acciones</th>
+              <!-- Columna de acciones oculta -->
+              <th style="display: none;">Acciones</th>
             </tr>
           </thead>
-          <tbody>
-            <tr>
-              <td>1</td>
-              <td>María</td>
-              <td>González</td>
-              <td>maria@example.com</td>
-              <td>555-123-4567</td>
-              <td>Av. Central #123</td>
-              <td>2025-10-29</td>
-              <td class="acciones">
-                <button class="btn-action edit"><i class="fas fa-edit"></i></button>
-                <button class="btn-action delete" onclick="abrirModalEliminar()"><i class="fas fa-trash"></i></button>
-              </td>
-            </tr>
-            <tr>
-              <td>2</td>
-              <td>Carlos</td>
-              <td>López</td>
-              <td>carlos@example.com</td>
-              <td>555-987-6543</td>
-              <td>Calle Reforma #45</td>
-              <td>2025-10-15</td>
-              <td class="acciones">
-                <button class="btn-action edit"><i class="fas fa-edit"></i></button>
-                <button class="btn-action delete" onclick="abrirModalEliminar()"><i class="fas fa-trash"></i></button>
-              </td>
-            </tr>
+          <tbody id="clientesTableBody">
+            <!-- Los datos se cargarán dinámicamente -->
           </tbody>
         </table>
+        
+        <div id="loadingMessage" class="loading-message">
+          <i class="fas fa-spinner fa-spin"></i> Cargando clientes...
+        </div>
+        
+        <div id="emptyMessage" class="empty-message" style="display: none;">
+          <i class="fas fa-users-slash"></i> No hay clientes registrados
+        </div>
       </div>
     </div>
   </main>
 </div>
-<!-- Modal Eliminar -->
-<div class="modal" id="modalEliminar">
+
+<!-- Modal de mensajes (solo para errores) -->
+<div class="modal" id="modalMensaje">
   <div class="modal-content">
-    <div class="modal-header">
-      <h3>Confirmar eliminación</h3>
-      <button class="close-modal" onclick="cerrarModalEliminar()">&times;</button>
-    </div>
     <div class="modal-body">
-      <p>¿Seguro que deseas eliminar este cliente? Esta acción no se puede deshacer.</p>
+      <div class="message-icon" id="mensajeIcono">
+        <i class="fas fa-info-circle"></i>
+      </div>
+      <h3 id="mensajeTitulo">Mensaje</h3>
+      <p id="mensajeTexto"></p>
       <div class="modal-actions">
-        <button class="btn ghost" onclick="cerrarModalEliminar()">Cancelar</button>
-        <button class="btn primary">Eliminar</button>
+        <button class="btn primary" onclick="cerrarModalMensaje()">Aceptar</button>
       </div>
     </div>
   </div>
 </div>
+
 <script>
-  // Modal Eliminar
-  const modalEliminar = document.getElementById('modalEliminar');
-  function abrirModalEliminar() { modalEliminar.classList.add('active'); }
-  function cerrarModalEliminar() { modalEliminar.classList.remove('active'); }
+// ============================================
+// CONFIGURACIÓN Y VARIABLES GLOBALES
+// ============================================
+const API_URL = 'http://localhost:5000';
+let clientes = [];
+
+// Elementos del DOM
+const modalMensaje = document.getElementById('modalMensaje');
+const clientesTableBody = document.getElementById('clientesTableBody');
+const loadingMessage = document.getElementById('loadingMessage');
+const emptyMessage = document.getElementById('emptyMessage');
+const totalClientes = document.getElementById('totalClientes');
+
+// ============================================
+// FUNCIONES DE MODALES (solo para mensajes)
+// ============================================
+function mostrarMensaje(titulo, mensaje, tipo = 'info') {
+  const icono = document.getElementById('mensajeIcono');
+  const tituloElem = document.getElementById('mensajeTitulo');
+  const textoElem = document.getElementById('mensajeTexto');
+  
+  tituloElem.textContent = titulo;
+  textoElem.textContent = mensaje;
+  
+  // Configurar icono según el tipo
+  const iconos = {
+    success: 'fas fa-check-circle',
+    error: 'fas fa-exclamation-triangle',
+    warning: 'fas fa-exclamation-circle',
+    info: 'fas fa-info-circle'
+  };
+  
+  icono.innerHTML = `<i class="${iconos[tipo] || iconos.info}"></i>`;
+  icono.className = `message-icon ${tipo}`;
+  
+  modalMensaje.classList.add('active');
+}
+
+function cerrarModalMensaje() {
+  modalMensaje.classList.remove('active');
+}
+
+// ============================================
+// FUNCIONES DE LA API
+// ============================================
+function getAuthHeaders() {
+  const token = localStorage.getItem('token');
+  return {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`
+  };
+}
+
+async function handleApiResponse(response) {
+  if (response.status === 401) {
+    localStorage.removeItem('token');
+    localStorage.removeItem('currentUser');
+    window.location.href = 'login.html';
+    throw new Error('Sesión expirada');
+  }
+  
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({ error: 'Error desconocido' }));
+    throw new Error(errorData.error || `Error ${response.status}`);
+  }
+  
+  return await response.json();
+}
+
+// ============================================
+// CARGAR CLIENTES (SOLO LECTURA)
+// ============================================
+async function cargarClientes() {
+  try {
+    loadingMessage.style.display = 'block';
+    emptyMessage.style.display = 'none';
+    clientesTableBody.innerHTML = '';
+    
+    const response = await fetch(`${API_URL}/clientes`, {
+      headers: getAuthHeaders()
+    });
+    
+    const data = await handleApiResponse(response);
+    clientes = data;
+    
+    renderClientes();
+    totalClientes.textContent = clientes.length;
+    
+  } catch (error) {
+    console.error('Error cargando clientes:', error);
+    mostrarMensaje('Error', `Error al cargar clientes: ${error.message}`, 'error');
+  } finally {
+    loadingMessage.style.display = 'none';
+  }
+}
+
+function renderClientes(clientesFiltrados = null) {
+  const clientesARenderizar = clientesFiltrados || clientes;
+  
+  if (clientesARenderizar.length === 0) {
+    emptyMessage.style.display = 'block';
+    clientesTableBody.innerHTML = '';
+    return;
+  }
+  
+  emptyMessage.style.display = 'none';
+  
+  clientesTableBody.innerHTML = clientesARenderizar.map(cliente => `
+    <tr>
+      <td>${cliente.id_cliente}</td>
+      <td>${cliente.nombre || '-'}</td>
+      <td>${cliente.apellido || '-'}</td>
+      <td>${cliente.correo || '-'}</td>
+      <td>${cliente.telefono || '-'}</td>
+      <td>${cliente.direccion || '-'}</td>
+      <td>${formatearFecha(cliente.fecha_registro)}</td>
+      <!-- Celda de acciones oculta -->
+      <td style="display: none;"></td>
+    </tr>
+  `).join('');
+}
+
+// ============================================
+// FUNCIONES UTILITARIAS
+// ============================================
+function filtrarClientes() {
+  const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+  
+  if (!searchTerm) {
+    renderClientes();
+    return;
+  }
+  
+  const clientesFiltrados = clientes.filter(cliente => 
+    (cliente.nombre && cliente.nombre.toLowerCase().includes(searchTerm)) ||
+    (cliente.apellido && cliente.apellido.toLowerCase().includes(searchTerm)) ||
+    (cliente.correo && cliente.correo.toLowerCase().includes(searchTerm)) ||
+    (cliente.telefono && cliente.telefono.includes(searchTerm))
+  );
+  
+  renderClientes(clientesFiltrados);
+}
+
+function formatearFecha(fechaString) {
+  if (!fechaString) return '-';
+  
+  try {
+    const fecha = new Date(fechaString);
+    return fecha.toLocaleDateString('es-ES');
+  } catch (error) {
+    return fechaString;
+  }
+}
+
+// ============================================
+// INICIALIZACIÓN
+// ============================================
+document.addEventListener('DOMContentLoaded', () => {
+  // Verificar autenticación
+  const token = localStorage.getItem('token');
+  if (!token) {
+    window.location.href = 'login.html';
+    return;
+  }
+  
+  // Cargar clientes al iniciar
+  cargarClientes();
+  
+  // Cerrar modal al hacer clic fuera
+  window.addEventListener('click', (event) => {
+    if (event.target === modalMensaje) cerrarModalMensaje();
+  });
+});
+
+// Función placeholder para evitar errores (no se usa)
+function abrirModalCliente() {
+  // No hacer nada - modo solo lectura
+}
 </script>
 </body>
 </html>
