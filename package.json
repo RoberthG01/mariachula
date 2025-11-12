@@ -1,6 +1,7 @@
 {
   "type": "module",
   "dependencies": {
+    "archiver": "^7.0.1",
     "bcryptjs": "^3.0.2",
     "corns": "^0.0.0",
     "cors": "^2.8.5",
