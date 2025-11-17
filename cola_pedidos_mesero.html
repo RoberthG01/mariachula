@@ -69,11 +69,11 @@
   // CONFIGURACIÓN INICIAL
   // ============================================
   let orders = [];
-  const API_URL = "http://localhost:5000/cola_mesero";
-  const UPDATE_URL = "http://localhost:5000/pedidos";
+  const API_URL = "http://57.154.42.0:5000/cola_mesero";
+  const UPDATE_URL = "http://57.154.42.0:5000/pedidos";
   
   const socketServer = window.location.hostname.includes("localhost")
-    ? "http://localhost:5000"
+    ? "http://57.154.42.0:5000"
     : window.location.origin;
   
   // ============================================
@@ -255,7 +255,7 @@
         return;
       }
   
-      const res = await fetch(`http://localhost:5000/pedidos/${id}/estado`, {
+      const res = await fetch(`http://57.154.42.0:5000/pedidos/${id}/estado`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

@@ -236,8 +236,8 @@
     </footer>
 
     <script>
-        // Configuración - PUERTO ACTUALIZADO A 5000
-        const API_BASE_URL = 'http://localhost:5000';
+        // Configuración
+        const API_BASE_URL = 'http://57.154.42.0:5000';
         
         document.addEventListener('DOMContentLoaded', function() {
             const loginForm = document.getElementById('loginForm');
@@ -394,7 +394,7 @@
                     console.error('💥 Error de conexión:', error);
                     
                     if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
-                        showError('No se puede conectar al servidor. Verifique que esté ejecutándose en http://localhost:5000');
+                        showError('No se puede conectar al servidor. Verifique que esté ejecutándose en http://57.154.42.0:5000');
                     } else {
                         showError('Error de conexión con el servidor');
                     }

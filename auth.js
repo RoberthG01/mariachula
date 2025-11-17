@@ -48,7 +48,7 @@ function createSessionModal() {
     }
   
     try {
-      const response = await fetch("http://localhost:5000/health", {
+      const response = await fetch("http://57.154.42.0:5000/health", {
         headers: { Authorization: `Bearer ${token}` },
       });
   

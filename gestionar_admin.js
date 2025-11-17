@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 function fetchUsers() {
-    fetch('http://localhost:5000/api/usuarios')
+    fetch('http://57.154.42.0:5000/api/usuarios')
         .then(response => {
             console.log("Respuesta recibida del servidor:", response);
             if (!response.ok) {

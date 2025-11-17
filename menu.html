@@ -149,7 +149,7 @@ async function loadMenu() {
     }
 
     // Siempre hacer fetch para tener datos actualizados
-    const res = await fetch("http://localhost:5000/menu_items", {
+    const res = await fetch("http://57.154.42.0:5000/menu_items", {
       headers: { Authorization: `Bearer ${token}` }
     });
     
@@ -404,7 +404,7 @@ async function submitOrder() {
   }
 
   try {
-    const resCliente = await fetch("http://localhost:5000/clientes", {
+    const resCliente = await fetch("http://57.154.42.0:5000/clientes", {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
       body: JSON.stringify({ nombre, apellido, correo, telefono, direccion })
@@ -426,7 +426,7 @@ async function submitOrder() {
       }))
     };
 
-    const resPedido = await fetch("http://localhost:5000/pedidos", {
+    const resPedido = await fetch("http://57.154.42.0:5000/pedidos", {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
       body: JSON.stringify(pedido)

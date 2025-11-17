@@ -32,9 +32,9 @@ app.use(cors({
       return;
     }
 
-    // En producción, restringir a dominios específicos
+    // En producción lo voy a restringir a dominios específicos
     const allowedOrigins = [
-      'https://tudominio.com', // Mi dominio de producción
+      'https://midominio.com', // mi dominio de producción planeo que sea www.mariachula.com
     ];
 
     if (!origin || allowedOrigins.indexOf(origin) !== -1) {
@@ -53,6 +53,26 @@ app.use(cors({
 app.options('*', cors());
 
 app.use(express.json({ limit: '50mb' }));
+
+// < - - - - - - - - - - - SERVIR ARCHIVOS ESTÁTICOS (Frontend) - - - - - - - - - - - >
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Servir todos los archivos .html, .css, .js, imágenes, etc.
+app.use(express.static(__dirname));
+
+// Redirigir "/" al login
+app.get('/', (req, res) => {
+  res.redirect('/login');
+});
+
+// Servir la página de login manualmente si se accede por ruta directa
+app.get('/login', (req, res) => {
+  res.sendFile(path.join(__dirname, 'login.html'));
+});
 
 // < - - - - - - - - - - - CONFIGURACIÓN DE CORREO ELECTRÓNICO - - - - - - - - - - - >
 const emailTransporter = nodemailer.createTransport({
@@ -150,7 +170,7 @@ function verificarToken(req, res, next) {
     return res.status(403).json({ error: 'Acceso denegado. Token requerido.' });
   }
 
-  const token = authHeader.split(' ')[1]; // Extraer token real
+  const token = authHeader.split(' ')[1];
 
   jwt.verify(token, JWT_SECRET, (err, decoded) => {
     if (err) {
@@ -158,7 +178,7 @@ function verificarToken(req, res, next) {
       return res.status(403).json({ error: 'Token inválido o expirado.' });
     }
 
-    req.user = decoded; // Guardar los datos del usuario del token
+    req.user = decoded;
     next();
   });
 }
@@ -263,7 +283,7 @@ app.post('/api/cash-register/open', verificarToken, async (req, res) => {
   }
 });
 
-// 📌 Resetear caja (SOLO ADMINISTRADORES)
+// Resetear caja (SOLO ADMINISTRADORES)
 app.post('/api/cash-register/reset', verificarToken, async (req, res) => {
   try {
     // Verificar que el usuario sea administrador
@@ -279,9 +299,6 @@ app.post('/api/cash-register/reset', verificarToken, async (req, res) => {
          SET estado = 'cerrada', fecha_cierre = NOW() 
          WHERE estado = 'abierta'`
       );
-
-      // Opcional: Limpiar movimientos recientes (cuidado con esto)
-      // await client.query('DELETE FROM restaurante.movimientos_caja WHERE fecha::date = CURRENT_DATE');
 
       return { mensaje: 'Caja reseteada correctamente' };
     });
@@ -1454,7 +1471,7 @@ app.put('/pedidos/:id/estado', verificarToken, async (req, res) => {
 });
 
 // < - - - - - - - - - - - - RUTAS DE EVENTOS - - - - - - - - - - - - - >
-// Obtener todos los eventos (SIMPLE)
+// Obtener todos los eventos
 app.get('/eventos', verificarToken, async (req, res) => {
   try {
     const result = await ejecutarConsulta(`
@@ -1466,7 +1483,6 @@ app.get('/eventos', verificarToken, async (req, res) => {
         cantidad_personas,
         estado,
         observacion,
-        id_vajilla,
         total
       FROM restaurante.eventos 
       ORDER BY fecha_evento DESC;
@@ -1493,7 +1509,6 @@ app.get('/eventos/:id', verificarToken, async (req, res) => {
         cantidad_personas,
         estado,
         observacion,
-        id_vajilla,
         total
       FROM restaurante.eventos 
       WHERE id_evento = $1;
@@ -1519,7 +1534,6 @@ app.post('/eventos', verificarToken, async (req, res) => {
       nombre_evento,
       fecha_evento,
       cantidad_personas,
-      id_vajilla,
       observacion,
       total,
       estado = 'Confirmado',
@@ -1535,13 +1549,13 @@ app.post('/eventos', verificarToken, async (req, res) => {
 
     await client.query('BEGIN');
 
-    // Crear el evento principal
+    // Crear el evento principal (SIN id_vajilla)
     const resultEvento = await client.query(
       `INSERT INTO restaurante.eventos 
-        (nombre_cliente, nombre_evento, fecha_evento, cantidad_personas, id_vajilla, observacion, total, estado)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        (nombre_cliente, nombre_evento, fecha_evento, cantidad_personas, observacion, total, estado)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
        RETURNING *;`,
-      [nombre_cliente, nombre_evento, fecha_evento, cantidad_personas, id_vajilla, observacion, total, estado]
+      [nombre_cliente, nombre_evento, fecha_evento, cantidad_personas, observacion, total, estado]
     );
 
     const nuevoEvento = resultEvento.rows[0];
@@ -1554,7 +1568,7 @@ app.post('/eventos', verificarToken, async (req, res) => {
           `INSERT INTO restaurante.detalles_evento 
             (id_evento, id_item, cantidad, precio_unitario, subtotal)
            VALUES ($1, $2, $3, $4, $5);`,
-          [idEvento, item.id_item, item.cantidad, item.precio_unitario, item.subtotal]  // ← CORREGIDO: item.id_item
+          [idEvento, item.id_item, item.cantidad, item.precio_unitario, item.subtotal]
         );
       }
     }
@@ -1617,7 +1631,6 @@ app.delete('/eventos/:id', verificarToken, async (req, res) => {
 });
 
 // < - - - - - - - - - - - - - - ENDPOINTS PARA DASHBOARD - - - - - - - - - - - - - - - >
-
 // Estadísticas generales
 app.get('/api/dashboard/stats', verificarToken, async (req, res) => {
   try {
@@ -1948,7 +1961,7 @@ configurarSocket(httpServer);
 // Configurar Socket.IO con CORS
 const io = new SocketServer(httpServer, {
   cors: {
-    origin: "*", // En producción, cámbialo a tu dominio real
+    origin: "*", // En producción lo cambio a mi dominio real
     methods: ["GET", "POST"]
   }
 });
@@ -1963,7 +1976,7 @@ io.on('connection', (socket) => {
 });
 
 // < - - - - - - - - - ARRANQUE FINAL DEL SERVIDOR - - - - - - - - - - - >
-httpServer.listen(PORT, () => {
+httpServer.listen(PORT, '0.0.0.0', () => {
   console.log('='.repeat(60));
   console.log(' SERVIDOR MARÍA CHULA INICIADO');
   console.log('='.repeat(60));

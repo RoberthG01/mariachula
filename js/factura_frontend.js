@@ -1,7 +1,7 @@
 // ==============================
 // CONFIGURACIÓN Y VARIABLES GLOBALES
 // ==============================
-const API_URL = "http://localhost:5000/api";
+const API_URL = "http://57.154.42.0:5000/api";
 const TOKEN = localStorage.getItem("token");
 let clienteTemp = null;
 let facturaActual = null;

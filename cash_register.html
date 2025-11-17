@@ -178,8 +178,8 @@
     </div>
 </div>
 <script>
-    // Configuración de la API - VERIFICA ESTA URL
-    const API_BASE = 'http://localhost:5000/api';
+    // Configuración de la API
+    const API_BASE = 'http://57.154.42.0:5000/api';
 
     // Variables globales
     let currentCashRegister = null;
@@ -702,7 +702,7 @@ async function resetearCaja() {
     async function testConnection() {
         try {
             console.log('🔍 Probando conexión con el servidor...');
-            const response = await fetch('http://localhost:5000/health');
+            const response = await fetch('http://57.154.42.0:5000/health');
             if (response.ok) {
                 const data = await response.json();
                 console.log('✅ Servidor conectado:', data);
@@ -713,7 +713,7 @@ async function resetearCaja() {
             }
         } catch (error) {
             console.error('❌ No se pudo conectar con el servidor:', error);
-            showResult('❌ No se puede conectar con el servidor. Verifica que esté corriendo en http://localhost:5000', 'error');
+            showResult('❌ No se puede conectar con el servidor. Verifica que esté corriendo en http://57.154.42.0:5000', 'error');
             return false;
         }
     }

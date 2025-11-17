@@ -192,7 +192,7 @@
   const API_BASE =
   window.location.hostname.includes("localhost") ||
   window.location.hostname.includes("127.0.0.1")
-    ? "http://localhost:5000"
+    ? "http://57.154.42.0:5000"
     : window.location.origin;
 
   // < - - - - - - - - - - FUNCIÓN AUXILIAR PARA FORMATEAR FECHA - - - - - - - - - - - >
@@ -281,7 +281,10 @@ async function loadEvents() {
     const data = await response.json();
     console.log("Eventos cargados:", data);
 
-    if (data && data.eventos && Array.isArray(data.eventos)) {
+    // CORREGIDO: Manejar diferentes estructuras de respuesta
+    if (Array.isArray(data)) {
+      events = data;
+    } else if (data && data.eventos && Array.isArray(data.eventos)) {
       events = data.eventos;
     } else {
       events = [];
@@ -334,7 +337,7 @@ async function loadEvents() {
     updateTotal();
   }
 
-  // < - - - - - - - - - - - ACTUALIZAR PRECIOS Y TOTALES - MODIFICADA - - - - - - - - - - - ->
+  // < - - - - - - - - - - - ACTUALIZAR PRECIOS Y TOTALES - - - - - - - - - - - ->
   function updateItemPrice(select) {
     const selectedOption = select.options[select.selectedIndex];
     const priceInput = select.parentElement.querySelectorAll("input")[1];
@@ -361,7 +364,7 @@ async function loadEvents() {
   function updateTotal() {
     let total = 0;
     
-    // Sumar precio de vajilla personalizable
+    // Sumar precio de vajilla
     const vajillaPrice = parseFloat(document.getElementById("evt_vajilla_price").value) || 0;
     total += vajillaPrice;
     
@@ -376,7 +379,7 @@ async function loadEvents() {
     return total;
   }
 
-  // < - - - - - - - - - - - COTIZAR Y CONFIRMAR EVENTO - MODIFICADA - - - - - - - - - - - >
+  // < - - - - - - - - - - - COTIZAR Y CONFIRMAR EVENTO - - - - - - - - - - - >
   function calculateQuote() {
     const client = document.getElementById("evt_client").value;
     const date = document.getElementById("evt_date").value;
@@ -433,7 +436,7 @@ async function loadEvents() {
       people: parseInt(people), 
       type, 
       vajillaPrice: parseFloat(vajillaPrice) || 0,
-      vajillaDesc: vajillaDesc || "Sin vajilla",
+      vajillaDesc: vajillaDesc || "",
       details, 
       items, 
       total: currentQuote 
@@ -445,12 +448,15 @@ async function loadEvents() {
     try {
       const token = localStorage.getItem("token");
       
-      // Incluir información de vajilla personalizada en observaciones
+      // CORREGIDO: Manejo optimizado de vajilla en observaciones
       const observacionCompleta = [];
-      if (pendingEvent.vajillaDesc && pendingEvent.vajillaPrice > 0) {
-        observacionCompleta.push(`Vajilla: ${pendingEvent.vajillaDesc} (Q${pendingEvent.vajillaPrice})`);
+      
+      // Solo incluir vajilla si tiene datos
+      if (pendingEvent.vajillaDesc && pendingEvent.vajillaDesc.trim() !== "" && pendingEvent.vajillaPrice > 0) {
+        observacionCompleta.push(`Vajilla: ${pendingEvent.vajillaDesc} (Q${pendingEvent.vajillaPrice.toFixed(2)})`);
       }
-      if (pendingEvent.details) {
+      
+      if (pendingEvent.details && pendingEvent.details.trim() !== "") {
         observacionCompleta.push(pendingEvent.details);
       }
 
@@ -460,8 +466,7 @@ async function loadEvents() {
         fecha_evento: pendingEvent.date + ' 00:00:00',
         cantidad_personas: pendingEvent.people,
         estado: "Confirmado",
-        observacion: observacionCompleta.join(' | '),
-        id_vajilla: null,
+        observacion: observacionCompleta.join(' | ') || "Sin observaciones",
         total: pendingEvent.total,
         items: pendingEvent.items.map(item => ({
           id_item: item.id_producto,
@@ -501,7 +506,7 @@ async function loadEvents() {
     }
   }
 
-  // < - - - - - - - - - RENDERIZADO DE EVENTOS - CORREGIDO - - - - - - - - - - >
+  // < - - - - - - - - - RENDERIZADO DE EVENTOS - - - - - - - - - - >
   function resetForm() {
     document.getElementById("eventForm").reset();
     document.getElementById("menuItemsContainer").innerHTML = `
@@ -557,7 +562,7 @@ async function loadEvents() {
   });
 }
 
-  // < - - - - - - - - - MODALES - CORREGIDOS - - - - - - - - >
+  // < - - - - - - - - - MODALES - - - - - - - - >
   async function viewEvent(id) {
     try {
       const token = localStorage.getItem("token");
