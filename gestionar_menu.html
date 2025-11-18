@@ -108,11 +108,11 @@
   </div>
 </div>
 <script>
-    // ✅ PUERTO CORREGIDO
+    // PUERTO CORREGIDO
     const API_URL = 'http://57.154.42.0:5000';
     let editingId = null;
     
-    // ✅ VERIFICACIÓN INICIAL
+    // VERIFICACIÓN INICIAL
     const token = localStorage.getItem('token');
     const currentUser = localStorage.getItem('currentUser');
     
@@ -124,7 +124,7 @@
     const qs = sel => document.querySelector(sel);
     function formatMoney(q) { return `Q${Number(q).toFixed(2)}`; }
     
-    // ✅ FUNCIÓN PARA HEADERS DE AUTORIZACIÓN
+    // FUNCIÓN PARA HEADERS DE AUTORIZACIÓN
     function getAuthHeaders() {
         return {
             'Content-Type': 'application/json',
@@ -132,8 +132,8 @@
         };
     }
 
-    // ✅ FUNCIÓN PARA MANEJAR RESPUESTAS DE API
-    async function handleApiResponse(response) {
+    // FUNCIÓN PARA MANEJAR RESPUESTAS DE API - CORREGIDA
+    async function handleApiResponse(response, action = 'operación') {
         if (response.status === 401) {
             localStorage.removeItem('token');
             localStorage.removeItem('currentUser');
@@ -141,22 +141,44 @@
             throw new Error('Sesión expirada');
         }
         
+        // Clonar la respuesta para poder leer el cuerpo múltiples veces
+        const responseClone = response.clone();
+        
         if (!response.ok) {
-            const errorData = await response.json().catch(() => ({ error: 'Error desconocido' }));
-            throw new Error(errorData.error || `Error ${response.status}`);
+            try {
+                // Intentar parsear como JSON primero
+                const errorData = await response.json();
+                if (response.status === 404) {
+                    throw new Error(errorData.error || 'Recurso no encontrado');
+                } else if (response.status === 403) {
+                    throw new Error(errorData.error || 'No tienes permisos para esta acción');
+                } else if (response.status === 409) {
+                    throw new Error(errorData.error || 'Conflicto: el recurso no puede ser eliminado');
+                } else {
+                    throw new Error(errorData.error || `Error en ${action}: ${response.status} ${response.statusText}`);
+                }
+            } catch (parseError) {
+                // Si falla el JSON, leer como texto
+                try {
+                    const errorText = await responseClone.text();
+                    throw new Error(`Error en ${action}: ${response.status} ${response.statusText} - ${errorText}`);
+                } catch (textError) {
+                    throw new Error(`Error en ${action}: ${response.status} ${response.statusText}`);
+                }
+            }
         }
         
         return await response.json();
     }
     
     // ------------------------------
-    // SINCRONIZAR MENÚ CON LOCALSTORAGE (VERSIÓN COMPATIBLE)
+    // SINCRONIZAR MENÚ CON LOCALSTORAGE
     // ------------------------------
     function updateLocalMenu(menuData) {
         if (!Array.isArray(menuData)) return;
         
         try {
-            // ✅ MANTENER ESTRUCTURA ORIGINAL para compatibilidad
+            // MANTENER ESTRUCTURA ORIGINAL para compatibilidad
             const localMenu = menuData.map(item => ({
                 id_item: item.id_item,
                 nombre: item.nombre,
@@ -212,9 +234,7 @@
         }
     }
     
-    // ------------------------------
-    // SISTEMA DE MODALES
-    // ------------------------------
+    // < - - - - -  SISTEMA DE MODALES - - - - - >
     
     // Mostrar modal de mensaje
     function showMessage(title, message, type = 'info') {
@@ -321,12 +341,15 @@
             
             console.log('Menú cargado:', menu);
             
-            if (menu.length === 0) {
+            // Filtrar solo items disponibles (no eliminados)
+            const menuDisponible = menu.filter(item => item.estado !== 'eliminado');
+            
+            if (menuDisponible.length === 0) {
                 el.innerHTML = '<div style="text-align:center;padding:30px;color:var(--muted);"><i class="fas fa-utensils" style="font-size:48px;margin-bottom:15px;"></i><p>No hay platillos en el menú</p></div>';
                 return;
             }
             
-            el.innerHTML = menu.map(item => `
+            el.innerHTML = menuDisponible.map(item => `
                 <div class="menu-item-card">
                     <img src="${item.img || 'https://via.placeholder.com/80?text=Imagen'}" 
                          class="menu-item-image" 
@@ -338,6 +361,9 @@
                             ${formatMoney(item.precio)}
                         </div>
                         ${item.descripcion ? `<small>${item.descripcion}</small>` : ''}
+                        <div class="estado-badge ${item.estado === 'disponible' ? 'disponible' : 'no-disponible'}">
+                            ${item.estado}
+                        </div>
                     </div>
                     <div class="menu-item-actions">
                         <button class="btn" onclick='startEdit(${item.id_item})'><i class="fas fa-edit"></i> Editar</button>
@@ -347,7 +373,7 @@
             `).join('');
             
             // Sincronizar con localStorage (versión COMPATIBLE)
-            updateLocalMenu(menu);
+            updateLocalMenu(menuDisponible);
             
         } catch (err) {
             console.error('Error al cargar menú:', err);
@@ -433,7 +459,7 @@
     }
     
     // ------------------------------
-    // EDITAR Y ELIMINAR
+    // EDITAR Y ELIMINAR - FUNCIONES CORREGIDAS
     // ------------------------------
     async function startEdit(id) {
         try {
@@ -456,6 +482,10 @@
             qs('#m_img_url').value = item.img || '';
             document.getElementById('file-name').textContent = item.img ? 'Imagen actual (editar para cambiar)' : 'No se ha seleccionado ningún archivo';
             
+            // Cambiar texto del botón
+            const submitBtn = qs('#menuForm button[type="submit"]');
+            submitBtn.innerHTML = '<i class="fas fa-save"></i> Actualizar';
+            
             // Scroll al formulario
             qs('#menuForm').scrollIntoView({ behavior: 'smooth' });
         } catch (err) {
@@ -464,22 +494,61 @@
         }
     }
     
+    // FUNCIÓN PARA "ELIMINAR" ITEM DEL MENÚ - USANDO PUT PARA CAMBIAR ESTADO
     async function doDelete(id) {
-        const confirmed = await showConfirm('¿Seguro que deseas eliminar este platillo?');
+        const confirmed = await showConfirm('¿Seguro que deseas eliminar este platillo? Esta acción marcará el platillo como eliminado pero mantendrá los registros históricos.');
         if (!confirmed) return;
         
         try {
-            const response = await fetch(`${API_URL}/menu_items/${id}`, { 
-                method: 'DELETE', 
+            console.log(`🔴 Marcando como eliminado item ID: ${id}`);
+            
+            // Obtener datos actuales del item primero
+            const responseGet = await fetch(`${API_URL}/menu_items`, { 
                 headers: getAuthHeaders()
             });
+            const menu = await handleApiResponse(responseGet);
+            const item = menu.find(m => m.id_item === id);
             
-            await handleApiResponse(response);
-            await showMessage('Eliminado', 'Platillo eliminado correctamente', 'success');
+            if (!item) {
+                throw new Error('Platillo no encontrado');
+            }
+            
+            // Usar PUT para actualizar el estado a 'eliminado'
+            const data = {
+                id_categoria: item.id_categoria,
+                nombre: item.nombre,
+                descripcion: item.descripcion,
+                precio: item.precio,
+                img: item.img,
+                estado: 'eliminado' // Cambiar estado en lugar de eliminar físicamente
+            };
+            
+            const response = await fetch(`${API_URL}/menu_items/${id}`, {
+                method: 'PUT',
+                headers: getAuthHeaders(),
+                body: JSON.stringify(data)
+            });
+            
+            const result = await handleApiResponse(response, 'eliminar platillo');
+            
+            await showMessage('Eliminado', 'Platillo marcado como eliminado correctamente', 'success');
             refreshList();
+            
         } catch (err) {
-            console.error('Error al eliminar:', err);
-            showMessage('Error al eliminar', `Error al eliminar el platillo: ${err.message}`, 'error');
+            console.error('❌ Error al eliminar platillo:', err);
+            
+            // Mensaje de error más específico
+            let errorMessage = 'Error al eliminar el platillo';
+            
+            if (err.message.includes('404')) {
+                errorMessage = 'El platillo no existe o ya fue eliminado';
+            } else if (err.message.includes('403')) {
+                errorMessage = 'No tienes permisos para eliminar platillos';
+            } else {
+                errorMessage = `Error: ${err.message}`;
+            }
+            
+            showMessage('Error al eliminar', errorMessage, 'error');
         }
     }
     
@@ -491,6 +560,10 @@
         qs('#menuForm').reset();
         qs('#m_img_file').value = '';
         document.getElementById('file-name').textContent = 'No se ha seleccionado ningún archivo';
+        
+        // Restaurar texto del botón
+        const submitBtn = qs('#menuForm button[type="submit"]');
+        submitBtn.innerHTML = '<i class="fas fa-save"></i> Guardar';
     }
     
     // ------------------------------
@@ -513,5 +586,34 @@
         }
     });
 </script>
+
+<style>
+.estado-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: bold;
+    margin-top: 5px;
+}
+
+.estado-badge.disponible {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.estado-badge.no-disponible {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.estado-badge.eliminado {
+    background-color: #e2e3e5;
+    color: #383d41;
+    border: 1px solid #d6d8db;
+}
+</style>
 </body>
 </html>

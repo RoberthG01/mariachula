@@ -46,19 +46,19 @@
   <form id="eventForm">
     <div class="form-grid">
       <div class="input-group">
-        <label>Cliente</label>
+        <label>Cliente *</label>
         <input id="evt_client" class="input" placeholder="Nombre del cliente" required>
       </div>
       <div class="input-group">
-        <label>Fecha del evento</label>
+        <label>Fecha del evento *</label>
         <input id="evt_date" class="input" type="date" required>
       </div>
       <div class="input-group">
-        <label>Cantidad de personas</label>
+        <label>Cantidad de personas *</label>
         <input id="evt_people" class="input" type="number" min="1" required>
       </div>
       <div class="input-group">
-        <label>Tipo de evento</label>
+        <label>Tipo de evento *</label>
         <select id="evt_type" class="input" required>
           <option value="">Seleccionar tipo</option>
           <option value="Banquete">Banquete</option>
@@ -86,15 +86,15 @@
       <textarea id="evt_details" class="input" rows="3" placeholder="Notas u observaciones..."></textarea>
     </div>
 
-    <h3 style="margin-top:15px;">Platillos del evento</h3>
+    <h3 style="margin-top:15px;">Platillos del evento *</h3>
     <div id="menuItemsContainer" style="margin-bottom:8px;">
       <div class="menu-item-selector">
-        <select class="input" onchange="updateItemPrice(this)" required>
+        <select class="input menu-select" onchange="updateItemPrice(this)" required>
           <option value="">Seleccionar platillo</option>
         </select>
-        <input type="number" class="input" min="1" value="1" placeholder="Cantidad" onchange="calculateItemTotal(this)" required>
-        <input type="number" class="input" step="0.01" placeholder="Precio" readonly>
-        <input type="text" class="input" placeholder="Total" readonly>
+        <input type="number" class="input menu-qty" min="1" value="1" placeholder="Cantidad" onchange="calculateItemTotal(this)" required>
+        <input type="number" class="input menu-price" step="0.01" placeholder="Precio" readonly>
+        <input type="text" class="input menu-total" placeholder="Total" readonly>
         <button class="btn ghost" type="button" onclick="removeMenuItem(this)" style="color:var(--color-error)">×</button>
       </div>
     </div>
@@ -104,9 +104,9 @@
     <h3 style="margin-top:20px;">Total: Q<span id="totalAmount">0.00</span></h3>
 
     <div style="margin-top:16px;">
-      <button type="button" class="btn primary" onclick="calculateQuote()"><i class="fas fa-calculator"></i> Cotizar</button>
+      <button type="button" class="btn primary" onclick="calculateQuote()"><i class="fas fa-calculator"></i> Calcular Total</button>
       <button type="button" id="confirmBtn" class="btn success" onclick="confirmEvent()" disabled><i class="fas fa-check-circle"></i> Confirmar Evento</button>
-      <button type="reset" class="btn ghost" onclick="resetForm()"><i class="fas fa-broom"></i> Limpiar</button>
+      <button type="button" class="btn ghost" onclick="resetForm()"><i class="fas fa-broom"></i> Limpiar</button>
     </div>
   </form>
 </div>
@@ -149,7 +149,7 @@
 <div id="confirmEventModal" class="modal">
   <div class="modal-content">
     <h3>¿Confirmar evento?</h3>
-    <p>¿Deseas registrar este evento con los datos ingresados?</p>
+    <p id="confirmEventDetails">Detalles del evento</p>
     <div class="modal-footer">
       <button class="btn" onclick="closeEventConfirmModal()">Cancelar</button>
       <button class="btn primary" onclick="processEventConfirmation()">Confirmar</button>
@@ -189,11 +189,7 @@
   let eventToDelete = null;
   let pendingEvent = null;
 
-  const API_BASE =
-  window.location.hostname.includes("localhost") ||
-  window.location.hostname.includes("127.0.0.1")
-    ? "http://57.154.42.0:5000"
-    : window.location.origin;
+  const API_BASE = 'http://57.154.42.0:5000';
 
   // < - - - - - - - - - - FUNCIÓN AUXILIAR PARA FORMATEAR FECHA - - - - - - - - - - - >
   function formatDate(dateString) {
@@ -209,18 +205,53 @@
       await loadEvents();
       const today = new Date().toISOString().split("T")[0];
       document.getElementById("evt_date").min = today;
+      
+      // Agregar event listeners para validación en tiempo real
+      document.getElementById('evt_client').addEventListener('input', validateForm);
+      document.getElementById('evt_date').addEventListener('input', validateForm);
+      document.getElementById('evt_people').addEventListener('input', validateForm);
+      document.getElementById('evt_type').addEventListener('change', validateForm);
+      
     } catch (error) {
       console.error("Error al inicializar página:", error);
       showQuoteModal("Error", "❌ Error al cargar la página.");
     }
   });
 
+  // < - - - - - - - - - - VALIDACIÓN DEL FORMULARIO - - - - - - - - - - >
+  function validateForm() {
+    const client = document.getElementById("evt_client").value;
+    const date = document.getElementById("evt_date").value;
+    const people = document.getElementById("evt_people").value;
+    const type = document.getElementById("evt_type").value;
+    
+    // Validar campos obligatorios
+    const basicFieldsValid = client && date && people && type;
+    
+    // Validar que haya al menos un platillo con datos completos
+    let hasValidItems = false;
+    document.querySelectorAll(".menu-item-selector").forEach((item) => {
+      const select = item.querySelector(".menu-select");
+      const qty = item.querySelector(".menu-qty").value;
+      const price = item.querySelector(".menu-price").value;
+      
+      if (select.value && qty && price && parseFloat(price) > 0) {
+        hasValidItems = true;
+      }
+    });
+    
+    const isFormValid = basicFieldsValid && hasValidItems && currentQuote > 0;
+    document.getElementById("confirmBtn").disabled = !isFormValid;
+    
+    return isFormValid;
+  }
+
 // < - - - - - - - - - - - - - CARGAR PLATILLOS DESDE BACKEND - - - - - - - - - - - - >
   async function loadMenuItems() {
     const token = localStorage.getItem("token");
     try {
       console.log("Cargando platillos...");
-      const res = await fetch(`${API_BASE}/api/menu_items`, {
+      const res = await fetch(`${API_BASE}/menu_items`, {
         headers: { 
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -235,7 +266,7 @@
       console.log("Platillos cargados:", data);
 
       if (Array.isArray(data)) {
-        menuItems = data;
+        menuItems = data.filter(item => item.estado === 'disponible' || item.estado === undefined);
         populateMenuDropdowns();
       }
       
@@ -246,8 +277,9 @@
   }
 
   function populateMenuDropdowns() {
-    const dropdowns = document.querySelectorAll("#menuItemsContainer select");
+    const dropdowns = document.querySelectorAll(".menu-select");
     dropdowns.forEach((dropdown) => {
+      const currentValue = dropdown.value;
       dropdown.innerHTML =
         '<option value="">Seleccionar platillo</option>' +
         menuItems
@@ -258,6 +290,12 @@
               </option>`
           )
           .join("");
+      
+      // Restaurar valor seleccionado si existe
+      if (currentValue) {
+        dropdown.value = currentValue;
+        updateItemPrice(dropdown);
+      }
     });
   }
 
@@ -299,13 +337,13 @@ async function loadEvents() {
   }
 }
 
-  // < - - - - - - - - - - AGREGAR / ELIMINAR PLATILLOS - - - - - - - - - - - >
+  // < - - - - - - - - - AGREGAR / ELIMINAR PLATILLOS - - - - - - - - - - - >
   function addMenuItem() {
     const container = document.getElementById("menuItemsContainer");
     const newItem = document.createElement("div");
     newItem.className = "menu-item-selector";
     newItem.innerHTML = `
-      <select class="input" onchange="updateItemPrice(this)" required>
+      <select class="input menu-select" onchange="updateItemPrice(this)" required>
         <option value="">Seleccionar platillo</option>
         ${menuItems
           .map(
@@ -316,12 +354,22 @@ async function loadEvents() {
           )
           .join("")}
       </select>
-      <input type="number" class="input" min="1" value="1" placeholder="Cantidad" onchange="calculateItemTotal(this)" required>
-      <input type="number" class="input" step="0.01" placeholder="Precio" readonly>
-      <input type="text" class="input" placeholder="Total" readonly>
+      <input type="number" class="input menu-qty" min="1" value="1" placeholder="Cantidad" onchange="calculateItemTotal(this)" required>
+      <input type="number" class="input menu-price" step="0.01" placeholder="Precio" readonly>
+      <input type="text" class="input menu-total" placeholder="Total" readonly>
       <button class="btn ghost" onclick="removeMenuItem(this)" style="color:var(--color-error)">×</button>
     `;
     container.appendChild(newItem);
+    
+    // Agregar event listeners al nuevo elemento
+    newItem.querySelector('.menu-select').addEventListener('change', function() {
+      updateItemPrice(this);
+      validateForm();
+    });
+    newItem.querySelector('.menu-qty').addEventListener('input', function() {
+      calculateItemTotal(this);
+      validateForm();
+    });
   }
 
   function removeMenuItem(button) {
@@ -329,18 +377,19 @@ async function loadEvents() {
     if (document.querySelectorAll(".menu-item-selector").length > 1) {
       item.remove();
     } else {
-      item.querySelector("select").value = "";
-      item.querySelectorAll("input")[0].value = "1";
-      item.querySelectorAll("input")[1].value = "";
-      item.querySelectorAll("input")[2].value = "";
+      item.querySelector(".menu-select").value = "";
+      item.querySelector(".menu-qty").value = "1";
+      item.querySelector(".menu-price").value = "";
+      item.querySelector(".menu-total").value = "";
     }
     updateTotal();
+    validateForm();
   }
 
   // < - - - - - - - - - - - ACTUALIZAR PRECIOS Y TOTALES - - - - - - - - - - - ->
   function updateItemPrice(select) {
     const selectedOption = select.options[select.selectedIndex];
-    const priceInput = select.parentElement.querySelectorAll("input")[1];
+    const priceInput = select.parentElement.querySelector(".menu-price");
     if (selectedOption && selectedOption.dataset.price) {
       priceInput.value = selectedOption.dataset.price;
       calculateItemTotal(select);
@@ -351,13 +400,16 @@ async function loadEvents() {
 
   function calculateItemTotal(input) {
     const item = input.parentElement;
-    const qty = item.querySelectorAll("input")[0].value;
-    const price = item.querySelectorAll("input")[1].value;
-    const totalInput = item.querySelectorAll("input")[2];
+    const qty = item.querySelector(".menu-qty").value;
+    const price = item.querySelector(".menu-price").value;
+    const totalInput = item.querySelector(".menu-total");
+    
     if (qty && price) {
       const total = parseFloat(qty) * parseFloat(price);
       totalInput.value = total.toFixed(2);
-    } else totalInput.value = "";
+    } else {
+      totalInput.value = "";
+    }
     updateTotal();
   }
 
@@ -370,7 +422,7 @@ async function loadEvents() {
     
     // Sumar platillos
     document.querySelectorAll(".menu-item-selector").forEach((item) => {
-      const totalInput = item.querySelectorAll("input")[2];
+      const totalInput = item.querySelector(".menu-total");
       if (totalInput.value) total += parseFloat(totalInput.value);
     });
     
@@ -381,18 +433,21 @@ async function loadEvents() {
 
   // < - - - - - - - - - - - COTIZAR Y CONFIRMAR EVENTO - - - - - - - - - - - >
   function calculateQuote() {
-    const client = document.getElementById("evt_client").value;
-    const date = document.getElementById("evt_date").value;
-    if (!client || !date) {
-      showQuoteModal("Error", "Por favor complete los campos obligatorios: Cliente y Fecha");
+    if (!validateForm()) {
+      showQuoteModal("Error", "Por favor complete todos los campos obligatorios (*) y agregue al menos un platillo válido.");
       return;
     }
+    
     const total = updateTotal();
-    document.getElementById("confirmBtn").disabled = false;
-    showQuoteModal("Cotización Calculada", `Total: Q${total.toFixed(2)}\n\nAhora puede confirmar el evento.`);
+    showQuoteModal("Total Calculado", `El total del evento es: Q${total.toFixed(2)}\n\nAhora puede confirmar el evento.`);
   }
 
   function confirmEvent() {
+    if (!validateForm()) {
+      showQuoteModal("Error", "Por favor complete todos los campos obligatorios antes de confirmar.");
+      return;
+    }
+
     const client = document.getElementById("evt_client").value;
     const date = document.getElementById("evt_date").value;
     const people = document.getElementById("evt_people").value;
@@ -402,31 +457,25 @@ async function loadEvents() {
     const details = document.getElementById("evt_details").value;
 
     const items = [];
-    let isValid = true;
     document.querySelectorAll(".menu-item-selector").forEach((item) => {
-      const select = item.querySelector("select");
-      const id_producto = select.value;
-      const name = select.options[select.selectedIndex]?.text.split(" - ")[0] || "";
-      const qty = item.querySelectorAll("input")[0].value;
-      const price = item.querySelectorAll("input")[1].value;
-      const total = item.querySelectorAll("input")[2].value;
-      if (id_producto && qty && price && total) {
+      const select = item.querySelector(".menu-select");
+      const id_item = select.value;
+      const qty = item.querySelector(".menu-qty").value;
+      const price = item.querySelector(".menu-price").value;
+      const total = item.querySelector(".menu-total").value;
+      
+      if (id_item && qty && price && total) {
         items.push({ 
-          id_producto, 
-          name, 
-          qty: parseFloat(qty), 
-          price: parseFloat(price), 
-          total: parseFloat(total) 
+          id_item: parseInt(id_item),
+          cantidad: parseFloat(qty), 
+          precio_unitario: parseFloat(price), 
+          subtotal: parseFloat(total) 
         });
-      } else if (select.value || qty || price) isValid = false;
+      }
     });
 
-    if (!isValid) {
-      showQuoteModal("Error", "Por favor complete correctamente todos los items del menú");
-      return;
-    }
     if (items.length === 0) {
-      showQuoteModal("Error", "Debe agregar al menos un platillo");
+      showQuoteModal("Error", "Debe agregar al menos un platillo válido.");
       return;
     }
 
@@ -441,6 +490,17 @@ async function loadEvents() {
       items, 
       total: currentQuote 
     };
+    
+    // Mostrar detalles en el modal de confirmación
+    const confirmDetails = `
+      <strong>Cliente:</strong> ${client}<br>
+      <strong>Fecha:</strong> ${date}<br>
+      <strong>Personas:</strong> ${people}<br>
+      <strong>Tipo:</strong> ${type}<br>
+      <strong>Total:</strong> Q${currentQuote.toFixed(2)}<br>
+      <strong>Platillos:</strong> ${items.length} items
+    `;
+    document.getElementById("confirmEventDetails").innerHTML = confirmDetails;
     showEventConfirmModal();
   }
 
@@ -448,6 +508,10 @@ async function loadEvents() {
     try {
       const token = localStorage.getItem("token");
       
+      if (!pendingEvent) {
+        throw new Error("No hay datos del evento pendiente");
+      }
+
       // CORREGIDO: Manejo optimizado de vajilla en observaciones
       const observacionCompleta = [];
       
@@ -463,17 +527,12 @@ async function loadEvents() {
       const eventData = {
         nombre_cliente: pendingEvent.client,
         nombre_evento: pendingEvent.type,
-        fecha_evento: pendingEvent.date + ' 00:00:00',
+        fecha_evento: pendingEvent.date,
         cantidad_personas: pendingEvent.people,
         estado: "Confirmado",
         observacion: observacionCompleta.join(' | ') || "Sin observaciones",
         total: pendingEvent.total,
-        items: pendingEvent.items.map(item => ({
-          id_item: item.id_producto,
-          cantidad: item.qty,
-          precio_unitario: item.price,
-          subtotal: item.total
-        }))
+        items: pendingEvent.items
       };
 
       console.log("Enviando evento al servidor:", eventData);
@@ -488,8 +547,8 @@ async function loadEvents() {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Error al guardar el evento');
+        const errorText = await response.text();
+        throw new Error(errorText || 'Error al guardar el evento');
       }
 
       const result = await response.json();
@@ -511,7 +570,7 @@ async function loadEvents() {
     document.getElementById("eventForm").reset();
     document.getElementById("menuItemsContainer").innerHTML = `
       <div class="menu-item-selector">
-        <select class="input" onchange="updateItemPrice(this)" required>
+        <select class="input menu-select" onchange="updateItemPrice(this)" required>
           <option value="">Seleccionar platillo</option>
           ${menuItems.map(
             (item) => `<option value="${item.id_item}" data-price="${item.precio}">
@@ -519,14 +578,27 @@ async function loadEvents() {
               </option>`
           ).join("")}
         </select>
-        <input type="number" class="input" min="1" value="1" placeholder="Cantidad" onchange="calculateItemTotal(this)" required>
-        <input type="number" class="input" step="0.01" placeholder="Precio" readonly>
-        <input type="text" class="input" placeholder="Total" readonly>
+        <input type="number" class="input menu-qty" min="1" value="1" placeholder="Cantidad" onchange="calculateItemTotal(this)" required>
+        <input type="number" class="input menu-price" step="0.01" placeholder="Precio" readonly>
+        <input type="text" class="input menu-total" placeholder="Total" readonly>
         <button class="btn ghost" onclick="removeMenuItem(this)" style="color:var(--color-error)">×</button>
       </div>`;
     document.getElementById("totalAmount").textContent = "0.00";
     document.getElementById("confirmBtn").disabled = true;
+    currentQuote = 0;
     pendingEvent = null;
+    
+    // Re-agregar event listeners
+    setTimeout(() => {
+      document.querySelector('.menu-select').addEventListener('change', function() {
+        updateItemPrice(this);
+        validateForm();
+      });
+      document.querySelector('.menu-qty').addEventListener('input', function() {
+        calculateItemTotal(this);
+        validateForm();
+      });
+    }, 100);
   }
 
   function renderEvents() {
@@ -638,8 +710,11 @@ async function loadEvents() {
         throw new Error('Error al eliminar evento');
       }
 
-      events = events.filter((e) => e.id_evento !== eventToDelete);
-      renderEvents();
+      const result = await response.json();
+      console.log("Evento eliminado:", result);
+      
+      // Recargar eventos desde el servidor
+      await loadEvents();
       
       document.getElementById("confirmDeleteModal").classList.remove("active");
       showQuoteModal("Eliminado", "🗑️ El evento ha sido eliminado correctamente.");
@@ -664,22 +739,36 @@ async function loadEvents() {
   }
 
   // < - - - - - - - - - SOCKET.IO - - - - - - - - - >
-  const socket = io(API_BASE);
+  // SOLUCIÓN TEMPORAL: Deshabilitar WebSocket si hay errores de conexión
+  let socket;
+  try {
+    socket = io(API_BASE, {
+      timeout: 5000,
+      reconnectionAttempts: 3
+    });
 
-  socket.on("connect", () => console.log("🟢 Conectado a WebSocket:", socket.id));
-  socket.on("disconnect", () => console.log("🔴 Desconectado del servidor WebSocket"));
+    socket.on("connect", () => console.log("🟢 Conectado a WebSocket:", socket.id));
+    socket.on("disconnect", () => console.log("🔴 Desconectado del servidor WebSocket"));
 
-  socket.on("nuevo_evento", (evento) => {
-    console.log("🎊 Nuevo evento recibido:", evento);
-    events.push(evento);
-    renderEvents();
-  });
+    socket.on("nuevo_evento", (evento) => {
+      console.log("🎊 Nuevo evento recibido:", evento);
+      events.push(evento);
+      renderEvents();
+    });
 
-  socket.on("evento_eliminado", (data) => {
-    console.log("🗑️ Evento eliminado:", data.id_evento);
-    events = events.filter(e => e.id_evento !== data.id_evento);
-    renderEvents();
-  });
+    socket.on("evento_eliminado", (data) => {
+      console.log("🗑️ Evento eliminado:", data.id_evento);
+      events = events.filter(e => e.id_evento !== data.id_evento);
+      renderEvents();
+    });
+
+    socket.on("connect_error", (error) => {
+      console.warn("⚠️ Error de conexión WebSocket:", error.message);
+      // No mostrar error al usuario, la aplicación funciona sin WebSocket
+    });
+  } catch (error) {
+    console.warn("⚠️ WebSocket no disponible, continuando sin actualizaciones en tiempo real");
+  }
 
   // < - - - - - - - - LOGOUT - - - - - - - - >
   function logout() {

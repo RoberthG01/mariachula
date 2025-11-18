@@ -5,7 +5,6 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import cors from 'cors';
 import facturasRoutes from "./routes/factura.js";
-// < - - - - - - - - - Importar nodemailer y dotenv para recuperación de contraseña - - - - - - - - ->
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
 import http from 'http';
